@@ -13,14 +13,13 @@
     //$userId = User::registration('test', '12345', 'support@it-stories.ru', 'user', 'Тестировщик', 'http://samag.ru/uploads/5222447.png');
 
 
-
     /*$user = new User($userId);*/
 
     $userId = User::getCurrentUserId();
     try {
         $user = new User($userId);
         User::authorize((int)$userId);
-        echo $userId;
+        echo 'Current user id: ' . $userId . '<br>';
     } catch (CoreException $e) {
         echo $e->showTrace();
     }
