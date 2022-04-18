@@ -78,7 +78,10 @@
             // Собираем информацию об окружении
             $logEnv = '';
             if ($addEnv) {
-                $env = ['ip' => SystemFunctions::getIP()];
+                $env = [
+                    'ip' => SystemFunctions::getIP(),
+                    'os' => SystemFunctions::getOS(),
+                ];
 
                 $userId = User::getUserId();
                 if (!empty($userId)) {
@@ -86,7 +89,6 @@
                     $env['userId']    = $arUserData['id'];
                     $env['userLogin'] = $arUserData['login'];
                 }
-
                 $env['memory'] = memory_get_usage(true);
 
                 $_SERVER['SERVER_NAME'] = $_SERVER['SERVER_NAME'] ?? gethostname();
@@ -103,7 +105,7 @@
 
             $logText .= $logContent;
 
-            if (false === $logTextPosEOL) {
+            if ($logTextPosEOL === false) {
                 $logText .= $logEnv;
             } else {
                 $logText = preg_replace('/\n/', $logEnv . PHP_EOL, $logText, 1);

@@ -9,7 +9,6 @@
     /*$userId = User::registration('test', '12345', 'support@it-stories.ru', 'user', 'Тестировщик', 'http://samag.ru/uploads/5222447.png');
     $user = new User($userId);*/
 
-    Log::logToFile('Проверка работы файлового лога', 'test.log');
     $userId = 2;//User::getUserId();
     try {
         $user = new User($userId);
