@@ -26,10 +26,6 @@
 
     echo '<br><br>';
 
-    Zip::createArchive(LOG_PATH . '/', ROOT_PATH . '/core/cache/temp.zip');
-    Telegram::sendDocument(412790359, ROOT_PATH . '/core/cache/temp.zip');
-    unlink(ROOT_PATH . '/core/cache/temp.zip');
-
     if (User::isAuthorized()) {
         echo SystemFunctions::arrayToTable($user->getAllUserData(), 'Информация о пользователе');
     }
