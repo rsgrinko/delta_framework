@@ -83,11 +83,11 @@
                     'os' => SystemFunctions::getOS(),
                 ];
 
-                $userId = User::getUserId();
+                $userId = User::getCurrentUserId();
                 if (!empty($userId)) {
-                    $arUserData       = (new User($userId))->getAllUserData();
-                    $env['userId']    = $arUserData['id'];
-                    $env['userLogin'] = $arUserData['login'];
+                    $objectUser       = new User($userId);
+                    $env['userId']    = $objectUser->getId();
+                    $env['userLogin'] = $objectUser->getLogin();
                 }
                 $env['memory'] = memory_get_usage(true);
 

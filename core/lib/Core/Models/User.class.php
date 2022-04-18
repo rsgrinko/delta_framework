@@ -142,6 +142,16 @@
         }
 
         /**
+         * Получение идентификатора текущего пользователя
+         *
+         * @return int|null
+         */
+        public static function getId(): ?int
+        {
+            return self::getAllUserData() ? self::getAllUserData()['id'] : null;
+        }
+
+        /**
          * Получение всех пользователей панели
          *
          * @param string $limit Лимит
@@ -376,7 +386,7 @@
          *
          * @return int|null
          */
-        public static function getUserId(): ?int
+        public static function getCurrentUserId(): ?int
         {
             if (self::isUser()) {
                 return $_SESSION['id'];
