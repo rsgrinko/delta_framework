@@ -82,10 +82,70 @@
         }
 
         /**
+         * Получение логина текущего пользователя
+         *
+         * @return string|null
+         */
+        public function getLogin(): ?string
+        {
+            return self::getAllUserData() ? self::getAllUserData()['login'] : null;
+        }
+
+        /**
+         * Получение E-Mail'а текущего пользователя
+         *
+         * @return string|null
+         */
+        public function getEmail(): ?string
+        {
+            return self::getAllUserData() ? self::getAllUserData()['email'] : null;
+        }
+
+        /**
+         * Получение имени текущего пользователя
+         *
+         * @return string|null
+         */
+        public function getName(): ?string
+        {
+            return self::getAllUserData() ? self::getAllUserData()['name'] : null;
+        }
+
+        /**
+         * Получение аватарки текущего пользователя
+         *
+         * @return string|null
+         */
+        public function getImage(): ?string
+        {
+            return self::getAllUserData() ? self::getAllUserData()['image'] : null;
+        }
+
+        /**
+         * Получение токена текущего пользователя
+         *
+         * @return string|null
+         */
+        public function getToken(): ?string
+        {
+            return self::getAllUserData() ? self::getAllUserData()['token'] : null;
+        }
+
+        /**
+         * Получение имени текущего пользователя
+         *
+         * @return string|null
+         */
+        public function getLastActive(): ?string
+        {
+            return self::getAllUserData() ? self::getAllUserData()['last_active'] : null;
+        }
+
+        /**
          * Получение всех пользователей панели
          *
-         * @param string $limit
-         * @param string $sort
+         * @param string $limit Лимит
+         * @param string $sort  Сортировка
          *
          * @return array
          */
@@ -102,32 +162,22 @@
         }
 
         /**
-         * Возвращает токен пользователя
-         */
-        public static function getUserToken(int $userId): string
-        {
-            $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $userId]);
-
-            if ($result) {
-                return $result['token'];
-            } else {
-                return '';
-            }
-        }
-
-        /**
          * Создание пользовательского токена
+         *
+         * @return string
          */
-        public static function createUserToken($userId): string
+        public function createToken(): string
         {
             $newToken = self::generateGUID();
-            (DB::getInstance())->update(self::TABLE, ['id' => $userId], ['token' => $newToken]);
+            (DB::getInstance())->update(self::TABLE, ['id' => $this->id], ['token' => $newToken]);
 
             return $newToken;
         }
 
         /**
          * Генерация GUID
+         *
+         * @return string
          */
         private static function generateGUID(): string
         {
@@ -140,11 +190,11 @@
         /**
          * Проверка существования токена
          *
-         * @param string $token
+         * @param string $token Токен
          *
          * @return bool
          */
-        public static function isTokenExists($token): bool
+        public static function isTokenExists(string $token): bool
         {
             $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
 
@@ -157,28 +207,32 @@
 
         /**
          * Получение пользователя по токену
+         *
+         * @param string $token Токен
+         *
+         * @return User|null
+         * @throws CoreException
          */
-        public static function getUserByToken($token)
+        public static function getUserByToken(string $token): ?self
         {
             $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
 
             if ($result) {
-                return $result;
+                return (new self($result['id']));
             } else {
-                return false;
+                return null;
             }
         }
 
         /**
          * Проверка пользователя на онлайн
          *
-         * @param $int $id
+         * @param int $id
+         *
+         * @return bool
          */
-        public static function isOnline($id = false)
+        public static function isOnline(int $id): bool
         {
-            if (!$id) {
-                return false;
-            }
             $res         = (DB::getInstance())->query('SELECT last_active FROM `' . self::TABLE . '` WHERE id=' . $id);
             $last_active = $res[0]['last_active'];
             $timeNow     = time();
@@ -193,13 +247,15 @@
         /**
          * Выполняет регистрацию пользователя в системе
          *
-         * @param string $login
-         * @param string $password
-         * @param string $level
-         * @param string $name
-         * @param string $image
+         * @param string $login    Логин
+         * @param string $password Пароль
+         * @param string $level    Права
+         * @param string $name     Имя
+         * @param string $image    Аватар
+         *
+         * @throws CoreException
          */
-        public static function registration($login, $password, $email, $level = 'user', $name = '', $image = ''): int
+        public static function registration(string $login, string $password, string $email, string $level = 'user', string $name = '', string $image = ''): int
         {
             $userId = (DB::getInstance())->addItem(self::TABLE, [
                 'login'        => $login,
@@ -211,7 +267,7 @@
                 'email'        => $email,
                 'last_active'  => time(),
             ]);
-            self::authorize($userId);
+            //self::authorize($userId);
             return $userId;
         }
 
@@ -252,12 +308,13 @@
         /**
          * Выполняет авторизацию пользователя в системе по ID
          *
-         * @param int $id
+         * @param int|null $id       Идентификатор пользователя
+         * @param bool     $remember Запомнить
          *
          * @return bool
          * @throws CoreException
          */
-        public static function authorize(?int $id = null, $remember = false): bool
+        public static function authorize(?int $id = null, bool $remember = false): bool
         {
             if (empty($id)) {
                 throw new CoreException('Передан некорректный идентификатор пользователя');
@@ -268,7 +325,7 @@
 
             if ($result) {
                 $_SESSION['id']        = $result['id'];
-                $_SESSION['authorize'] = 'Y';
+                $_SESSION['authorize'] = CODE_VALUE_Y;
                 $_SESSION['login']     = $result['login'];
                 $_SESSION['password']  = md5(self::$cryptoSalt . $result['password']);
                 $_SESSION['token']     = $result['token'];
@@ -287,12 +344,13 @@
         /**
          * Выполняет авторизацию пользователя в системе по логину и паролю
          *
-         * @param string $login
-         * @param string $password
+         * @param string $login    Логин
+         * @param string $password Пароль
+         * @param bool   $remember Запомнить
          *
          * @return bool
          */
-        public static function securityAuthorize($login, $password, $remember = false): bool
+        public static function securityAuthorize(string $login, string $password, bool $remember = false): bool
         {
             $result = (DB::getInstance())->getItem(self::TABLE, ['login' => $login, 'password' => md5(self::$cryptoSalt . $password)], true);
             if ($result) {
@@ -369,11 +427,10 @@
          */
         public function isAdmin(): bool
         {
-            if ($this->getAllUserData()['access_level'] == self::ACCESS_ADMIN) {
-                return true;
-            } else {
+            if(empty($this->getAllUserData())) {
                 return false;
             }
+            return $this->getAllUserData()['access_level'] == self::ACCESS_ADMIN;
         }
 
         /**
