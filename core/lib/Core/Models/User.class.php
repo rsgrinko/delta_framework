@@ -4,6 +4,7 @@
      *
      * @author Roman Grinko <rsgrinko@gmail.com>
      */
+use Core\Models\DB;
 
     class User
     {
@@ -28,22 +29,13 @@
         private static $cryptoSalt = 'BKH92FdiQvEW2aOy0giywXasYAMl0pFvIrlop8Sz';
 
         /**
-         * Объект базы данных
-         *
-         * @var object
-         */
-        public static $DB;
-
-        /**
          * Инициализация класса
          *
-         * @param object $DB
          * @param string $table
          */
-        public static function init($DB, $table = 'users'): void
+        public static function init( string $table = TABLE_PREFIX . 'users'): void
         {
             self::$table = $table;
-            self::$DB    = $DB;
             if (isset($_SESSION['authorize']) and $_SESSION['authorize'] == 'Y') {
                 self::$id = $_SESSION['id'];
             }
@@ -67,7 +59,7 @@
             } else {
                 $where = ['id' => $id];
             }
-            $result = self::$DB->getItem(self::$table, $where);
+            $result = (DB::getInstance())->getItem(self::$table, $where);
             if ($result) {
                 return $result;
             } else {
@@ -78,23 +70,23 @@
         /**
          * Получение всех пользователей панели
          *
-         * @param int    $limit
+         * @param string $limit
          * @param string $sort
          *
          * @return array
          */
-        public static function getUsers($limit = 10, $sort = 'ASC')
+        public static function getUsers(string $limit = '10', $sort = 'ASC')
         {
-            $res = self::$DB->query('SELECT * FROM `' . self::$table . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
+            $res = (DB::getInstance())->query('SELECT * FROM `' . self::$table . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
             return $res;
         }
 
         /**
          * Возвращает токен пользователя
          */
-        public static function getUserToken($userId): string
+        public static function getUserToken(int $userId): string
         {
-            $result = self::$DB->getItem(self::$table, ['id' => $userId]);
+            $result = (DB::getInstance())->getItem(self::$table, ['id' => $userId]);
 
             if ($result) {
                 return $result['token'];
@@ -109,7 +101,7 @@
         public static function createUserToken($userId): string
         {
             $newToken = self::generateGUID();
-            self::$DB->update(self::$table, ['id' => $userId], ['token' => $newToken]);
+            (DB::getInstance())->update(self::$table, ['id' => $userId], ['token' => $newToken]);
 
             return $newToken;
         }
@@ -134,7 +126,7 @@
          */
         public static function isTokenExists($token): bool
         {
-            $result = self::$DB->getItem(self::$table, ['token' => $token]);
+            $result = (DB::getInstance())->getItem(self::$table, ['token' => $token]);
 
             if ($result) {
                 return true;
@@ -148,7 +140,7 @@
          */
         public static function getUserByToken($token)
         {
-            $result = self::$DB->getItem(self::$table, ['token' => $token]);
+            $result = (DB::getInstance())->getItem(self::$table, ['token' => $token]);
 
             if ($result) {
                 return $result;
@@ -167,7 +159,7 @@
             if (!$id) {
                 return false;
             }
-            $res         = self::$DB->query('SELECT last_active FROM `' . self::$table . '` WHERE id=' . $id);
+            $res         = (DB::getInstance())->query('SELECT last_active FROM `' . self::$table . '` WHERE id=' . $id);
             $last_active = $res[0]['last_active'];
             $timeNow     = time();
             if ($last_active > ($timeNow - USER_ONLINE_TIME)) {
@@ -189,10 +181,10 @@
          */
         public static function registration($login, $password, $email, $level = 'user', $name = '', $image = ''): void
         {
-            self::$DB->addItem(self::$table,
+            (DB::getInstance())->addItem(self::$table,
                                [
                                    'login'        => $login,
-                                   'password'     => $password,
+                                   'password'     => md5(self::$cryptoSalt . $password),
                                    'access_level' => $level,
                                    'name'         => $name,
                                    'image'        => $image,
@@ -201,7 +193,7 @@
                                    'last_active'  => time(),
                                ]
             );
-            $result = self::$DB->getItem(self::$table, ['login' => $login, 'password' => $password]);
+            $result = (DB::getInstance())->getItem(self::$table, ['login' => $login, 'password' => $password]);
 
             self::$id              = $result['id'];
             $_SESSION['id']        = $result['id'];
@@ -220,9 +212,9 @@
          *
          * @return bool
          */
-        public static function isUserExists($login): bool
+        public static function isUserExists(string $login): bool
         {
-            $result = self::$DB->getItem(self::$table, ['login' => $login]);
+            $result = (DB::getInstance())->getItem(self::$table, ['login' => $login]);
 
             if ($result) {
                 return true;
@@ -238,7 +230,7 @@
          */
         public static function countUsers(): int
         {
-            $result = self::$DB->getItems(self::$table, ['id' => '>0']);
+            $result = (DB::getInstance())->getItems(self::$table, ['id' => '>0']);
 
             if ($result) {
                 return count($result);
@@ -256,14 +248,14 @@
          */
         public static function authorize($id, $remember = false): bool
         {
-            $result = self::$DB->getItem(self::$table, ['id' => $id], true);
+            $result = (DB::getInstance())->getItem(self::$table, ['id' => $id], true);
 
             if ($result) {
                 self::$id              = $result['id'];
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = 'Y';
                 $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = $result['password'];
+                $_SESSION['password']  = md5(self::$cryptoSalt . $result['password']);
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
@@ -287,13 +279,13 @@
          */
         public static function securityAuthorize($login, $password, $remember = false): bool
         {
-            $result = self::$DB->getItem(self::$table, ['login' => $login, 'password' => $password], true);
+            $result = (DB::getInstance())->getItem(self::$table, ['login' => $login, 'password' => md5(self::$cryptoSalt . $password)], true);
             if ($result) {
                 self::$id              = $result['id'];
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = 'Y';
                 $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = $result['password'];
+                $_SESSION['password']  = md5(self::$cryptoSalt . $result['password']);
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
@@ -317,7 +309,7 @@
             if (!empty($_COOKIE['userId'])
                 && !empty($_COOKIE['userLogin'])
                 && self::isUserExists($_COOKIE['userLogin'])) {
-                $arUser = self::$DB->getItem(self::$table, ['id' => $_COOKIE['userId']]);
+                $arUser = (DB::getInstance())->getItem(self::$table, ['id' => $_COOKIE['userId']]);
                 if ($_COOKIE['token'] == md5(self::$cryptoSalt . $arUser['id'] . $arUser['login'] . $arUser['password'])) {
                     if (empty($_SESSION['authorize'])) {
                         self::authorize($arUser['id']);
@@ -328,10 +320,10 @@
             if (!isset($_SESSION['authorize']) or empty($_SESSION['authorize']) or $_SESSION['authorize'] !== 'Y') {
                 return false;
             }
-            $result = self::$DB->getItem(self::$table, ['login' => $_SESSION['login']]);
+            $result = (DB::getInstance())->getItem(self::$table, ['login' => $_SESSION['login']]);
             if ($result) {
-                if ($result['password'] == $_SESSION['password']) {
-                    self::$DB->update(self::$table, ['id' => $result['id']], ['last_active' => time()]);
+                if (md5(self::$cryptoSalt . $result['password']) == $_SESSION['password']) {
+                    (DB::getInstance())->update(self::$table, ['id' => $result['id']], ['last_active' => time()]);
                     self::$id       = $result['id'];
                     $_SESSION['id'] = $result['id'];
                     return true;
