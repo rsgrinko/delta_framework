@@ -55,6 +55,7 @@
             if (empty($id)) {
                 throw new CoreException('Передан некорректный идентификатор пользователя');
             }
+
             $this->id = $id;
         }
 
@@ -65,8 +66,15 @@
          */
         public function getAllUserData(): ?array
         {
-            $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
-            if ($result) {
+            $cacheId = md5('User_getAllUserData_' . $this->id);
+            if(Cache::check($cacheId)) {
+                $result = Cache::get($cacheId);
+            } else {
+                $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
+                Cache::set($cacheId, $result);
+            }
+
+            if (!empty($result)) {
                 return $result;
             } else {
                 return null;
@@ -360,14 +368,10 @@
          *
          * @return bool
          */
-        public static function isAdmin(): bool
+        public function isAdmin(): bool
         {
-            if (self::isUser()) {
-                if (self::getFields(self::$id)['access_level'] == 'admin') {
-                    return true;
-                } else {
-                    return false;
-                }
+            if ($this->getAllUserData()['access_level'] == self::ACCESS_ADMIN) {
+                return true;
             } else {
                 return false;
             }
