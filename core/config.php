@@ -11,7 +11,7 @@
     define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
     /**
-     * Путь до диреткории с логами
+     * Путь до директории с логами
      */
     define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');
 

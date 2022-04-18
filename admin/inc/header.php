@@ -3,7 +3,7 @@
     use Core\Models\User;
 
     require_once __DIR__ . '/bootstrap.php';
-    if (!User::isUser() and $_SERVER['REQUEST_URI'] !== '/login.php') {
+    if (!User::isAuthorized() and $_SERVER['REQUEST_URI'] !== '/login.php') {
         header('Location: login.php');
         die();
     }
@@ -34,7 +34,7 @@
 <header>
     <div class="headerwrapper">
         <div class="header-left">
-            <a href="index.html" class="logo">
+            <a href="index.php" class="logo">
                 <img src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/logo.png" alt=""/>
             </a>
             <div class="pull-right">

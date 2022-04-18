@@ -4,7 +4,7 @@
 
     require_once __DIR__ . '/inc/bootstrap.php';
 
-    if (User::isUser()) {
+    if (User::isAuthorized()) {
         $auth = true;
     } else {
         $auth = false;

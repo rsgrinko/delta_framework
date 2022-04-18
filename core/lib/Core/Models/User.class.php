@@ -9,7 +9,7 @@
 
     use Core\CoreException;
     use Core\Models\DB;
-    use Core\Helpers\Cache;
+    use Core\Helpers\{Cache, Log};
 
     class User
     {
@@ -88,7 +88,7 @@
          */
         public function getLogin(): ?string
         {
-            return self::getAllUserData() ? self::getAllUserData()['login'] : null;
+            return $this->getAllUserData() ? $this->getAllUserData()['login'] : null;
         }
 
         /**
@@ -98,7 +98,7 @@
          */
         public function getEmail(): ?string
         {
-            return self::getAllUserData() ? self::getAllUserData()['email'] : null;
+            return $this->getAllUserData() ? $this->getAllUserData()['email'] : null;
         }
 
         /**
@@ -108,7 +108,7 @@
          */
         public function getName(): ?string
         {
-            return self::getAllUserData() ? self::getAllUserData()['name'] : null;
+            return $this->getAllUserData() ? $this->getAllUserData()['name'] : null;
         }
 
         /**
@@ -118,7 +118,7 @@
          */
         public function getImage(): ?string
         {
-            return self::getAllUserData() ? self::getAllUserData()['image'] : null;
+            return $this->getAllUserData() ? $this->getAllUserData()['image'] : null;
         }
 
         /**
@@ -128,7 +128,7 @@
          */
         public function getToken(): ?string
         {
-            return self::getAllUserData() ? self::getAllUserData()['token'] : null;
+            return $this->getAllUserData() ? $this->getAllUserData()['token'] : null;
         }
 
         /**
@@ -138,7 +138,7 @@
          */
         public function getLastActive(): ?string
         {
-            return self::getAllUserData() ? self::getAllUserData()['last_active'] : null;
+            return $this->getAllUserData() ? $this->getAllUserData()['last_active'] : null;
         }
 
         /**
@@ -146,9 +146,9 @@
          *
          * @return int|null
          */
-        public static function getId(): ?int
+        public function getId(): ?int
         {
-            return self::getAllUserData() ? self::getAllUserData()['id'] : null;
+            return $this->getAllUserData() ? $this->getAllUserData()['id'] : null;
         }
 
         /**
@@ -168,6 +168,7 @@
                 $res = (DB::getInstance())->query('SELECT * FROM `' . self::TABLE . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
                 Cache::set($cacheId, $res);
             }
+            Log::logToFile(__METHOD__, 'User.log', func_get_args());
             return $res;
         }
 
@@ -180,7 +181,7 @@
         {
             $newToken = self::generateGUID();
             (DB::getInstance())->update(self::TABLE, ['id' => $this->id], ['token' => $newToken]);
-
+            Log::logToFile('Создан токен ' . $newToken, 'User.log');
             return $newToken;
         }
 
@@ -207,7 +208,6 @@
         public static function isTokenExists(string $token): bool
         {
             $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
-
             if ($result) {
                 return true;
             } else {
@@ -226,7 +226,6 @@
         public static function getUserByToken(string $token): ?self
         {
             $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
-
             if ($result) {
                 return (new self($result['id']));
             } else {
@@ -267,6 +266,7 @@
          */
         public static function registration(string $login, string $password, string $email, string $level = 'user', string $name = '', string $image = ''): int
         {
+            Log::logToFile(__METHOD__, 'User.log', func_get_args());
             $userId = (DB::getInstance())->addItem(self::TABLE, [
                 'login'        => $login,
                 'password'     => md5(self::$cryptoSalt . $password),
@@ -345,6 +345,7 @@
                     setcookie('userLogin', $result['login'], time() + 3600 * 24);
                     setcookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']), time() + 3600 * 24);
                 }
+                Log::logToFile(__METHOD__, 'User.log', func_get_args());
                 return true;
             } else {
                 return false;
@@ -362,6 +363,7 @@
          */
         public static function securityAuthorize(string $login, string $password, bool $remember = false): bool
         {
+            Log::logToFile(__METHOD__, 'User.log', func_get_args());
             $result = (DB::getInstance())->getItem(self::TABLE, ['login' => $login, 'password' => md5(self::$cryptoSalt . $password)], true);
             if ($result) {
                 $_SESSION['id']        = $result['id'];
@@ -388,7 +390,7 @@
          */
         public static function getCurrentUserId(): ?int
         {
-            if (self::isUser()) {
+            if (self::isAuthorized()) {
                 return $_SESSION['id'];
             } else {
                 return null;
@@ -399,8 +401,9 @@
          * Проверка на пользователя
          *
          * @return bool
+         * @throws CoreException
          */
-        public static function isUser(): bool
+        public static function isAuthorized(): bool
         {
             if (!empty($_COOKIE['userId'])
                 && !empty($_COOKIE['userLogin'])
@@ -448,6 +451,7 @@
          */
         public static function logout(): void
         {
+            Log::logToFile(__METHOD__, 'User.log', func_get_args());
             $_SESSION['id']        = '';
             $_SESSION['authorize'] = '';
             $_SESSION['login']     = '';

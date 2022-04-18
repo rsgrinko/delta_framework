@@ -2,7 +2,7 @@
     use Core\Models\User;
 
     require_once __DIR__ . '/../../core/bootstrap.php';
-    $userId = User::getUserId();
+    $userId = User::getCurrentUserId();
 
     if(!empty($userId)) {
         $USER = new User($userId);
