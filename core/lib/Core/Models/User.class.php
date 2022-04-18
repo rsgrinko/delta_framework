@@ -4,7 +4,10 @@
      *
      * @author Roman Grinko <rsgrinko@gmail.com>
      */
-use Core\Models\DB;
+
+    namespace Core\Models;
+
+    use Core\Models\DB;
 
     class User
     {
@@ -33,7 +36,7 @@ use Core\Models\DB;
          *
          * @param string $table
          */
-        public static function init( string $table = TABLE_PREFIX . 'users'): void
+        public static function init(string $table = TABLE_PREFIX . 'users'): void
         {
             self::$table = $table;
             if (isset($_SESSION['authorize']) and $_SESSION['authorize'] == 'Y') {
@@ -181,18 +184,16 @@ use Core\Models\DB;
          */
         public static function registration($login, $password, $email, $level = 'user', $name = '', $image = ''): void
         {
-            (DB::getInstance())->addItem(self::$table,
-                               [
-                                   'login'        => $login,
-                                   'password'     => md5(self::$cryptoSalt . $password),
-                                   'access_level' => $level,
-                                   'name'         => $name,
-                                   'image'        => $image,
-                                   'token'        => '',
-                                   'email'        => $email,
-                                   'last_active'  => time(),
-                               ]
-            );
+            (DB::getInstance())->addItem(self::$table, [
+                                                         'login'        => $login,
+                                                         'password'     => md5(self::$cryptoSalt . $password),
+                                                         'access_level' => $level,
+                                                         'name'         => $name,
+                                                         'image'        => $image,
+                                                         'token'        => '',
+                                                         'email'        => $email,
+                                                         'last_active'  => time(),
+                                                     ]);
             $result = (DB::getInstance())->getItem(self::$table, ['login' => $login, 'password' => $password]);
 
             self::$id              = $result['id'];

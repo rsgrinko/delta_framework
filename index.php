@@ -1,7 +1,12 @@
 <?php
     use Core\ExternalServices\Telegram;
+    use Core\Models\User;
+    use Core\Helpers\SystemFunctions;
+
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
 
-    Telegram::init('5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU', './');
-    Telegram::execute(412790359, 'Hello from test site');
+    User::authorize(2);
+    $res = User::getFields();
+
+    echo SystemFunctions::arrayToTable($res, 'Информация о пользователе');

@@ -1,4 +1,14 @@
 <?php
+
+    use Core\Models\User;
+
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    define('START_TIME', microtime(true));                          // засекаем время старта скрипта
+    define('CORE_LOADED', true);                                    // флаг корректного запуска
+
     require_once __DIR__ . '/config.php';
 
     /**
@@ -6,11 +16,12 @@
      */
     spl_autoload_register(function ($class) {
         if (strpos($class, 'Core') === 0) {
-            $class = str_replace('\\', '/', $class);
-            $classPath = __DIR__ . '/lib/' . $class . '.class.php';
-            echo $classPath;
+            $class     = str_replace('\\', '/', $class);
+            $classPath = ROOT_PATH . '/core/lib/' . $class . '.class.php';
             if (file_exists($classPath)) {
                 require_once $classPath;
             }
         }
     });
+
+    User::init();
