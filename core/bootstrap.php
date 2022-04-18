@@ -1,12 +1,13 @@
 <?php
 
     use Core\Models\User;
+    use Core\Helpers\Cache;
 
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
 
-    define('START_TIME', microtime(true));                          // засекаем время старта скрипта
+    define('START_TIME', microtime(true));                   // засекаем время старта скрипта
     define('CORE_LOADED', true);                                    // флаг корректного запуска
 
     require_once __DIR__ . '/config.php';
@@ -24,4 +25,4 @@
         }
     });
 
-    User::init();
+    Cache::init(ROOT_PATH . '/core/cache/', true);
