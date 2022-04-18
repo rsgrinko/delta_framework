@@ -7,7 +7,7 @@
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
 
-    echo '<a href="/admin/">Админка</a> | <a href="/">Обновить страницу</a> <br>';
+    echo '<a href="/admin/">Админка</a> | <a href="/?clear_cache=Y">Очистить кэш</a> | <a href="/">Обновить страницу</a> <br>';
 
     Telegram::init('5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU', './');
     //$userId = User::registration('test', '12345', 'support@it-stories.ru', 'user', 'Тестировщик', 'http://samag.ru/uploads/5222447.png');
