@@ -22,8 +22,6 @@
     } catch (CoreException $e) {
         echo $e->showTrace();
     }
-    die('stoped');
-
     echo '<br><br>';
 
     if (User::isAuthorized()) {
