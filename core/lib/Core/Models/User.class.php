@@ -67,7 +67,7 @@
         public function getAllUserData(): ?array
         {
             $cacheId = md5('User_getAllUserData_' . $this->id);
-            if(Cache::check($cacheId)) {
+            if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
                 $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
@@ -91,8 +91,8 @@
          */
         public static function getUsers(string $limit = '10', $sort = 'ASC')
         {
-            $cacheId = md5('User::getUsers(' . $limit . ', ' . $sort . ')');
-            if(Cache::check($cacheId)) {
+            $cacheId = md5('User_getUsers_' . $limit . '_' . $sort);
+            if (Cache::check($cacheId)) {
                 $res = Cache::get($cacheId);
             } else {
                 $res = (DB::getInstance())->query('SELECT * FROM `' . self::TABLE . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
@@ -296,7 +296,6 @@
         {
             $result = (DB::getInstance())->getItem(self::TABLE, ['login' => $login, 'password' => md5(self::$cryptoSalt . $password)], true);
             if ($result) {
-                self::$id              = $result['id'];
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = 'Y';
                 $_SESSION['login']     = $result['login'];
@@ -321,7 +320,7 @@
          */
         public static function getUserId(): ?int
         {
-            if(self::isUser()) {
+            if (self::isUser()) {
                 return $_SESSION['id'];
             } else {
                 return null;

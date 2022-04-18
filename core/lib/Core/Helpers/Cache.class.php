@@ -35,12 +35,12 @@
         /**
          * Инициализация кэша
          *
-         * @param string $dir Директория хранения файлов кэша
-         * @param bool $enabled Флаг включения кэширования
+         * @param string $dir     Директория хранения файлов кэша
+         * @param bool   $enabled Флаг включения кэширования
          */
         public static function init(string $dir, $enabled = true): void
         {
-            self::$cacheDir = $dir;
+            self::$cacheDir     = $dir;
             self::$cacheEnabled = $enabled;
         }
 
@@ -75,9 +75,27 @@
         }
 
         /**
+         * Получение информации о кэше
+         *
+         * @return array
+         */
+        public static function getCacheInfo(): array
+        {
+            return [
+                'countAll'    => self::$quantity,
+                'countWrite'  => self::$quantityWrite,
+                'countRead'   => self::$quantityRead,
+                'cacheDir'    => self::$cacheDir,
+                'cachedCount' => self::getCachedCount(),
+                'size'        => self::getCacheSize(),
+            ];
+        }
+
+        /**
          * Проверка наличия элемента в кэше
          *
          * @param string $name Имя элемента кэша
+         *
          * @return bool Флаг наличия или отсутствия кэша
          */
         public static function check(string $name): bool
@@ -95,6 +113,7 @@
          * Получение кэшированных данных из кэша
          *
          * @param string $name Имя элемента кэша
+         *
          * @return Кэшированные данные
          */
         public static function get(string $name)
@@ -102,6 +121,16 @@
             self::$quantity++;
             self::$quantityRead++;
             return unserialize(base64_decode(file_get_contents(self::$cacheDir . md5($name) . '.tmp')));
+        }
+
+        /**
+         * Получить количество кэшированных элементов
+         *
+         * @return int
+         */
+        public static function getCachedCount()
+        {
+            return count(scandir(self::$cacheDir)) - 2;
         }
 
         /**
@@ -134,7 +163,8 @@
         public static function flush(): bool
         {
             foreach (scandir(self::$cacheDir) as $file) {
-                if ($file == '.' || $file == '..') continue;
+                if ($file == '.' || $file == '..')
+                    continue;
                 self::$quantity++;
                 self::$quantityWrite++;
                 if (!unlink(self::$cacheDir . $file)) {
@@ -148,6 +178,7 @@
          * Удаление элемента из кэша
          *
          * @param string $name Имя элемента кэша
+         *
          * @return bool Флаг успеха
          */
         public static function del(string $name): bool
@@ -166,6 +197,7 @@
          * Получение размера элемента кэша в байтах
          *
          * @param string $name Имя элемента кэша
+         *
          * @return int|null Размер элемента в байтах или null
          */
         public static function getSize(string $name): ?int
@@ -185,7 +217,8 @@
         {
             $return_size = 0;
             foreach (scandir(self::$cacheDir) as $file) {
-                if ($file == '.' or $file == '..') continue;
+                if ($file == '.' or $file == '..')
+                    continue;
                 $return_size = $return_size + filesize(self::$cacheDir . $file);
             }
             return $return_size;
@@ -195,6 +228,7 @@
          * Получение времени существованя кэша в секундах
          *
          * @param string $name Имя элемента кэша
+         *
          * @return int Время в секундах или false
          */
         public static function getAge(string $name): int

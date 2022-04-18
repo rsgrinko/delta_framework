@@ -26,3 +26,8 @@
     });
 
     Cache::init(ROOT_PATH . '/core/cache/', true);
+
+
+    if(isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
+        Cache::flush();
+    }
