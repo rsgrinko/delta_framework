@@ -11,6 +11,11 @@
     define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
     /**
+     * Путь до диреткории с логами
+     */
+    define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');
+
+    /**
      * Префикс таблиц в БД
      */
     define('TABLE_PREFIX', 'd_');
@@ -49,3 +54,4 @@
      * Код значения Да
      */
     define('CODE_VALUE_Y', 'Y');
+

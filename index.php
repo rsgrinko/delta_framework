@@ -3,12 +3,13 @@
     use Core\CoreException;
     use Core\ExternalServices\Telegram;
     use Core\Models\User;
-    use Core\Helpers\{SystemFunctions, Cache};
+    use Core\Helpers\{SystemFunctions, Cache, Log};
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
 
     /*$userId = User::registration('test', '12345', 'support@it-stories.ru', 'user', 'Тестировщик', 'http://samag.ru/uploads/5222447.png');
     $user = new User($userId);*/
 
+    Log::logToFile('Проверка работы файлового лога', 'test.log');
     $userId = 2;//User::getUserId();
     try {
         $user = new User($userId);

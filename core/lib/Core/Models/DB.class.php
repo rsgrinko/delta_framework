@@ -13,10 +13,12 @@
         /**
          * @var object $db Объект базы
          */
-        public object          $db;
+        public object $db;
 
+        /**
+         * @var object|null $instance Объект класса
+         */
         private static ?object $instance = null;
-
 
         /**
          * @var int $quantity Количество обращений к базе

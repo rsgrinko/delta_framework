@@ -113,7 +113,7 @@
         /**
          * Генерация пароля
          *
-         * @param int $number Количество символов в пароле
+         * @param int  $number          Количество символов в пароле
          * @param bool $useSpecialChars Использовать ли спецсимволы
          *
          * @return string
@@ -156,6 +156,7 @@
          * Проверка UserAgent на бота
          *
          * @param string|null $userAgent User agent
+         *
          * @return string|null
          */
         public static function isSearchBot(?string $userAgent): ?string
@@ -201,8 +202,9 @@
          * Метод для склонения слов в зависимости от числа
          * Пример: numWord($secs, array('секунда', 'секунды', 'секунд'))
          *
-         * @param int $value Число
+         * @param int   $value Число
          * @param array $words Массив слов
+         *
          * @return string
          */
         public static function numWord(int $value, array $words): string
@@ -234,6 +236,7 @@
          * Преобразование количества секунд в строку с разбиением на дни, часы, минуты и секунды
          *
          * @param int $secs Секунды
+         *
          * @return string
          */
         public static function secToString(int $secs): string
@@ -265,7 +268,9 @@
 
         /**
          * Удаление GET параметров из строки URL
+         *
          * @param string|null $url URL
+         *
          * @return string|string[]|null
          */
         public static function getBaseUrl(?string $url = null): ?string
@@ -276,8 +281,8 @@
         /**
          * Транслитерация строки
          *
-         * @param string|null $text Строка для преобразования
-         * @param bool $noUseSpace Использование режима "для ЧПУ"
+         * @param string|null $text       Строка для преобразования
+         * @param bool        $noUseSpace Использование режима "для ЧПУ"
          *
          * @return string|null
          */
@@ -320,8 +325,8 @@
         /**
          * Построение структурной таблицы из массива
          *
-         * @param array|string|null $var Массив
-         * @param string $title Заголовок
+         * @param array|string|null $var   Массив
+         * @param string            $title Заголовок
          *
          * @return string|null
          */
