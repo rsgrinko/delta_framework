@@ -15,7 +15,7 @@
  * @author  Roman Grinko <rsgrinko@gmail.com>
  */
 
-namespace Delta\ExternalServices;
+namespace Core\ExternalServices;
 
 class TelegramActions
 {
