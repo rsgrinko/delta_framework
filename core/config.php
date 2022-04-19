@@ -3,7 +3,7 @@
     /**
      * Версия сервиса
      */
-    define('VERSION', '1.0.0');
+    const VERSION = '1.0.0';
 
     /**
      * Путь до корня проекта
@@ -18,40 +18,40 @@
     /**
      * Префикс таблиц в БД
      */
-    define('TABLE_PREFIX', 'd_');
+    const TABLE_PREFIX = 'd_';
 
     /**
      * Сервер БД
      */
-    define('DB_HOST', 'localhost');
+    const DB_HOST = 'localhost';
 
     /**
      * Имя пользователя БД
      */
-    define('DB_USER', 'delta_core');
+    const DB_USER = 'delta_core';
 
     /**
      * Пароль пользователя БД
      */
-    define('DB_PASSWORD', 'dickpick');
+    const DB_PASSWORD = 'dickpick';
 
     /**
      * Название базы
      */
-    define('DB_NAME', 'delta_core');
+    const DB_NAME = 'delta_core';
 
     /**
      * Время, в течении которого считаем пользователя онлайн, сек.
      */
-    define('USER_ONLINE_TIME', 60 * 5);
+    const USER_ONLINE_TIME = 60 * 5;
 
     /**
      * Время жизни кэша
      */
-    define('CACHE_TTL', 3600);
+    const CACHE_TTL = 3600;
 
     /**
      * Код значения Да
      */
-    define('CODE_VALUE_Y', 'Y');
+    const CODE_VALUE_Y = 'Y';
 
