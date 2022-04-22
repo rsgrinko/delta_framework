@@ -12,6 +12,9 @@
     Telegram::init('5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU', './');
     //$userId = User::registration('test', '12345', 'support@it-stories.ru', 'user', 'Тестировщик', 'http://samag.ru/uploads/5222447.png');
 
+    if (isset($_REQUEST['log']) && $_REQUEST['log'] === CODE_VALUE_Y) {
+        Log::logToFile('Тестовое сообщение в лог', 'test.log', $_REQUEST);
+    }
 
     /*$user = new User($userId);*/
 
