@@ -2,10 +2,17 @@
 
     use Core\Models\User;
     use Core\Helpers\Cache;
+    use Core\Template;
 
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
+    ob_start(function($buffer) {
+        Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
+        Template::set('ADMIN_PANEL_LINK_NAME', 'Панель администратора');
+        Template::set('REFRESH_PAGE_LINK_NAME', 'Перезагрузить страницу');
+        return Template::render($buffer);
+    });
 
     define('START_TIME', microtime(true));                   // засекаем время старта скрипта
     define('CORE_LOADED', true);                                    // флаг корректного запуска

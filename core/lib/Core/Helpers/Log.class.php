@@ -3,6 +3,7 @@
     namespace Core\Helpers;
 
     use Core\Models\User;
+    use Core\CoreException;
 
     class Log
     {
@@ -31,6 +32,7 @@
          * @param bool        $addEnv   Флаг необходимости указания расширенных данных
          *
          * @return int             Количество сохранённых байт
+         * @throws CoreException
          */
         public static function logToFile(
             string $message,

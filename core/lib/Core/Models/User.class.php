@@ -290,7 +290,13 @@
          */
         public static function isUserExists(string $login): bool
         {
-            $result = (DB::getInstance())->getItem(self::TABLE, ['login' => $login]);
+            $cacheId = md5('isUserExists_' . $login);
+            if(Cache::check($cacheId)) {
+                $result = Cache::get($cacheId);
+            } else {
+                $result = (DB::getInstance())->getItem(self::TABLE, ['login' => $login]);
+                Cache::set($cacheId, $result);
+            }
 
             if ($result) {
                 return true;
@@ -306,7 +312,13 @@
          */
         public static function countUsers(): int
         {
-            $result = (DB::getInstance())->getItems(self::TABLE, ['id' => '>0']);
+            $cacheId = md5('countUsers');
+            if(Cache::check($cacheId) && Cache::getAge($cacheId) < 300) {
+                $result = Cache::get($cacheId);
+            } else {
+                $result = (DB::getInstance())->getItems(self::TABLE, ['id' => '>0']);
+                Cache::set($cacheId, $result);
+            }
 
             if ($result) {
                 return count($result);
@@ -416,7 +428,7 @@
                     return true;
                 }
             }
-            if (!isset($_SESSION['authorize']) or empty($_SESSION['authorize']) or $_SESSION['authorize'] !== 'Y') {
+            if (!isset($_SESSION['authorize']) || empty($_SESSION['authorize']) || $_SESSION['authorize'] !== 'Y') {
                 return false;
             }
             $result = (DB::getInstance())->getItem(self::TABLE, ['login' => $_SESSION['login']]);
