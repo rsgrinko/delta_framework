@@ -332,19 +332,23 @@
          */
         public static function arrayToTable($var, string $title = ''): ?string
         {
+            $tableStyle = 'border: 1px solid #7b9ea3;border-collapse: collapse;';
+            $tdBoldStyle = 'padding: 10px;border: 1px solid #7b9ea3;background: powderblue;font-weight: bold; text-align: center;';
+            $tdStyle = 'padding: 10px;border: 1px solid #7b9ea3;';
+            $thStyle = 'background: #b0e0e6;font-size: 1.3em;padding: 10px;';
             if (is_array($var)) {
-                $table = '<table>';
+                $table = '<table style="' . $tableStyle . '">';
                 if ($title) {
-                    $table .= '<tr><th colspan="20">' . $title . '</th></tr>';
+                    $table .= '<tr><th colspan="20" style="' . $thStyle . '">' . $title . '</th></tr>';
                 }
                 foreach ($var as $k => $v) {
                     $table .= '<tr>';
-                    $table .= '<td><b>' . htmlspecialchars($k) . '</b></td>';
-                    $table .= '<td>';
+                    $table .= '<td style="' . $tdBoldStyle . '">' . htmlspecialchars($k) . '</td>';
+                    $table .= '<td style="' . $tdStyle . '">';
                     if (is_array($v)) {
                         $table .= self::arrayToTable($v);
                     } else {
-                        $table .= htmlspecialchars($v);
+                        $table .= '<pre>' . htmlspecialchars($v) . '</pre>';
                     }
                     $table .= '</td>';
                     $table .= '</tr>';
