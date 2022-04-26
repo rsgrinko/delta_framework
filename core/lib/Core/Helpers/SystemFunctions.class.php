@@ -333,9 +333,9 @@
         public static function arrayToTable($var, string $title = ''): ?string
         {
             $tableStyle = 'border: 1px solid #7b9ea3;border-collapse: collapse;';
-            $tdBoldStyle = 'padding: 10px;border: 1px solid #7b9ea3;background: powderblue;font-weight: bold; text-align: center;';
+            $tdBoldStyle = 'padding: 10px;border: 1px solid #7b9ea3;background: powderblue;font-weight: bold; text-align: center;color: #226770;text-shadow: #7b9ea3 0px 0px 2px;';
             $tdStyle = 'padding: 10px;border: 1px solid #7b9ea3;';
-            $thStyle = 'background: #b0e0e6;font-size: 1.3em;padding: 10px;';
+            $thStyle = 'background: #b0e0e6;font-size: 1.3em;padding: 10px;background: linear-gradient(0deg, #b0e0e6, #90c1c7);color: #226770;text-shadow: #7b9ea3 1px 1px 0px;';
             if (is_array($var)) {
                 $table = '<table style="' . $tableStyle . '">';
                 if ($title) {

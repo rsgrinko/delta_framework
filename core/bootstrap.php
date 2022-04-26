@@ -7,12 +7,16 @@
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
-    /*ob_start(function($buffer) {
-        Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
-        Template::set('ADMIN_PANEL_LINK_NAME', 'Панель администратора');
-        Template::set('REFRESH_PAGE_LINK_NAME', 'Перезагрузить страницу');
-        return Template::render($buffer);
-    });*/
+    ob_start(function($buffer) {
+        try {
+            Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
+            Template::set('ADMIN_PANEL_LINK_NAME', 'Панель администратора');
+            Template::set('REFRESH_PAGE_LINK_NAME', 'Перезагрузить страницу');
+            return Template::render($buffer);
+        } catch(Throwable $e) {
+            return $e->getMessage();
+        }
+    });
 
     define('START_TIME', microtime(true));                   // засекаем время старта скрипта
     define('CORE_LOADED', true);                                    // флаг корректного запуска
