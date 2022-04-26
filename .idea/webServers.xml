@@ -2,8 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="afaead60-4e07-45ee-a3a6-955b92f318f9" name="seoven.it-stories.ru" url="http://seoven.it-stories.ru">
-        <fileTransfer rootFolder="/seoven.it-stories.ru" host="seoven.it-stories.ru" port="21">
+      <webServer id="afaead60-4e07-45ee-a3a6-955b92f318f9" name="dev.it-stories.ru" url="http://dev.it-stories.ru">
+        <fileTransfer rootFolder="/dev.it-stories.ru" host="dev.it-stories.ru" port="21">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
