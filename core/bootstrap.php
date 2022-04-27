@@ -3,6 +3,8 @@
     use Core\Models\User;
     use Core\Helpers\Cache;
     use Core\Template;
+    use Core\ExternalServices\Telegram;
+    use Core\CoreException;
 
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
@@ -41,7 +43,26 @@
 
     Cache::init(ROOT_PATH . '/core/cache/', true);
 
-
+    // очистка кэша
     if(isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
         Cache::flush();
+    }
+
+    // выход из системы
+    if (isset($_REQUEST['logout']) && $_REQUEST['logout'] === CODE_VALUE_Y) {
+        User::logout();
+    }
+
+    Telegram::init('5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU', './');
+
+
+    $userId = User::getCurrentUserId();
+    if(!empty($userId)) {
+        try {
+            $USER = new User($userId);
+        } catch (CoreException $e) {
+            $USER = null;
+        }
+    } else {
+        $USER = null;
     }

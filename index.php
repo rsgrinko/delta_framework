@@ -45,24 +45,16 @@
         </div>
     </nav>
 
+
+
+
     <div class="container">
         <div class="row justify-content-md-center">
             <div class="col-md">
 <?php
-    Telegram::init('5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU', './');
-
-    $userId = User::getCurrentUserId();
-    try {
-        $user = new User($userId);
-        User::authorize((int)$userId);
-        echo 'Current user id: ' . $userId . '<br>';
-    } catch (CoreException $e) {
-        echo $e->showTrace();
-    }
-    echo '<br><br>';
-
     if (User::isAuthorized()) {
-        echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($user->getAllUserData(), 'Информация о пользователе'));
+        global $USER;
+        echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($USER->getAllUserData(), 'Информация о пользователе'));
     }
 
 //echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable(Cache::getCacheInfo(), 'Информация о кэше'));
