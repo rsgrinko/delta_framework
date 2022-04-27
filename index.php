@@ -44,6 +44,10 @@
             </div>
         </div>
     </nav>
+
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-md">
 <?php
     Telegram::init('5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU', './');
 
@@ -58,10 +62,10 @@
     echo '<br><br>';
 
     if (User::isAuthorized()) {
-        echo SystemFunctions::arrayToTable($user->getAllUserData(), 'Информация о пользователе');
+        echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($user->getAllUserData(), 'Информация о пользователе'));
     }
 
-//echo SystemFunctions::arrayToTable(Cache::getCacheInfo(), 'Информация о кэше');
+//echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable(Cache::getCacheInfo(), 'Информация о кэше'));
 
 $count = (int)(DB::getInstance())->query('select count(*) as count from d_posts where post_type="post" and post_status="publish"')[0]['count'];
 Pagination::execute($_REQUEST['page'], $count, 3);
@@ -84,9 +88,20 @@ echo '<nav aria-label="Page navigation example">';
 Pagination::show('page');
 echo '</nav>';
 
-echo SystemFunctions::arrayToTable($arResult, 'Статьи');
+echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($arResult, 'Статьи'));
 ?>
+            </div></div></div>
 </main>
+<footer class="py-3 my-4">
+    <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Home</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Features</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Pricing</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
+    </ul>
+    <p class="text-center text-muted">© 2021 Company, Inc</p>
+</footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     </body>
 </html>
