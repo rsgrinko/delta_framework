@@ -6,7 +6,7 @@
     use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination, Files};
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
-    ?>
+?>
 <!doctype html>
 <html lang="ru">
 <head>
@@ -15,6 +15,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <title>Главная тестовая</title>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/mode/sql/sql.min.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3/codemirror.min.css">
+
+
 </head>
 <body>
 <main>
@@ -28,7 +39,7 @@
             <div class="navbar-collapse collapse" id="navbarsExample04" style="">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Главная</a>
+                        <a class="nav-link" aria-current="page" href="/">Главная</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/admin/">{{ADMIN_PANEL_LINK_NAME}}</a>
@@ -37,7 +48,7 @@
                         <a class="nav-link" href="/?clear_cache=Y">{{CLEAR_CACHE_LINK_NAME}}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/phpcmd.php">{{PHP_CMD_LINK_NAME}}</a>
+                        <a class="nav-link active" href="/phpcmd.php">{{PHP_CMD_LINK_NAME}}</a>
                     </li>
 
                     <li class="nav-item">
@@ -47,48 +58,52 @@
             </div>
         </div>
     </nav>
-
-
-
-
     <div class="container">
         <div class="row justify-content-md-center">
             <div class="col-md">
-<?php
-    if (User::isAuthorized()) {
-        global $USER;
-        echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($USER->getAllUserData(), 'Информация о пользователе'));
-    }
 
-//echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable(Cache::getCacheInfo(), 'Информация о кэше'));
+                <h1 class="entry-title">Командная строка PHP</h1>
 
-$count = (int)(DB::getInstance())->query('select count(*) as count from d_users')[0]['count'];
-Pagination::execute($_REQUEST['page'], $count, 2);
-$limit = Pagination::getLimit();
+                <form action="" method="POST">
+                    <input type="hidden" name="execute" value="Y">
 
-$arData = (DB::getInstance())->query('select * from d_users order by id desc limit ' . $limit);
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Введите PHP код для выполнения</label>
+                    <textarea class="form-control" rows="8" id="query" name="query"><?php echo isset($_REQUEST['query']) ? $_REQUEST['query'] : ''; ?></textarea>
+                </div>
 
-    $arResult = [];
-    foreach ($arData as $element) {
-        $arResult[$element['id']] = [
-            'id'           => $element['id'],
-            'login'        => $element['login'],
-            //'password'     => $element['password'],
-            'access_level' => $element['access_level'],
-            'name'         => $element['name'],
-            'email'        => $element['email'],
-            'image'        => $element['image'],
-            'token'        => $element['token'],
-            'last_active'  => $element['last_active'],
+                <div class="mb-3">
+                    <input class="btn btn-primary" type="submit" name="btn" value="Выполнить">
+                </div>
 
-        ];
-    }
-echo '<nav aria-label="Page navigation example">';
-Pagination::show('page');
-echo '</nav>';
 
-echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($arResult, 'Пользователи'));
-?>
+                </form>
+
+                <script>
+                    CodeMirror.fromTextArea(document.getElementById("query"), {
+                        lineNumbers: true
+                    });
+                </script>
+
+                <?php if (isset($_REQUEST['execute']) and $_REQUEST['execute'] == 'Y') {
+                    echo '<h2 class="entry-title">Результат</h2><p class="exec_result">';
+                    try {
+                        eval($_REQUEST['query']);
+                    } catch (ParseError $p) {
+                        echo '<div class="alert alert-danger"><p><strong>(ParseError)</strong> Ошибка парсинга: ' . $p->getMessage() . '</p></div>';
+                    } catch (Throwable $e) {
+                        echo '<div class="alert alert-danger"><p><strong>(Throwable)</strong> Ошибка при выполнении: ' . $e->getMessage() . '</p></div>';
+                    } catch (Error $e) {
+                        echo '<div class="alert alert-danger"><p><strong>(Error)</strong>  Ошибка при выполнении: ' . $e->getMessage() . '</p></div>';
+                    }
+                    echo '</p>';
+                }
+                ?>
+
+
+
+
+
             </div>
         </div>
     </div>
@@ -123,6 +138,6 @@ echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions:
     ?>
     <p class="text-center text-muted">© <?=date('Y');?> Delta Project</p>
 </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
 </html>

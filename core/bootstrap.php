@@ -14,6 +14,7 @@
             Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
             Template::set('ADMIN_PANEL_LINK_NAME', 'Панель администратора');
             Template::set('REFRESH_PAGE_LINK_NAME', 'Перезагрузить страницу');
+            Template::set('PHP_CMD_LINK_NAME', 'Командная PHP строка');
             return Template::render($buffer);
         } catch(Throwable $e) {
             return $e->getMessage();

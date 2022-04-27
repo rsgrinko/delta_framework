@@ -152,6 +152,16 @@
         }
 
         /**
+         * Получение прав доступа текущего пользователя
+         *
+         * @return string|null
+         */
+        public function getAccessLevel(): ?string
+        {
+            return $this->getAllUserData() ? $this->getAllUserData()['access_level'] : null;
+        }
+
+        /**
          * Получение всех пользователей панели
          *
          * @param string $limit Лимит
