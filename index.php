@@ -3,7 +3,7 @@
     use Core\CoreException;
     use Core\ExternalServices\Telegram;
     use Core\Models\{User, DB};
-    use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination};
+    use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination, Files};
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
     ?>
@@ -68,7 +68,7 @@
 //echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable(Cache::getCacheInfo(), 'Информация о кэше'));
 
 $count = (int)(DB::getInstance())->query('select count(*) as count from d_posts where post_type="post" and post_status="publish"')[0]['count'];
-Pagination::execute($_REQUEST['page'], $count, 3);
+Pagination::execute($_REQUEST['page'], $count, 2);
 $limit = Pagination::getLimit();
 
 $arPosts = (DB::getInstance())->query('select * from d_posts where post_type="post" and post_status="publish" order by id desc limit ' . $limit);
@@ -90,7 +90,9 @@ echo '</nav>';
 
 echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($arResult, 'Статьи'));
 ?>
-            </div></div></div>
+            </div>
+        </div>
+    </div>
 </main>
 <footer class="py-3 my-4">
     <ul class="nav justify-content-center border-bottom pb-3 mb-3">
@@ -100,7 +102,27 @@ echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions:
         <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
         <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
     </ul>
-    <p class="text-center text-muted">© 2021 Company, Inc</p>
+    <?php
+        $finish_time = microtime(true);
+        $delta = round($finish_time - START_TIME, 3);
+        if ($delta < 0.001) {
+            $delta = 0.001;
+        }
+        $cacheSize = Cache::getCacheSize();
+        echo '<p class="text-center text-muted">Использовано ОЗУ: '
+             . round(memory_get_usage() / 1024 / 1024, 2)
+             . ' МБ / БД: '
+             . round(DB::$workingTime, 3)
+             . ' сек ('
+             . DB::$quantity
+             . ' шт.) / Кэш: '
+             . Files::convertBytes($cacheSize)
+             . ' / Генерация: '
+             . $delta
+             . ' сек</p>';
+
+    ?>
+    <p class="text-center text-muted">© <?=date('Y');?> Delta Project</p>
 </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     </body>
