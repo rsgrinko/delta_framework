@@ -9,7 +9,7 @@
 
     use Core\CoreException;
     use Core\Models\DB;
-    use Core\Helpers\{Cache, Log};
+    use Core\Helpers\{Cache, Log, SystemFunctions};
 
     class User
     {
@@ -160,22 +160,13 @@
         }
 
         /**
-         * Получение прав доступа текущего пользователя
-         *
-         * @return string|null
-         */
-        public function getAccessLevel(): ?string
-        {
-            return $this->getAllUserData() ? $this->getAllUserData()['access_level'] : null;
-        }
-
-        /**
          * Получение всех пользователей панели
          *
          * @param string $limit Лимит
          * @param string $sort  Сортировка
          *
          * @return array
+         * @throws CoreException
          */
         public static function getUsers(string $limit = '10', $sort = 'ASC')
         {
@@ -194,6 +185,7 @@
          * Создание пользовательского токена
          *
          * @return string
+         * @throws CoreException
          */
         public function createToken(): string
         {
@@ -276,27 +268,23 @@
          *
          * @param string $login    Логин
          * @param string $password Пароль
-         * @param string $level    Права
          * @param string $name     Имя
          * @param string $image    Аватар
          *
          * @throws CoreException
          */
-        public static function registration(string $login, string $password, string $email, string $level = 'user', string $name = '', string $image = ''): int
+        public static function registration(string $login, string $password, string $email, string $name = '', string $image = ''): int
         {
             Log::logToFile(__METHOD__, 'User.log', func_get_args());
-            $userId = (DB::getInstance())->addItem(self::USERS_TABLE, [
-                'login'        => $login,
-                'password'     => md5(self::$cryptoSalt . $password),
-                'access_level' => $level,
-                'name'         => $name,
-                'image'        => $image,
-                'token'        => '',
-                'email'        => $email,
-                'last_active'  => time(),
+            return (DB::getInstance())->addItem(self::USERS_TABLE, [
+                'login'       => $login,
+                'password'    => md5(self::$cryptoSalt . $password),
+                'name'        => $name,
+                'image'       => $image,
+                'token'       => '',
+                'email'       => $email,
+                'last_active' => time(),
             ]);
-            //self::authorize($userId);
-            return $userId;
         }
 
         /**

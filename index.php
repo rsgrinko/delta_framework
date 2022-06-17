@@ -75,7 +75,6 @@ $arData = (DB::getInstance())->query('select * from users order by id desc limit
             'id'           => $element['id'],
             'login'        => $element['login'],
             //'password'     => $element['password'],
-            'access_level' => $element['access_level'],
             'name'         => $element['name'],
             'email'        => $element['email'],
             'image'        => $element['image'],

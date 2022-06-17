@@ -206,6 +206,7 @@
             <ul class="nav nav-pills nav-stacked">
                 <li><a href="/admin/"><i class="fa fa-home"></i> <span>Дашбоард</span></a></li>
                 <li><a href="/admin/users.php"><i class="fa fa-home"></i> <span>Список пользователей</span></a></li>
+                <li><a href="/admin/groups.php"><i class="fa fa-home"></i> <span>Список групп</span></a></li>
                 <li><a href="/admin/cacheInfo.php"><i class="fa fa-home"></i> <span>Кэширование</span></a></li>
                 <li><a href="index.html"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
                 <li><a href="index.html"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
