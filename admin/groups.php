@@ -10,9 +10,9 @@
             <div class="media-body">
                 <ul class="breadcrumb">
                     <li><a href=""><i class="glyphicon glyphicon-home"></i></a></li>
-                    <li>Список Групп</li>
+                    <li>Список ролей</li>
                 </ul>
-                <h4>Список групп</h4>
+                <h4>Список ролей</h4>
             </div>
         </div><!-- media -->
     </div><!-- pageheader -->
@@ -34,15 +34,15 @@
                         </thead>
                         <tbody>
                         <?php
-                            $arGroups = Roles::getAllGroups();
-                            foreach($arGroups as $group){
+                            $arRoles = Roles::getAllGroups();
+                            foreach($arRoles as $role){
                                 ?>
                                 <tr>
-                                    <td><?=$group['id'];?></td>
-                                    <td><?=$group['name'];?></td>
-                                    <td><?=$group['description'];?></td>
-                                    <td><?=$group['date_created'] ? date('d.m.Y H:i:s', strtotime($group['date_created'])) : '-';?></td>
-                                    <td><?=$group['date_updated'] ? date('d.m.Y H:i:s', strtotime($group['date_updated'])) : '-';?></td>
+                                    <td><?= $role['id'];?></td>
+                                    <td><?= $role['name'];?></td>
+                                    <td><?= $role['description'];?></td>
+                                    <td><?= $role['date_created'] ? date('d.m.Y H:i:s', strtotime($role['date_created'])) : '-';?></td>
+                                    <td><?= $role['date_updated'] ? date('d.m.Y H:i:s', strtotime($role['date_updated'])) : '-';?></td>
                                 </tr>
                                 <?php
                             }

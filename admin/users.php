@@ -32,7 +32,7 @@
                             <th>Имя</th>
                             <th>E-Mail</th>
                             <th>Изображение</th>
-                            <th>Группы</th>
+                            <th>Роли</th>
                             <th>Токен</th>
                             <th>Был активен</th>
                             <th>Создан</th>
@@ -53,11 +53,11 @@
                             <td><?=$elUser['email'];?></td>
                             <td><?=$elUser['image'] ? '<img src="'.$elUser['image'].'" width="50px">' : ''; ?></td>
                             <td><?php
-                                    $arGroups = [];
-                                    foreach($userObject->getRolesObject()->getFullGroup() as $userGroup) {
-                                        $arGroups[] = $userGroup['name'] . ' (' . $userGroup['id'] . ')';
+                                    $arRoles = [];
+                                    foreach($userObject->getRolesObject()->getFullGroup() as $userRole) {
+                                        $arRoles[] = $userRole['name'] . ' (' . $userRole['id'] . ')';
                                     }
-                                    echo implode(', ', $arGroups);
+                                    echo implode(', ', $arRoles);
                                 ?></td>
                             <td><?=$elUser['token'];?></td>
                             <td><?=date('d.m.Y H:i:s', $elUser['last_active']);?></td>
