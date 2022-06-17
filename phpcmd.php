@@ -6,6 +6,8 @@
     use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination, Files};
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
+    /** @var $USER User */
+    global $USER;
 ?>
 <!doctype html>
 <html lang="ru">
@@ -32,7 +34,8 @@
     <nav class="navbar navbar-expand-md navbar-dark bg-dark" aria-label="Fourth navbar example">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Delta Framework</a>
-            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04"
+                    aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -63,36 +66,72 @@
             <div class="col-md">
 
                 <h1 class="entry-title">Командная строка PHP</h1>
+                <?php if (!empty($USER) && $USER->isAdmin()) { ?>
+                    <form action="" method="POST">
+                        <input type="hidden" name="execute" value="Y">
 
-                <form action="" method="POST">
-                    <input type="hidden" name="execute" value="Y">
+                        <div class="mb-3">
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Models\\DB;');">DB</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Models\\User;');">User</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Cache;');">Cache</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Log;');">Log</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Files;');">Files</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Mail;');">Mail</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Pagination;');">Pagination</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Registry;');">Registry</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\SystemFunctions;');">SystemFunctions</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Zip;');">Zip</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\CoreException;');">CoreException</button>
+                            <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Template;');">Template</button>
+                        </div>
 
-                <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">Введите PHP код для выполнения</label>
-                    <textarea class="form-control" rows="8" id="query" name="query"><?php echo isset($_REQUEST['query']) ? $_REQUEST['query'] : ''; ?></textarea>
-                </div>
+                        <div class="mb-3">
+                            <label for="query" class="form-label">Введите PHP код для выполнения</label>
+                            <textarea class="form-control" rows="8" id="query"
+                                      name="query"><?php echo isset($_REQUEST['query']) ? $_REQUEST['query'] : ''; ?></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <input id="use_pre" type="checkbox" name="use_pre" value="Y" <?php if (isset($_REQUEST['use_pre'])
+                                                                                                   and $_REQUEST['use_pre'] == 'Y') {
+                                echo 'checked';
+                            } ?>>
+                            <label for="use_pre" class="form-label"> Отображать результат выполнения как текст</label>
+                        </div>
+                        <div class="mb-3">
+                            <input class="btn btn-primary" type="submit" name="btn" value="Выполнить">
+                        </div>
 
-                <div class="mb-3">
-                    <input class="btn btn-primary" type="submit" name="btn" value="Выполнить">
-                </div>
 
+                    </form>
 
-                </form>
+                    <script>
+                        var editor = CodeMirror.fromTextArea(document.getElementById("query"), {
+                            lineNumbers: true
+                        });
 
-                <script>
-                    CodeMirror.fromTextArea(document.getElementById("query"), {
-                        lineNumbers: true
-                    });
-                </script>
+                        function addUseSection(button, text) {
+                            editor.setValue(text + "\n" + editor.getValue());
+                            //button.disabled = true;
+                            console.log(button);
+                        }
+                    </script>
 
                 <?php if (isset($_REQUEST['execute']) and $_REQUEST['execute'] == 'Y') {
                     echo '<h2 class="entry-title">Результат</h2><p class="exec_result">';
+
                     try {
+                        if (isset($_REQUEST['use_pre']) and $_REQUEST['use_pre'] == 'Y') {
+                            echo '<pre>';
+                        }
                         eval($_REQUEST['query']);
+                        if (isset($_REQUEST['use_pre']) and $_REQUEST['use_pre'] == 'Y') {
+                            echo '</pre>';
+                        }
                     } catch (ParseError $p) {
                         echo '<div class="alert alert-danger"><p><strong>(ParseError)</strong> Ошибка парсинга: ' . $p->getMessage() . '</p></div>';
                     } catch (Throwable $e) {
-                        echo '<div class="alert alert-danger"><p><strong>(Throwable)</strong> Ошибка при выполнении: ' . $e->getMessage() . '</p></div>';
+                        echo '<div class="alert alert-danger"><p><strong>(Throwable)</strong> Ошибка при выполнении: ' . $e->getMessage()
+                             . '</p></div>';
                     } catch (Error $e) {
                         echo '<div class="alert alert-danger"><p><strong>(Error)</strong>  Ошибка при выполнении: ' . $e->getMessage() . '</p></div>';
                     }
@@ -101,8 +140,9 @@
                 ?>
 
 
-
-
+                <?php } else { ?>
+                    <div class="alert alert-danger"><p>Недостаточно прав</p></div>
+                <?php } ?>
 
             </div>
         </div>
@@ -118,26 +158,20 @@
     </ul>
     <?php
         $finish_time = microtime(true);
-        $delta = round($finish_time - START_TIME, 3);
+        $delta       = round($finish_time - START_TIME, 3);
         if ($delta < 0.001) {
             $delta = 0.001;
         }
         $cacheSize = Cache::getCacheSize();
-        echo '<p class="text-center text-muted">Использовано ОЗУ: '
-             . round(memory_get_usage() / 1024 / 1024, 2)
-             . ' МБ / БД: '
-             . round(DB::$workingTime, 3)
-             . ' сек ('
-             . DB::$quantity
-             . ' шт.) / Кэш: '
-             . Files::convertBytes($cacheSize)
-             . ' / Генерация: '
-             . $delta
-             . ' сек</p>';
+        echo '<p class="text-center text-muted">Использовано ОЗУ: ' . round(memory_get_usage() / 1024 / 1024, 2) . ' МБ / БД: ' . round(
+                DB::$workingTime,
+                3
+            ) . ' сек (' . DB::$quantity . ' шт.) / Кэш: ' . Files::convertBytes($cacheSize) . ' / Генерация: ' . $delta . ' сек</p>';
 
     ?>
-    <p class="text-center text-muted">© <?=date('Y');?> Delta Project</p>
+    <p class="text-center text-muted">© <?= date('Y'); ?> Delta Project</p>
 </footer>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 </body>
 </html>

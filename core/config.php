@@ -18,15 +18,15 @@ define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');
 /**
  * Префикс таблиц в БД
  */
-const TABLE_PREFIX = 'd_';
+const TABLE_PREFIX = '';
 
 /**
  * БД
  */
 const DB_HOST = 'localhost';
-const DB_USER = 'delta_core';
-const DB_PASSWORD = 'dickpick';
-const DB_NAME = 'delta_core';
+const DB_USER = 'rsgrinko_delta';
+const DB_PASSWORD = '2670135';
+const DB_NAME = 'rsgrinko_delta';
 
 /**
  * Время, в течении которого считаем пользователя онлайн, сек.
