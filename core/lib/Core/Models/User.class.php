@@ -479,7 +479,7 @@
          */
         public function isAdmin(): bool
         {
-            return in_array(Roles::ADMIN_GROUP_ID, $this->getRolesObject()->getGroups());
+            return in_array(Roles::ADMIN_ROLE_ID, $this->getRolesObject()->getRoles());
         }
 
         /**

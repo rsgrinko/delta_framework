@@ -31,14 +31,14 @@ SET time_zone = "+00:00";
 CREATE TABLE `user_roles` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `group_id` int(11) NOT NULL
+  `role_id` int(11) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Дамп данных таблицы `user_groups`
 --
 
-INSERT INTO `user_roles` (`id`, `user_id`, `group_id`) VALUES
+INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
 (1, 1, 1),
 
 --

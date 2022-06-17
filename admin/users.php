@@ -54,7 +54,7 @@
                             <td><?=$elUser['image'] ? '<img src="'.$elUser['image'].'" width="50px">' : ''; ?></td>
                             <td><?php
                                     $arRoles = [];
-                                    foreach($userObject->getRolesObject()->getFullGroup() as $userRole) {
+                                    foreach($userObject->getRolesObject()->getFullRoles() as $userRole) {
                                         $arRoles[] = $userRole['name'] . ' (' . $userRole['id'] . ')';
                                     }
                                     echo implode(', ', $arRoles);

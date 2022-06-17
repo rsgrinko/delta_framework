@@ -34,7 +34,7 @@
                         </thead>
                         <tbody>
                         <?php
-                            $arRoles = Roles::getAllGroups();
+                            $arRoles = Roles::getAllRoles();
                             foreach($arRoles as $role){
                                 ?>
                                 <tr>

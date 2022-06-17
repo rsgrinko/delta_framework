@@ -8,24 +8,24 @@
     class Roles
     {
         /**
-         * Таблица с группами пользователей
+         * Таблица с ролями пользователей
          */
-        const USER_GROUPS_TABLE = 'user_roles';
+        const USER_ROLES_TABLE = 'user_roles';
 
         /**
-         * Таблица с группами
+         * Таблица с ролями
          */
-        const GROUPS_TABLE = 'roles';
+        const ROLES_TABLE = 'roles';
 
         /**
-         * Группа "администратор"
+         * Роль "администратор"
          */
-        const ADMIN_GROUP_ID = 1;
+        const ADMIN_ROLE_ID = 1;
 
         /**
-         * Группа "пользователь"
+         * Роль "пользователь"
          */
-        const ADMIN_USER_ID = 2;
+        const USER_ROLE_ID = 2;
 
         /**
          * @var User $user
@@ -38,100 +38,100 @@
         }
 
         /**
-         * Получение групп пользователя
+         * Получение ролей пользователя
          *
          * @return array
          */
-        public function getGroups(): array
+        public function getRoles(): array
         {
-            $cacheId = md5('Group_' . $this->user->getId() . '_getGroups');
+            $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
             if (Cache::check($cacheId)) {
-                $userGroups = Cache::get($cacheId);
+                $userRoles = Cache::get($cacheId);
             } else {
                 /** @var  $DB DB */
                 $DB = DB::getInstance();
 
-                $res        = $DB->query('SELECT group_id FROM `' . self::USER_GROUPS_TABLE . '` WHERE user_id=' . $this->user->getId());
-                $userGroups = [];
+                $res        = $DB->query('SELECT role_id FROM `' . self::USER_ROLES_TABLE . '` WHERE user_id=' . $this->user->getId());
+                $userRoles = [];
                 if (!empty($res)) {
                     foreach ($res as $row) {
-                        $userGroups[] = $row['group_id'];
+                        $userRoles[] = $row['role_id'];
                     }
                 }
-                Cache::set($cacheId, $userGroups);
+                Cache::set($cacheId, $userRoles);
             }
-            return $userGroups;
+            return $userRoles;
         }
 
         /**
-         * Добавляет пользователя в указанную группу
+         * Добавляет пользователю указанную роль
          *
-         * @param int $groupId Идентификатор группы
+         * @param int $roleId ID роли
          *
          * @return int|null
          */
-        public function addToGroup(int $groupId): ?int
+        public function addRole(int $roleId): ?int
         {
-            $cacheId = md5('Group_' . $this->user->getId() . '_getGroups');
+            $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
             Cache::del($cacheId);
 
             /** @var  $DB DB */
             $DB = DB::getInstance();
-            return $DB->addItem(self::USER_GROUPS_TABLE, ['user_id' => $this->user->getId(), 'group_id' => $groupId]);
+            return $DB->addItem(self::USER_ROLES_TABLE, ['user_id' => $this->user->getId(), 'role_id' => $roleId]);
         }
 
         /**
-         * Убирает пользователя из указанной группы
+         * Убирает пользователю указанную роль
          *
-         * @param int $groupId Идентификатор группы
+         * @param int $roleId ID роли
          *
          * @return int|null
          */
-        public function removeFromGroup(int $groupId): ?int
+        public function removeRole(int $roleId): ?int
         {
-            $cacheId = md5('Group_' . $this->user->getId() . '_getGroups');
+            $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
             Cache::del($cacheId);
 
             /** @var  $DB DB */
             $DB = DB::getInstance();
-            return $DB->query('DELETE FROM ' . self::USER_GROUPS_TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND group_id=' . $groupId);
+            return $DB->query('DELETE FROM ' . self::USER_ROLES_TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND role_id=' . $roleId);
         }
 
         /**
-         * Получение полной информации о группах пользователя
+         * Получение полной информации о ролях пользователя
          *
          * @return array|null
          */
-        public function getFullGroup(): ?array
+        public function getFullRoles(): ?array
         {
             return array_map(function ($element) {
-                return static::getAllGroups()[$element];
+                return static::getAllRoles()[$element];
             },
-                $this->getGroups());
+                $this->getRoles());
         }
 
         /**
-         * Получение всех существующих групп
+         * Получение всех существующих ролей
          *
          * @return array|null
          */
-        public static function getAllGroups(): ?array
+        public static function getAllRoles(): ?array
         {
-            $cacheId = md5('Group::getAllGroups');
+            $cacheId = md5('Roles::getAllRoles');
             if (Cache::check($cacheId)) {
-                $groups = Cache::get($cacheId);
+                $roles = Cache::get($cacheId);
             } else {
                 /** @var  $DB DB */
                 $DB = DB::getInstance();
-                $res    = $DB->query('SELECT * FROM ' . self::GROUPS_TABLE);
-                $groups = [];
+                $res    = $DB->query('SELECT * FROM ' . self::ROLES_TABLE);
+                $roles = [];
                 if (!empty($res)) {
-                    foreach ($res as $group) {
-                        $groups[$group['id']] = $group;
+                    foreach ($res as $role) {
+                        $roles[$role['id']] = $role;
                     }
                 }
-                Cache::set($cacheId, $groups);
+                Cache::set($cacheId, $roles);
             }
-            return $groups;
+            return $roles;
         }
     }

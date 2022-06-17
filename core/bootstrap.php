@@ -42,7 +42,7 @@
 
 
 
-    Cache::init(ROOT_PATH . '/core/cache/', true);
+    Cache::init(ROOT_PATH . '/core/cache/', USE_CACHE);
 
     // очистка кэша
     if(isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
