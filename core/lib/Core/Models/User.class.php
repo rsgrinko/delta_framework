@@ -417,6 +417,7 @@
          * Получение идентификатора текущего пользователя
          *
          * @return int|null
+         * @throws CoreException
          */
         public static function getCurrentUserId(): ?int
         {

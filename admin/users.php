@@ -28,7 +28,6 @@
                             <th>ID</th>
                             <th>Логин</th>
                             <th>Пароль</th>
-                            <th>Права</th>
                             <th>Имя</th>
                             <th>E-Mail</th>
                             <th>Изображение</th>
@@ -45,7 +44,6 @@
                             <td><?=$elUser['id'];?></td>
                             <td><?=$elUser['login'];?></td>
                             <td><?=$elUser['password'];?></td>
-                            <td><?=$elUser['access_level'];?></td>
                             <td><?=$elUser['name'];?></td>
                             <td><?=$elUser['email'];?></td>
                             <td><?=$elUser['image'];?></td>
