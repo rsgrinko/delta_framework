@@ -1,5 +1,6 @@
 <?php
     use Core\Models\User;
+
     require_once __DIR__ . '/inc/header.php';
     ?>
     <div class="pageheader">
@@ -31,14 +32,18 @@
                             <th>Имя</th>
                             <th>E-Mail</th>
                             <th>Изображение</th>
+                            <th>Группы</th>
                             <th>Токен</th>
                             <th>Был активен</th>
+                            <th>Создан</th>
+                            <th>Обновлен</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php
                         $arUsers = User::getUsers();
                         foreach($arUsers as $elUser){
+                            $userObject = new User($elUser['id']);
                         ?>
                         <tr>
                             <td><?=$elUser['id'];?></td>
@@ -46,9 +51,18 @@
                             <td><?=$elUser['password'];?></td>
                             <td><?=$elUser['name'];?></td>
                             <td><?=$elUser['email'];?></td>
-                            <td><?=$elUser['image'];?></td>
+                            <td><?=$elUser['image'] ? '<img src="'.$elUser['image'].'" width="50px">' : ''; ?></td>
+                            <td><?php
+                                    $arGroups = [];
+                                    foreach($userObject->getGroupsObject()->getFullGroup() as $userGroup) {
+                                        $arGroups[] = $userGroup['name'] . ' (' . $userGroup['id'] . ')';
+                                    }
+                                    echo implode(', ', $arGroups);
+                                ?></td>
                             <td><?=$elUser['token'];?></td>
                             <td><?=date('d.m.Y H:i:s', $elUser['last_active']);?></td>
+                            <td><?=$elUser['date_created'] ? date('d.m.Y H:i:s', strtotime($elUser['date_created'])) : '-';?></td>
+                            <td><?=$elUser['date_updated'] ? date('d.m.Y H:i:s', strtotime($elUser['date_updated'])) : '-';?></td>
                         </tr>
                         <?php
                         }

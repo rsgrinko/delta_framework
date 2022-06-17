@@ -8,7 +8,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\Models\DB;
+    use Core\Models\{DB, Groups};
     use Core\Helpers\{Cache, Log, SystemFunctions};
 
     class User
@@ -22,29 +22,16 @@
         public $id;
 
         /**
+         * Объект групп
+         *
+         * @var Groups
+         */
+        public $groupsObject = null;
+
+        /**
          * Таблица с пользователями
          */
         const USERS_TABLE = 'users';
-
-        /**
-         * Таблица с группами пользователей
-         */
-        const USER_GROUPS_TABLE = 'user_groups';
-
-        /**
-         * Таблица с группами
-         */
-        const GROUPS_TABLE = 'groups';
-
-        /**
-         * Группа "администратор"
-         */
-        const ADMIN_GROUP_ID = 1;
-
-        /**
-         * Группа "пользователь"
-         */
-        const ADMIN_USER_ID = 2;
 
         /**
          * @var string $cryptoSalt Соль для шифрования
@@ -262,6 +249,18 @@
             }
         }
 
+        /**
+         * Шифрование пароля
+         *
+         * @param string $password Пароль
+         *
+         * @return string
+         */
+        public static function passwordEncryption(string $password): string
+        {
+            return md5(self::$cryptoSalt . $password);
+        }
+
 
         /**
          * Выполняет регистрацию пользователя в системе
@@ -276,15 +275,25 @@
         public static function registration(string $login, string $password, string $email, string $name = '', string $image = ''): int
         {
             Log::logToFile(__METHOD__, 'User.log', func_get_args());
-            return (DB::getInstance())->addItem(self::USERS_TABLE, [
+
+            /** @var  $DB DB */
+            $DB = DB::getInstance();
+            return $DB->addItem(self::USERS_TABLE, [
                 'login'       => $login,
-                'password'    => md5(self::$cryptoSalt . $password),
+                'password'    => self::passwordEncryption($password),
                 'name'        => $name,
                 'image'       => $image,
                 'token'       => '',
                 'email'       => $email,
                 'last_active' => time(),
             ]);
+        }
+
+        public function update(array $fields): bool
+        {
+            /** @var  $DB DB */
+            $DB = DB::getInstance();
+            return $DB->update(self::USERS_TABLE, ['id' => $this->id], $fields);
         }
 
         /**
@@ -297,10 +306,12 @@
         public static function isUserExists(string $login): bool
         {
             $cacheId = md5('isUserExists_' . $login);
-            if(Cache::check($cacheId)) {
+            if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
-                $result = (DB::getInstance())->getItem(self::USERS_TABLE, ['login' => $login]);
+                /** @var  $DB DB */
+                $DB     = DB::getInstance();
+                $result = $DB->getItem(self::USERS_TABLE, ['login' => $login]);
                 Cache::set($cacheId, $result);
             }
 
@@ -319,10 +330,12 @@
         public static function countUsers(): int
         {
             $cacheId = md5('countUsers');
-            if(Cache::check($cacheId) && Cache::getAge($cacheId) < 300) {
+            if (Cache::check($cacheId) && Cache::getAge($cacheId) < 300) {
                 $result = Cache::get($cacheId);
             } else {
-                $result = (DB::getInstance())->getItems(self::USERS_TABLE, ['id' => '>0']);
+                /** @var  $DB DB */
+                $DB     = DB::getInstance();
+                $result = $DB->getItems(self::USERS_TABLE, ['id' => '>0']);
                 Cache::set($cacheId, $result);
             }
 
@@ -348,14 +361,15 @@
                 throw new CoreException('Передан некорректный идентификатор пользователя');
             }
             self::logout();
-
-            $result = (DB::getInstance())->getItem(self::USERS_TABLE, ['id' => $id], true);
+            /** @var  $DB DB */
+            $DB     = DB::getInstance();
+            $result = $DB->getItem(self::USERS_TABLE, ['id' => $id], true);
 
             if ($result) {
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = CODE_VALUE_Y;
                 $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = md5(self::$cryptoSalt . $result['password']);
+                $_SESSION['password']  = self::passwordEncryption($result['password']);
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
@@ -382,12 +396,15 @@
         public static function securityAuthorize(string $login, string $password, bool $remember = false): bool
         {
             Log::logToFile(__METHOD__, 'User.log', func_get_args());
-            $result = (DB::getInstance())->getItem(self::USERS_TABLE, ['login' => $login, 'password' => md5(self::$cryptoSalt . $password)], true);
+
+            /** @var  $DB DB */
+            $DB     = DB::getInstance();
+            $result = $DB->getItem(self::USERS_TABLE, ['login' => $login, 'password' => self::passwordEncryption($password)], true);
             if ($result) {
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = 'Y';
                 $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = md5(self::$cryptoSalt . $result['password']);
+                $_SESSION['password']  = self::passwordEncryption($result['password']);
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
@@ -424,10 +441,13 @@
          */
         public static function isAuthorized(): bool
         {
+            /** @var  $DB DB */
+            $DB = DB::getInstance();
+
             if (!empty($_COOKIE['userId'])
                 && !empty($_COOKIE['userLogin'])
                 && self::isUserExists($_COOKIE['userLogin'])) {
-                $arUser = (DB::getInstance())->getItem(self::USERS_TABLE, ['id' => $_COOKIE['userId']]);
+                $arUser = $DB->getItem(self::USERS_TABLE, ['id' => $_COOKIE['userId']]);
                 if ($_COOKIE['token'] == md5(self::$cryptoSalt . $arUser['id'] . $arUser['login'] . $arUser['password'])) {
                     if (empty($_SESSION['authorize'])) {
                         self::authorize($arUser['id']);
@@ -438,10 +458,10 @@
             if (!isset($_SESSION['authorize']) || empty($_SESSION['authorize']) || $_SESSION['authorize'] !== 'Y') {
                 return false;
             }
-            $result = (DB::getInstance())->getItem(self::USERS_TABLE, ['login' => $_SESSION['login']]);
+            $result = $DB->getItem(self::USERS_TABLE, ['login' => $_SESSION['login']]);
             if ($result) {
-                if (md5(self::$cryptoSalt . $result['password']) == $_SESSION['password']) {
-                    (DB::getInstance())->update(self::USERS_TABLE, ['id' => $result['id']], ['last_active' => time()]);
+                if (self::passwordEncryption($result['password']) == $_SESSION['password']) {
+                    $DB->update(self::USERS_TABLE, ['id' => $result['id']], ['last_active' => time()]);
                     $_SESSION['id'] = $result['id'];
                     return true;
                 } else {
@@ -459,7 +479,7 @@
          */
         public function isAdmin(): bool
         {
-            return in_array(self::ADMIN_GROUP_ID, $this->getGroups());
+            return in_array(Groups::ADMIN_GROUP_ID, $this->getGroupsObject()->getGroups());
         }
 
         /**
@@ -480,64 +500,15 @@
             setcookie('token', '', time() - 3600);
         }
 
-
         /**
-         * Получение групп пользователя
+         * Получить объект для работы с группами
          *
-         * @return array
+         * @return Groups
          */
-        public function getGroups(): array
-        {
-            $res        = (DB::getInstance())->query('SELECT group_id FROM `' . self::USER_GROUPS_TABLE . '` WHERE user_id=' . $this->id);
-            $userGroups = [];
-            if (!empty($res)) {
-                foreach ($res as $row) {
-                    $userGroups[] = $row['group_id'];
-                }
+        public function getGroupsObject(): Groups {
+            if(empty($this->groupsObject)) {
+                $this->groupsObject = (new Groups($this));
             }
-
-            return $userGroups;
+            return $this->groupsObject;
         }
-
-        /**
-         * Добавляет пользователя в указанную группу
-         *
-         * @param int $groupId Идентификатор группы
-         *
-         * @return int|null
-         */
-        public function addToGroup(int $groupId): ?int
-        {
-            return (DB::getInstance())->addItem(self::USER_GROUPS_TABLE, ['user_id' => $this->id, 'group_id' => $groupId]);
-        }
-
-        /**
-         * Убирает пользователя из указанной группы
-         *
-         * @param int $groupId Идентификатор группы
-         *
-         * @return int|null
-         */
-        public function removeFromGroup(int $groupId): ?int
-        {
-            return (DB::getInstance())->query('DELETE FROM ' . self::USER_GROUPS_TABLE . ' WHERE user_id=' . $this->id . ' AND group_id=' . $groupId);
-        }
-
-        /**
-         * Получение всех существующих групп
-         * @return array|null
-         */
-        public static function getAllGroups(): ?array
-        {
-            $res = (DB::getInstance())->query('SELECT * FROM ' . self::GROUPS_TABLE);
-            $groups = [];
-            if(!empty($res)) {
-                foreach($res as $group) {
-                    $groups[$group['id']] = $group;
-                }
-            }
-            return $groups;
-        }
-
-
     }

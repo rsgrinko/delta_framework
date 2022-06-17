@@ -1,5 +1,5 @@
 <?php
-    use Core\Models\User;
+    use Core\Models\{User, Groups};
     require_once __DIR__ . '/inc/header.php';
 ?>
     <div class="pageheader">
@@ -28,17 +28,21 @@
                             <th>ID</th>
                             <th>Название</th>
                             <th>Описание</th>
+                            <th>Создана</th>
+                            <th>Обновлена</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php
-                            $arGroups = User::getAllGroups();
+                            $arGroups = Groups::getAllGroups();
                             foreach($arGroups as $group){
                                 ?>
                                 <tr>
                                     <td><?=$group['id'];?></td>
                                     <td><?=$group['name'];?></td>
                                     <td><?=$group['description'];?></td>
+                                    <td><?=$group['date_created'] ? date('d.m.Y H:i:s', strtotime($group['date_created'])) : '-';?></td>
+                                    <td><?=$group['date_updated'] ? date('d.m.Y H:i:s', strtotime($group['date_updated'])) : '-';?></td>
                                 </tr>
                                 <?php
                             }
