@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 -- Структура таблицы `user_groups`
 --
 
-CREATE TABLE `user_groups` (
+CREATE TABLE `user_roles` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `group_id` int(11) NOT NULL
@@ -38,7 +38,7 @@ CREATE TABLE `user_groups` (
 -- Дамп данных таблицы `user_groups`
 --
 
-INSERT INTO `user_groups` (`id`, `user_id`, `group_id`) VALUES
+INSERT INTO `user_roles` (`id`, `user_id`, `group_id`) VALUES
 (1, 1, 1),
 
 --
@@ -48,7 +48,7 @@ INSERT INTO `user_groups` (`id`, `user_id`, `group_id`) VALUES
 --
 -- Индексы таблицы `user_groups`
 --
-ALTER TABLE `user_groups`
+ALTER TABLE `user_roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`);
 
@@ -59,7 +59,7 @@ ALTER TABLE `user_groups`
 --
 -- AUTO_INCREMENT для таблицы `user_groups`
 --
-ALTER TABLE `user_groups`
+ALTER TABLE `user_roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 

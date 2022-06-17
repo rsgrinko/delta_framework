@@ -1,5 +1,5 @@
 <?php
-    use Core\Models\{User, Groups};
+    use Core\Models\{User, Roles};
     require_once __DIR__ . '/inc/header.php';
 ?>
     <div class="pageheader">
@@ -34,7 +34,7 @@
                         </thead>
                         <tbody>
                         <?php
-                            $arGroups = Groups::getAllGroups();
+                            $arGroups = Roles::getAllGroups();
                             foreach($arGroups as $group){
                                 ?>
                                 <tr>

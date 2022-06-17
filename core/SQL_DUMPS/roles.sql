@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 -- Структура таблицы `groups`
 --
 
-CREATE TABLE `groups` (
+CREATE TABLE `roles` (
   `id` int(11) NOT NULL,
   `name` text,
   `description` text
@@ -38,7 +38,7 @@ CREATE TABLE `groups` (
 -- Дамп данных таблицы `groups`
 --
 
-INSERT INTO `groups` (`id`, `name`, `description`) VALUES
+INSERT INTO `roles` (`id`, `name`, `description`) VALUES
 (1, 'Админисистратор', 'Группа, имеющая доступ ко всему'),
 (2, 'Пользователи', 'Базовая группа для простых пользователей'),
 
@@ -49,7 +49,7 @@ INSERT INTO `groups` (`id`, `name`, `description`) VALUES
 --
 -- Индексы таблицы `groups`
 --
-ALTER TABLE `groups`
+ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`);
 COMMIT;

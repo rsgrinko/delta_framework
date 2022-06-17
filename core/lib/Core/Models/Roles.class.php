@@ -5,17 +5,17 @@
     use Core\Helpers\Cache;
     use Core\Models\User;
 
-    class Groups
+    class Roles
     {
         /**
          * Таблица с группами пользователей
          */
-        const USER_GROUPS_TABLE = 'user_groups';
+        const USER_GROUPS_TABLE = 'user_roles';
 
         /**
          * Таблица с группами
          */
-        const GROUPS_TABLE = 'groups';
+        const GROUPS_TABLE = 'roles';
 
         /**
          * Группа "администратор"

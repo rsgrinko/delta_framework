@@ -8,7 +8,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\Models\{DB, Groups};
+    use Core\Models\{DB, Roles};
     use Core\Helpers\{Cache, Log, SystemFunctions};
 
     class User
@@ -24,9 +24,9 @@
         /**
          * Объект групп
          *
-         * @var Groups
+         * @var Roles
          */
-        public $groupsObject = null;
+        public $rolesObject = null;
 
         /**
          * Таблица с пользователями
@@ -479,7 +479,7 @@
          */
         public function isAdmin(): bool
         {
-            return in_array(Groups::ADMIN_GROUP_ID, $this->getGroupsObject()->getGroups());
+            return in_array(Roles::ADMIN_GROUP_ID, $this->getRolesObject()->getGroups());
         }
 
         /**
@@ -501,14 +501,14 @@
         }
 
         /**
-         * Получить объект для работы с группами
+         * Получить объект для работы с ролями
          *
-         * @return Groups
+         * @return Roles
          */
-        public function getGroupsObject(): Groups {
-            if(empty($this->groupsObject)) {
-                $this->groupsObject = (new Groups($this));
+        public function getRolesObject(): Roles {
+            if(empty($this->rolesObject)) {
+                $this->rolesObject = (new Roles($this));
             }
-            return $this->groupsObject;
+            return $this->rolesObject;
         }
     }
