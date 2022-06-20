@@ -3,7 +3,6 @@
     use Core\Models\User;
     use Core\Helpers\Cache;
     use Core\Template;
-    use Core\ExternalServices\Telegram;
     use Core\CoreException;
 
     if (session_status() == PHP_SESSION_NONE) {
@@ -22,7 +21,7 @@
     });
 
     define('START_TIME', microtime(true));                   // засекаем время старта скрипта
-    define('CORE_LOADED', true);                                    // флаг корректного запуска
+    const CORE_LOADED = true;                                       // флаг корректного запуска
 
     require_once __DIR__ . '/config.php';
 
@@ -38,9 +37,6 @@
             }
         }
     });
-
-
-
 
     Cache::init(ROOT_PATH . '/core/cache/', USE_CACHE);
 
