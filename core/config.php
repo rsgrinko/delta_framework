@@ -25,6 +25,11 @@
     const DB_NAME     = 'rsgrinko_delta';
 
     /**
+     * Токен телеграм бота
+     */
+    const TELEGRAM_BOT_TOKEN = '5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU';
+
+    /**
      * Время, в течении которого считаем пользователя онлайн, сек.
      */
     const USER_ONLINE_TIME = 60 * 5;

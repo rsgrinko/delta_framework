@@ -54,10 +54,11 @@
         User::logout();
     }
 
-    Telegram::init('5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU', './');
-
-
-    $userId = User::getCurrentUserId();
+    try {
+        $userId = User::getCurrentUserId();
+    } catch (CoreException $e) {
+        $userId = null;
+    }
     if(!empty($userId)) {
         try {
             $USER = new User($userId);
