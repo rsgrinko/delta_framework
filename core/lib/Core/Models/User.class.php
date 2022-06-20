@@ -127,7 +127,7 @@
         }
 
         /**
-         * Получение имени текущего пользователя
+         * Получение времени ппоследней активности
          *
          * @return string|null
          */
@@ -155,7 +155,7 @@
          * @return array
          * @throws CoreException
          */
-        public static function getUsers(string $limit = '10', $sort = 'ASC')
+        public static function getUsers(string $limit = '10', string $sort = 'ASC'): array
         {
             $cacheId = md5('User_getUsers_' . $limit . '_' . $sort);
             if (Cache::check($cacheId)) {
@@ -186,6 +186,7 @@
          * Генерация GUID
          *
          * @return string
+         * @throws \Exception
          */
         private static function generateGUID(): string
         {
@@ -272,7 +273,7 @@
          *
          * @throws CoreException
          */
-        public static function registration(string $login, string $password, string $email, string $name = '', string $image = ''): int
+        public static function create(string $login, string $password, string $email, string $name = '', string $image = ''): int
         {
             Log::logToFile(__METHOD__, 'User.log', func_get_args());
 

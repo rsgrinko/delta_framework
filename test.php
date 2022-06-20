@@ -1,25 +1,27 @@
 <?php
 
-    //require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
-    if (php_sapi_name() === 'cli') {
-        $cliMode = true;
-    } else {
-        $cliMode = false;
-    }
+    $_SERVER['DOCUMENT_ROOT'] = '/home/rsgrinko/sites/dev.it-stories.ru';
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
+    use Core\ExternalServices\TelegramSender;
+    use Core\Helpers\Log;
 
+    $numProc = 4;
 
-    if ($cliMode) {
-        echo 'run' . PHP_EOL;
-        for ($i = 0; $i < 1024; $i++) {
-
+    if (empty($argv[1])) {
+        $currentRunThread = (int)exec('ps -awx | grep \'test.php\' | grep -v \'grep\' | wc -l');
+        echo 'Now running: ' . $currentRunThread . PHP_EOL;
+        while ($currentRunThread <= $numProc) {
+            echo 'Run new (' . $currentRunThread . ')' . PHP_EOL;
+            $handler = '(php -f /home/rsgrinko/sites/dev.it-stories.ru/test.php ' . $currentRunThread . ' &) >> /dev/null 2>&1';
+            passthru($handler);
+            $currentRunThread = (int)exec('ps -awx | grep \'test.php\' | grep -v \'grep\' | wc -l');
+            echo 'Now running: ' . $currentRunThread . PHP_EOL;
         }
-        echo 'stop' . PHP_EOL;
     } else {
-        //$currentRunThread = (int)exec('ps -awx | grep \'test.php\' | grep -v \'grep\' | wc -l');
-        //if ($currentRunThread < 4) {
-        //echo 'run new (' . $currentRunThread . ')';
-        $handler = 'php /home/rsgrinko/sites/dev.it-stories.ru/test.php cli &';
-        exec($handler);
-        //}
+        $res = (new TelegramSender(TELEGRAM_BOT_TOKEN))->setChat(TELEGRAM_NOTIFICATION_CHANNEL)->sendMessage('Start proc #' . $argv[1]);
+        Log::logToFile(json_encode($res, JSON_UNESCAPED_UNICODE), 'test.log', $argv[1]);
+        sleep(rand(2, 10));
+        $res = (new TelegramSender(TELEGRAM_BOT_TOKEN))->setChat(TELEGRAM_NOTIFICATION_CHANNEL)->sendMessage('End proc #' . $argv[1]);
+        Log::logToFile(json_encode($res, JSON_UNESCAPED_UNICODE), 'test.log', $argv[1]);
     }
 

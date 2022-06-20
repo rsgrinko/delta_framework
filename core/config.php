@@ -30,6 +30,11 @@
     const TELEGRAM_BOT_TOKEN = '5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU';
 
     /**
+     * ID чата канала уведомлений в телеграм
+     */
+    const TELEGRAM_NOTIFICATION_CHANNEL = '-1001714289174';
+
+    /**
      * Время, в течении которого считаем пользователя онлайн, сек.
      */
     const USER_ONLINE_TIME = 60 * 5;

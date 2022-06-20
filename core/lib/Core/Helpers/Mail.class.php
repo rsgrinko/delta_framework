@@ -32,6 +32,11 @@
         public $body = '';
 
         /**
+         * Тип
+         */
+        public $type = '';
+
+        /**
          * Массив заголовков файлов
          */
         private $_files = [];
@@ -68,6 +73,14 @@
         public function setBody($body = null)
         {
             $this->body = $body;
+        }
+
+        /**
+         * Тело письма
+         */
+        public function setType($type = 'html')
+        {
+            $this->type = $type;
         }
 
         /**
