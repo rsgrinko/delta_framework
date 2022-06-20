@@ -2,7 +2,7 @@
 
     use Core\CoreException;
     use Core\ExternalServices\Telegram;
-    use Core\Models\{User, DB};
+    use Core\Models\{User, DB, Roles};
     use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination, Files};
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
@@ -80,7 +80,7 @@ $arData = (DB::getInstance())->query('select * from users order by id desc limit
             'image'        => $element['image'],
             'token'        => $element['token'],
             'last_active'  => $element['last_active'],
-            'groups'       => array_map(function($element){ return User::getAllGroups()[$element]; }, (new User($element['id']))->getGroups()),
+            'groups'       => array_map(function($element){ return Roles::getAllRoles()[$element]; }, (new User($element['id']))->getRolesObject()->getRoles()),
             //'groups_human' => User::getAllGroups(),
 
         ];
