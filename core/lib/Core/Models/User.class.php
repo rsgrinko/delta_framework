@@ -48,7 +48,7 @@
         public function __construct(?int $id)
         {
             if (empty($id)) {
-                throw new CoreException('Передан некорректный идентификатор пользователя');
+                throw new CoreException('Передан некорректный идентификатор пользователя', CoreException::ERROR_INCORRECT_USER_ID);
             }
 
             $this->id = $id;
@@ -279,7 +279,7 @@
 
             /** @var  $DB DB */
             $DB = DB::getInstance();
-            return $DB->addItem(self::USERS_TABLE, [
+            $userId = $DB->addItem(self::USERS_TABLE, [
                 'login'       => $login,
                 'password'    => self::passwordEncryption($password),
                 'name'        => $name,
@@ -288,6 +288,15 @@
                 'email'       => $email,
                 'last_active' => time(),
             ]);
+            try {
+                (new self($userId))->getRolesObject()->addRole(Roles::USER_ROLE_ID);
+            } catch (CoreException $e) {
+                Log::logToFile('Ошибка создания объекта пользователя для добавления ролей', 'User.log', func_get_args());
+                throw new CoreException('Ошибка создания объекта пользователя для добавления ролей', CoreException::ERROR_CREATE_USER);
+            }
+
+
+            return $userId;
         }
 
         public function update(array $fields): bool
@@ -456,7 +465,7 @@
                     return true;
                 }
             }
-            if (!isset($_SESSION['authorize']) || empty($_SESSION['authorize']) || $_SESSION['authorize'] !== 'Y') {
+            if (empty($_SESSION['authorize']) || $_SESSION['authorize'] !== 'Y') {
                 return false;
             }
             $result = $DB->getItem(self::USERS_TABLE, ['login' => $_SESSION['login']]);

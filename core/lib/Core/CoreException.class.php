@@ -4,6 +4,15 @@
 
     class CoreException extends \Exception
     {
+        /**
+         * Некорректный идентификатор пользователя
+         */
+        const ERROR_INCORRECT_USER_ID = 100;
+
+        /**
+         * Ошибка создания пользователя
+         */
+        const ERROR_CREATE_USER = 200;
 
         /**
          * Возвращает обработанный callTrace текущего исключения

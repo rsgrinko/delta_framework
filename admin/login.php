@@ -95,7 +95,7 @@
 
                 </div><!-- panel-body -->
                 <div class="panel-footer">
-                    <a href="signup" class="btn btn-primary btn-block">Регистрация в системе</a>
+                    <a href="register.php" class="btn btn-primary btn-block">Регистрация в системе</a>
                 </div><!-- panel-footer -->
             </div><!-- panel -->
 

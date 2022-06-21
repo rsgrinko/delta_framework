@@ -3,12 +3,18 @@
     use Core\Models\User;
 
     require_once __DIR__ . '/bootstrap.php';
-    if (!User::isAuthorized() and $_SERVER['REQUEST_URI'] !== '/login.php') {
+    if (!User::isAuthorized() && $_SERVER['REQUEST_URI'] !== '/login.php') {
         header('Location: login.php');
         die();
     }
 
     global $USER, $arUser;
+
+    if(!$USER->isAdmin()) {
+        User::logout();
+        echo 'Вы не админ, сессия разорвана.';
+        die();
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
