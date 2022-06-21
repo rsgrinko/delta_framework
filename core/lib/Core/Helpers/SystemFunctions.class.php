@@ -359,4 +359,16 @@
             }
             return $table;
         }
+
+
+        public static function showPage()
+        {
+            $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
+            $twig = new \Twig\Environment($loader, [
+                'cache' => CACHE_DIR,
+            ]);
+
+            echo $twig->render('index.tpl', ['name' => 'Roman']);
+
+        }
     }

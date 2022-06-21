@@ -25,6 +25,11 @@
     const DB_NAME     = 'rsgrinko_delta';
 
     /**
+     * Путь до шаблонов
+     */
+    const PATH_TO_TEMPLATES = ROOT_PATH . '/templates';
+
+    /**
      * Токен телеграм бота
      */
     const TELEGRAM_BOT_TOKEN = '5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU';
@@ -43,6 +48,12 @@
      * Использование кэша
      */
     const USE_CACHE = false;
+
+    /**
+     * Папка кэша
+     */
+    const CACHE_DIR = ROOT_PATH . '/core/cache';
+
     /**
      * Время жизни кэша
      */

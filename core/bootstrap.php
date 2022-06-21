@@ -11,6 +11,7 @@
     }
     require_once __DIR__ . '/../vendor/autoload.php';
 
+
     ob_start(function($buffer) {
         try {
             Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
@@ -28,6 +29,8 @@
 
     require_once __DIR__ . '/config.php';
 
+
+
     /**
      * Реализация механизма автозагрузки классов
      */
@@ -43,7 +46,15 @@
 
     require_once __DIR__ . '/routes.php';
 
-    Cache::init(ROOT_PATH . '/core/cache/', USE_CACHE);
+    /**
+     * Инициализация шаблонизатора
+     */
+    $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
+    $twig = new \Twig\Environment($loader, [
+        //'cache' => CACHE_DIR,
+    ]);
+
+    Cache::init(CACHE_DIR, USE_CACHE);
 
     // очистка кэша
     if(isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
@@ -70,6 +81,8 @@
         $USER = null;
     }
 
-    // запускаем маршрутизатор, передавая ему запрошенный адрес
+    /**
+     * Запускаем маршрутизатор
+     */
     Router::execute();
     die();

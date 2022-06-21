@@ -40,7 +40,7 @@
          */
         public static function init(string $dir, $enabled = true): void
         {
-            self::$cacheDir     = $dir;
+            self::$cacheDir     = $dir . '/';
             self::$cacheEnabled = $enabled;
         }
 

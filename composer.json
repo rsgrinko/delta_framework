@@ -14,5 +14,7 @@
             "email": "rsgrinko@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "twig/twig": "^3.0"
+    }
 }

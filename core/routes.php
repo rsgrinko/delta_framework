@@ -1,11 +1,8 @@
 <?php
 
     use Core\Models\Router;
-    use Core\Helpers\SystemFunctions;
 
-    Router::route('/', function () {
-        echo 'Домашняя станица';
-    });
+    Router::route('/', '\Core\App::index');
 
     Router::route('/404', function () {
         header('HTTP/1.0 404 Not Found');
@@ -19,14 +16,8 @@
 
 
 
-    class Test {
-        public static function run($num = 0, $d = 0) {
-            echo 'Hello World! ('.$num.') - ('.$d.')';
-        }
-    }
-
-
-    Router::route('/test/(\w+)/(\d+)', 'Test::run');
+    Router::route('/test', '\Core\App::test');
+    Router::route('/test/(\d+)', '\Core\App::test');
 
 
 
