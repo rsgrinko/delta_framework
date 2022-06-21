@@ -4,6 +4,7 @@
     use Core\Helpers\Cache;
     use Core\Template;
     use Core\CoreException;
+    use Core\Models\Router;
 
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
@@ -66,3 +67,7 @@
     } else {
         $USER = null;
     }
+
+    // запускаем маршрутизатор, передавая ему запрошенный адрес
+    Router::execute();
+    die();
