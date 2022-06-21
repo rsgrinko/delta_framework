@@ -55,6 +55,7 @@
         <div class="row justify-content-md-center">
             <div class="col-md">
 <?php
+echo $_REQUEST['route'] . '<br>';
     if (User::isAuthorized()) {
         global $USER;
         echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable($USER->getAllUserData(), 'Информация о пользователе'));

@@ -38,6 +38,8 @@
         }
     });
 
+    require_once __DIR__ . '/routes.php';
+
     Cache::init(ROOT_PATH . '/core/cache/', USE_CACHE);
 
     // очистка кэша
