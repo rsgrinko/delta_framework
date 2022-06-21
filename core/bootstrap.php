@@ -9,6 +9,8 @@
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
+    require_once __DIR__ . '/../vendor/autoload.php';
+
     ob_start(function($buffer) {
         try {
             Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
