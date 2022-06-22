@@ -10,6 +10,11 @@
         const ERROR_INCORRECT_USER_ID = 100;
 
         /**
+         * Пользователь не найден
+         */
+        const ERROR_USER_NOT_FOUND = 101;
+
+        /**
          * Ошибка создания пользователя
          */
         const ERROR_CREATE_USER = 200;

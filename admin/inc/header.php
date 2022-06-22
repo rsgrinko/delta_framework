@@ -9,7 +9,7 @@
         header('Location: login.php');
         die();
     } elseif (!$USER->isAdmin()) {
-        header('Location: ../index.php');
+        header('Location: ../');
         die();
     }
 ?>
@@ -211,7 +211,7 @@
                 <li><a href="/admin/users.php"><i class="fa fa-home"></i> <span>Список пользователей</span></a></li>
                 <li><a href="/admin/groups.php"><i class="fa fa-home"></i> <span>Список ролей</span></a></li>
                 <li><a href="/admin/cacheInfo.php"><i class="fa fa-home"></i> <span>Кэширование</span></a></li>
-                <li><a href="index.html"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="/admin/phpcmd.php"><i class="fa fa-home"></i> <span>Командная PHP строка</span></a></li>
                 <li><a href="index.html"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
 
 

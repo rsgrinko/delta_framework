@@ -50,6 +50,9 @@
             if (empty($id)) {
                 throw new CoreException('Передан некорректный идентификатор пользователя', CoreException::ERROR_INCORRECT_USER_ID);
             }
+            if (!(DB::getInstance())->getItem(self::USERS_TABLE, ['id' => $id])) {
+                throw new CoreException('Пользователь с идентификатором ' . $id . ' отсутствует в базе', CoreException::ERROR_USER_NOT_FOUND);
+            }
 
             $this->id = $id;
         }
