@@ -12,23 +12,22 @@
     require_once __DIR__ . '/../vendor/autoload.php';
 
 
-    ob_start(function($buffer) {
+    ob_start(function ($buffer) {
         try {
             Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
             Template::set('ADMIN_PANEL_LINK_NAME', 'Панель администратора');
             Template::set('REFRESH_PAGE_LINK_NAME', 'Перезагрузить страницу');
             Template::set('PHP_CMD_LINK_NAME', 'Командная PHP строка');
             return Template::render($buffer);
-        } catch(Throwable $e) {
+        } catch (Throwable $e) {
             return $e->getMessage();
         }
     });
 
-    define('START_TIME', microtime(true));                   // засекаем время старта скрипта
+    define('START_TIME', microtime(true));                          // засекаем время старта скрипта
     const CORE_LOADED = true;                                       // флаг корректного запуска
 
     require_once __DIR__ . '/config.php';
-
 
 
     /**
@@ -50,14 +49,13 @@
      * Инициализация шаблонизатора
      */
     $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
-    $twig = new \Twig\Environment($loader, [
-        //'cache' => CACHE_DIR,
+    $twig   = new \Twig\Environment($loader, [//'cache' => CACHE_DIR,
     ]);
 
     Cache::init(CACHE_DIR, USE_CACHE);
 
     // очистка кэша
-    if(isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
+    if (isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
         Cache::flush();
     }
 
@@ -71,7 +69,7 @@
     } catch (CoreException $e) {
         $userId = null;
     }
-    if(!empty($userId)) {
+    if (!empty($userId)) {
         try {
             $USER = new User($userId);
         } catch (CoreException $e) {
@@ -82,7 +80,9 @@
     }
 
     /**
-     * Запускаем маршрутизатор
+     * Запускаем маршрутизатор если не сказано иного
      */
-    Router::execute();
-    die();
+    if (defined('USE_ROUTER') && USE_ROUTER === true) {
+        Router::execute();
+        die();
+    }

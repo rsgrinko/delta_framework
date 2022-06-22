@@ -5,6 +5,7 @@
     use Core\Models\{User, DB, Roles};
     use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination, Files};
 
+    const USE_ROUTER = true;
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
     ?>
 <!doctype html>

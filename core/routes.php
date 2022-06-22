@@ -1,7 +1,6 @@
 <?php
 
     use Core\Models\Router;
-
     Router::route('/', '\Core\App::index');
 
     Router::route('/404', function () {
