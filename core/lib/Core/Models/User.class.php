@@ -50,7 +50,7 @@
             if (empty($id)) {
                 throw new CoreException('Передан некорректный идентификатор пользователя', CoreException::ERROR_INCORRECT_USER_ID);
             }
-            if (!(DB::getInstance())->getItem(self::USERS_TABLE, ['id' => $id])) {
+            if (!self::isUserExistsByParams(['id' => $id])) {
                 throw new CoreException('Пользователь с идентификатором ' . $id . ' отсутствует в базе', CoreException::ERROR_USER_NOT_FOUND);
             }
 
@@ -231,6 +231,23 @@
                 return (new self($result['id']));
             } else {
                 return null;
+            }
+        }
+
+        /**
+         * Проверка пользователя на существование по параметрам
+         *
+         * @param array $where Массив параметров фильтра
+         *
+         * @return bool
+         */
+        public static function isUserExistsByParams(array $where): bool
+        {
+            $result = (DB::getInstance())->getItem(self::USERS_TABLE, $where);
+            if (!empty($result)) {
+                return true;
+            } else {
+                return false;
             }
         }
 
