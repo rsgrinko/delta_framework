@@ -116,4 +116,38 @@
 
             return $result ?: 0;
         }
+
+
+        /**
+         * Метод сохранения логов в Sentry
+         *
+         * @param string $sentryMessage    Сообщение, передаваемое в Sentry и отображающееся как заголовок Issue
+         * @param string $sentryErrorLevel Уровень события Sentry (FATAL, ERROR, WARNING, INFO, DEBUG)
+         * @param array  $sentryData       Массив данных лога
+         *
+         * @return bool
+         */
+        public static function logToSentry(
+            string $sentryMessage,
+            string $sentryErrorLevel = 'DEBUG',
+            array $sentryData = []
+        ): bool {
+            $sentryErrorLevelArray = ['FATAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'];
+
+            if (empty(trim($sentryMessage))
+                || !in_array($sentryErrorLevel, $sentryErrorLevelArray)) {
+                return false;
+            }
+
+            if (is_array($sentryData) && count($sentryData) > 0) {
+                \Sentry\configureScope(function (\Sentry\State\Scope $sentryScope) use ($sentryData) {
+                    foreach ($sentryData as $paramName => $paramValue) {
+                        $sentryScope->setExtra($paramName, $paramValue);
+                    }
+                });
+            }
+
+            \Sentry\captureMessage($sentryMessage, \Sentry\Severity::$sentryErrorLevel());
+            return true;
+        }
     }

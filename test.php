@@ -4,7 +4,10 @@
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
     use Core\ExternalServices\TelegramSender;
     use Core\Helpers\Log;
+rfrf
+    //Log::logToSentry('Тестовая ошибка', 'ERROR', $_REQUEST);
 
+    die();
     $numProc = 4;
 
     if (empty($argv[1])) {
