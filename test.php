@@ -4,7 +4,7 @@
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
     use Core\ExternalServices\TelegramSender;
     use Core\Helpers\Log;
-rfrf
+throw new Exception('test ololo');
     //Log::logToSentry('Тестовая ошибка', 'ERROR', $_REQUEST);
 
     die();

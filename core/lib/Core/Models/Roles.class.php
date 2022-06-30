@@ -51,7 +51,7 @@
                 /** @var  $DB DB */
                 $DB = DB::getInstance();
 
-                $res        = $DB->query('SELECT role_id FROM `' . self::USER_ROLES_TABLE . '` WHERE user_id=' . $this->user->getId());
+                $res       = $DB->query('SELECT role_id FROM `' . self::USER_ROLES_TABLE . '` WHERE user_id=' . $this->user->getId());
                 $userRoles = [];
                 if (!empty($res)) {
                     foreach ($res as $row) {
@@ -122,8 +122,8 @@
                 $roles = Cache::get($cacheId);
             } else {
                 /** @var  $DB DB */
-                $DB = DB::getInstance();
-                $res    = $DB->query('SELECT * FROM ' . self::ROLES_TABLE);
+                $DB    = DB::getInstance();
+                $res   = $DB->query('SELECT * FROM ' . self::ROLES_TABLE);
                 $roles = [];
                 if (!empty($res)) {
                     foreach ($res as $role) {
