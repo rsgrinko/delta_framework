@@ -535,8 +535,9 @@
          *
          * @return Roles
          */
-        public function getRolesObject(): Roles {
-            if(empty($this->rolesObject)) {
+        public function getRolesObject(): Roles
+        {
+            if (empty($this->rolesObject)) {
                 $this->rolesObject = (new Roles($this));
             }
             return $this->rolesObject;
