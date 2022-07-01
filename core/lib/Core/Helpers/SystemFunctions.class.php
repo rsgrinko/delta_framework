@@ -321,6 +321,19 @@
             return $result;
         }
 
+        /**
+         * Отправка сообщения в канал нотификаций
+         *
+         * @param string $message Сообщение
+         *
+         * @return void
+         */
+        public static function sendTelegram(string $message): void
+        {
+            (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))
+                ->setChat(TELEGRAM_NOTIFICATION_CHANNEL)
+                ->sendMessage($message);
+        }
 
         /**
          * Построение структурной таблицы из массива

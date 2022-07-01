@@ -2,8 +2,9 @@
 
     namespace Core\Models;
 
+    use Core\CoreException;
     use Core\Models\DB;
-    use Core\Helpers\Log;
+    use Core\Helpers\{SystemFunctions, Log};
 
     class MQ
     {
@@ -33,6 +34,11 @@
         const VALUE_N = 'N';
 
         /**
+         * Количество задач для обработки
+         */
+        const EXECUTION_TASKS_LIMIT = 2;
+
+        /**
          * @var DB|null $DB Объект базы
          */
         private $DB = null;
@@ -59,6 +65,80 @@
             return Log::logToFile('Тестирование сработало видимо.', 'MQ_test.log', func_get_args());
         }
 
+        /**
+         * Выборка активных невыполненных заданий из очереди
+         *
+         * @return array|null
+         */
+        private function getActiveTasksCount(): int
+        {
+            return (int)$this->DB->query(
+                'SELECT count(id) AS count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND executed="' . self::VALUE_N . '"'
+            )[0]['count'];
+        }
+
+        /**
+         * Выборка активных заданий из очереди
+         *
+         * @return array|null
+         */
+        private function getActiveTasks(): ?array
+        {
+            return $this->DB->getItems(
+                self::TABLE, [
+                               'active'   => self::VALUE_Y,
+                               'executed' => self::VALUE_N,
+                           ]
+            );
+        }
+
+        /**
+         * Помечает задания активными с ограничением по количеству
+         *
+         * @return void
+         */
+        private function setTasksActiveStatus()
+        {
+            $countTasks = $this->getActiveTasksCount();
+
+            // Если активных задач меньше чем возможно
+            if ($countTasks < self::EXECUTION_TASKS_LIMIT) {
+                // Вычисляем сколько заданий требуется докинуть
+                $num     = self::EXECUTION_TASKS_LIMIT - $countTasks;
+                $arTasks = $this->DB->query(
+                    'SELECT id FROM ' . self::TABLE
+                    . ' WHERE active="' . self::VALUE_N
+                    .'" AND executed="'. self::VALUE_N
+                    . '" AND in_progress="' . self::VALUE_N
+                    . '" LIMIT ' . $num
+                );
+                if (!empty($arTasks)) {
+                    $arTaskIds = [];
+                    foreach ($arTasks as $task) {
+                        $arTaskIds[] = $task['id'];
+                    }
+                    $this->DB->query('UPDATE ' . self::TABLE . ' SET active="Y" WHERE id IN (' . implode(',', $arTaskIds) . ')');
+                }
+            }
+        }
+
+        /**
+         * Запуск диспетчера очереди
+         *
+         * @return void
+         */
+        public function run()
+        {
+            $this->setTasksActiveStatus();
+
+            $arTasks = $this->getActiveTasks();
+            if (!empty($arTasks)) {
+                foreach ($arTasks as $task) {
+                    $this->execute($task['id']);
+                    SystemFunctions::sendTelegram('Выполнено задание с ID ' . $task['id']);
+                }
+            }
+        }
 
         /**
          * Добавление задания в очередь
@@ -107,25 +187,32 @@
                            ]
             );
 
+
             try {
+                if (!method_exists($arTask['class'], $arTask['method'])) {
+                    throw new CoreException('Недействительный класс или метод для выполнения', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
+                }
                 $result = call_user_func_array($arTask['class'] . '::' . $arTask['method'], $arTask['params']);
                 //$this->DB->remove(self::TABLE, ['id' => $taskId]);
                 $this->DB->update(
                     self::TABLE, ['id' => $taskId], [
-                                   'active'      => self::VALUE_N,
-                                   'in_progress' => self::VALUE_N,
-                                   'executed'    => self::VALUE_Y,
-                                   'status'      => self::STATUS_OK,
-                                   'response'    => json_encode($result, JSON_UNESCAPED_UNICODE),
+                                   'active'       => self::VALUE_N,
+                                   'in_progress'  => self::VALUE_N,
+                                   'executed'     => self::VALUE_Y,
+                                   'status'       => self::STATUS_OK,
+                                   'date_updated' => date('Y-m-d H:i:s'),
+                                   'response'     => json_encode($result, JSON_UNESCAPED_UNICODE),
                                ]
                 );
-            } catch (\Throwable $t) {
+            } catch (\Throwable|CoreException $t) {
                 $this->DB->update(
                     self::TABLE, ['id' => $taskId], [
-                                   'active'      => 'N',
-                                   'in_progress' => 'N',
-                                   'status'      => self::STATUS_ERROR,
-                                   'response'    => $t->getMessage(),
+                                   'active'       => self::VALUE_N,
+                                   'in_progress'  => self::VALUE_N,
+                                   'executed'     => self::VALUE_Y,
+                                   'date_updated' => date('Y-m-d H:i:s'),
+                                   'status'       => self::STATUS_ERROR,
+                                   'response'     => $t->getMessage(),
                                ]
                 );
                 $executeStatus = false;

@@ -20,6 +20,11 @@
         const ERROR_CREATE_USER = 200;
 
         /**
+         * Ошибка проверки класса или метода на существование
+         */
+        const ERROR_CLASS_OR_METHOD_NOT_FOUND = 300;
+
+        /**
          * Возвращает обработанный callTrace текущего исключения
          *
          * @return array
