@@ -164,7 +164,7 @@
          *
          * @return int|null Идентификатор созданного задания
          */
-        public function add(string $class, string $method, ?array $params = null): ?int
+        public function addTask(string $class, string $method, ?array $params = null): ?int
         {
             if (empty($params)) {
                 $params = [];
