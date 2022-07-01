@@ -1,5 +1,12 @@
 <?php
+    @ignore_user_abort(true);
+
     require_once __DIR__ . '/bootstrap.php';
+
     use Core\Models\MQ;
 
-    (new MQ())->run();
+    try {
+        (new MQ())->run();
+    } catch (Throwable $t) {
+        echo 'Error: ' . $t->getMessage();
+    }

@@ -36,7 +36,7 @@
         /**
          * Количество задач для обработки
          */
-        const EXECUTION_TASKS_LIMIT = 2;
+        const EXECUTION_TASKS_LIMIT = 10;
 
         /**
          * @var DB|null $DB Объект базы
@@ -66,6 +66,18 @@
         }
 
         /**
+         * Тестовая функция 2
+         *
+         * @return int
+         * @throws \Core\CoreException
+         */
+        public static function test2(): int
+        {
+            sleep(5);
+            return Log::logToFile('Тестирование2', 'MQ_test.log', func_get_args());
+        }
+
+        /**
          * Выборка активных невыполненных заданий из очереди
          *
          * @return array|null
@@ -86,8 +98,9 @@
         {
             return $this->DB->getItems(
                 self::TABLE, [
-                               'active'   => self::VALUE_Y,
-                               'executed' => self::VALUE_N,
+                               'active'     => self::VALUE_Y,
+                               'in_progres' => self::VALUE_N,
+                               'executed'   => self::VALUE_N,
                            ]
             );
         }
@@ -106,11 +119,8 @@
                 // Вычисляем сколько заданий требуется докинуть
                 $num     = self::EXECUTION_TASKS_LIMIT - $countTasks;
                 $arTasks = $this->DB->query(
-                    'SELECT id FROM ' . self::TABLE
-                    . ' WHERE active="' . self::VALUE_N
-                    .'" AND executed="'. self::VALUE_N
-                    . '" AND in_progress="' . self::VALUE_N
-                    . '" LIMIT ' . $num
+                    'SELECT id FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_N . '" AND executed="' . self::VALUE_N . '" AND in_progress="'
+                    . self::VALUE_N . '" LIMIT ' . $num
                 );
                 if (!empty($arTasks)) {
                     $arTaskIds = [];
@@ -135,7 +145,12 @@
             if (!empty($arTasks)) {
                 foreach ($arTasks as $task) {
                     $this->execute($task['id']);
-                    SystemFunctions::sendTelegram('Выполнено задание с ID ' . $task['id']);
+                    SystemFunctions::sendTelegram(
+                        'Выполнено задание с ID ' . $task['id'] . PHP_EOL . $task['class'] . '::' . $task['method'] . '()' . PHP_EOL . print_r(
+                            $task['params'],
+                            true
+                        )
+                    );
                 }
             }
         }
