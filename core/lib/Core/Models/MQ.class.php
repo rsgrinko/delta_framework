@@ -104,7 +104,7 @@
             return $this->DB->getItems(
                 self::TABLE, [
                                'active'     => self::VALUE_Y,
-                               'in_progres' => self::VALUE_N,
+                               'in_progress' => self::VALUE_N,
                                'executed'   => self::VALUE_N,
                            ]
             );
@@ -171,7 +171,7 @@
          *
          * @return int|null Идентификатор созданного задания
          */
-        public function addTask(string $class, string $method, ?array $params = null): ?int
+        public function createTask(string $class, string $method, ?array $params = null): ?int
         {
             if (empty($params)) {
                 $params = [];
