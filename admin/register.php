@@ -7,7 +7,7 @@ if (User::isAuthorized()) {
     header('Location: index.php');
 } else {
     $arErrors = [];
-    if ($_REQUEST['send'] === 'Y') {
+    if (!empty($_REQUEST['send']) && $_REQUEST['send'] === 'Y') {
 
         if (empty($_REQUEST['login'])) {
             $arErrors[] = 'Логин не задан';

@@ -18,9 +18,9 @@
     );
 
     Sentry\configureScope(function (Sentry\State\Scope $sentryScope) {
-        $sentryScope->setExtra('user_id', $_SESSION['id']);
-        $sentryScope->setExtra('user_login', $_SESSION['login']);
-        $sentryScope->setExtra('user_token', $_SESSION['token']);
+        $sentryScope->setExtra('user_id', $_SESSION['id'] ?: '');
+        $sentryScope->setExtra('user_login', $_SESSION['login'] ?: '');
+        $sentryScope->setExtra('user_token', $_SESSION['token'] ?: '');
     });
     /*
         try {

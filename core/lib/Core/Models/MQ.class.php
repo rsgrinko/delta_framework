@@ -19,9 +19,9 @@
             $this->DB = DB::getInstance();
         }
 
-        public static function test($params): void
+        public static function test($name, $age): int
         {
-            Log::logToFile('Тестирование сработало видимо', 'MQ_test.log', $params);
+            return Log::logToFile('Тестирование сработало видимо.', 'MQ_test.log', func_get_args());
         }
 
 
@@ -32,7 +32,7 @@
                                'active'      => 'N',
                                'in_progress' => 'N',
                                'attempts'    => '0',
-                               'class'       => str_replace('\\', '\\\\\\\\', $class),
+                               'class'       => str_replace('\\', '\\\\', $class),
                                'method'      => $method,
                                'params'      => json_encode($params, JSON_UNESCAPED_UNICODE),
                            ]
@@ -42,6 +42,8 @@
         public function execute(int $taskId)
         {
             $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+            $arTask['class'] = str_replace('\\\\', '\\', $arTask['class']);
+            $arTask['params'] = json_decode($arTask['params'], true);
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
                                'active'      => 'Y',
@@ -49,10 +51,19 @@
                                'attempts'    => ((int)$arTask['attempts'] + 1),
                            ]
             );
-            //echo '<pre>'.print_r($arTask, true).'</pre>';die();
+
             try {
-                $arTask['class']::$arTask['method']();
-                $this->DB->remove(self::TABLE, ['id' => $taskId]);
+
+                $result = call_user_func_array($arTask['class'] . '::' . $arTask['method'], $arTask['params']);
+                //$this->DB->remove(self::TABLE, ['id' => $taskId]);
+                $this->DB->update(
+                    self::TABLE, ['id' => $taskId], [
+                                   'active' => 'N',
+                                   'in_progress' => 'N',
+                                   'executed' => 'Y',
+                                   'response' => json_encode($result, JSON_UNESCAPED_UNICODE),
+                               ]
+                );
             } catch (\Throwable $t) {
                 $this->DB->update(
                     self::TABLE, ['id' => $taskId], [
@@ -61,6 +72,7 @@
                                    'response'    => $t->getMessage(),
                                ]
                 );
+                echo $t->getMessage();
             }
         }
     }
