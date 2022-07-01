@@ -14,6 +14,11 @@
         const TABLE = 'threads';
 
         /**
+         * Имя файла логов
+         */
+        const LOG_FILE = 'MQ.log';
+
+        /**
          * Статус успешно выполненного задания
          */
         const STATUS_OK = 'OK';
@@ -127,6 +132,7 @@
                     foreach ($arTasks as $task) {
                         $arTaskIds[] = $task['id'];
                     }
+                    Log::logToFile('Взято в работу заданий ' . count($arTaskIds), self::LOG_FILE, ['added' => count($arTaskIds), 'defore' => $countTasks]);
                     $this->DB->query('UPDATE ' . self::TABLE . ' SET active="Y" WHERE id IN (' . implode(',', $arTaskIds) . ')');
                 }
             }
@@ -140,9 +146,10 @@
         public function run()
         {
             $this->setTasksActiveStatus();
-
             $arTasks = $this->getActiveTasks();
+
             if (!empty($arTasks)) {
+                Log::logToFile('Запущено выполнение заданий из очереди', self::LOG_FILE, ['count' => count($arTasks)]);
                 foreach ($arTasks as $task) {
                     $this->execute($task['id']);
                     SystemFunctions::sendTelegram(
@@ -169,6 +176,8 @@
             if (empty($params)) {
                 $params = [];
             }
+            Log::logToFile('Добавлено новое задание в очередь', self::LOG_FILE, func_get_args());
+
             return $this->DB->addItem(
                 self::TABLE, [
                                'active'      => self::VALUE_N,
