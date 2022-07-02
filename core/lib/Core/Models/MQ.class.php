@@ -103,9 +103,9 @@
         {
             return $this->DB->getItems(
                 self::TABLE, [
-                               'active'     => self::VALUE_Y,
+                               'active'      => self::VALUE_Y,
                                'in_progress' => self::VALUE_N,
-                               'executed'   => self::VALUE_N,
+                               'executed'    => self::VALUE_N,
                            ]
             );
         }
@@ -132,7 +132,9 @@
                     foreach ($arTasks as $task) {
                         $arTaskIds[] = $task['id'];
                     }
-                    Log::logToFile('Взято в работу заданий ' . count($arTaskIds), self::LOG_FILE, ['added' => count($arTaskIds), 'defore' => $countTasks]);
+                    Log::logToFile(
+                        'Взято в работу заданий ' . count($arTaskIds), self::LOG_FILE, ['added' => count($arTaskIds), 'defore' => $countTasks]
+                    );
                     $this->DB->query('UPDATE ' . self::TABLE . ' SET active="Y" WHERE id IN (' . implode(',', $arTaskIds) . ')');
                 }
             }
@@ -171,11 +173,12 @@
          *
          * @return int|null Идентификатор созданного задания
          */
-        public function createTask(string $class, string $method, ?array $params = null): ?int
+        public function createTask(?string $class = null, string $method, ?array $params = null): ?int
         {
             if (empty($params)) {
                 $params = [];
             }
+
             Log::logToFile('Добавлено новое задание в очередь', self::LOG_FILE, func_get_args());
 
             return $this->DB->addItem(
@@ -183,7 +186,7 @@
                                'active'      => self::VALUE_N,
                                'in_progress' => self::VALUE_N,
                                'attempts'    => '0',
-                               'class'       => str_replace('\\', '\\\\', $class),
+                               'class'       => !empty($class) ? str_replace('\\', '\\\\', $class) : '',
                                'method'      => $method,
                                'params'      => json_encode($params, JSON_UNESCAPED_UNICODE),
                            ]
@@ -213,19 +216,37 @@
 
 
             try {
-                if (!method_exists($arTask['class'], $arTask['method'])) {
-                    throw new CoreException('Недействительный класс или метод для выполнения', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
+                $startTime = microtime(true);
+
+                if (empty($arTask['method'])) {
+                    throw new CoreException('Метод не задан, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
                 }
-                $result = call_user_func_array($arTask['class'] . '::' . $arTask['method'], $arTask['params']);
+
+                if (!empty($arTask['class']) && !method_exists($arTask['class'], $arTask['method'])) {
+                    throw new CoreException('Класс или метод не определен, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
+                }
+
+                if (empty($arTask['class']) && !empty($arTask['method']) && !function_exists($arTask['method'])) {
+                    throw new CoreException('Функция не определена, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
+                }
+
+                if (empty($arTask['class'])) {
+                    $result = call_user_func_array($arTask['method'], $arTask['params']);
+                } else {
+                    $result = call_user_func_array($arTask['class'] . '::' . $arTask['method'], $arTask['params']);
+                }
+
+
                 //$this->DB->remove(self::TABLE, ['id' => $taskId]);
                 $this->DB->update(
                     self::TABLE, ['id' => $taskId], [
-                                   'active'       => self::VALUE_N,
-                                   'in_progress'  => self::VALUE_N,
-                                   'executed'     => self::VALUE_Y,
-                                   'status'       => self::STATUS_OK,
-                                   'date_updated' => date('Y-m-d H:i:s'),
-                                   'response'     => json_encode($result, JSON_UNESCAPED_UNICODE),
+                                   'active'         => self::VALUE_N,
+                                   'in_progress'    => self::VALUE_N,
+                                   'executed'       => self::VALUE_Y,
+                                   'execution_time' => round(microtime(true) - $startTime, 4),
+                                   'status'         => self::STATUS_OK,
+                                   'date_updated'   => date('Y-m-d H:i:s'),
+                                   'response'       => json_encode($result, JSON_UNESCAPED_UNICODE),
                                ]
                 );
             } catch (\Throwable|CoreException $t) {
@@ -234,6 +255,7 @@
                                    'active'       => self::VALUE_N,
                                    'in_progress'  => self::VALUE_N,
                                    'executed'     => self::VALUE_Y,
+                                   'execution_time' => round(microtime(true) - $startTime, 4),
                                    'date_updated' => date('Y-m-d H:i:s'),
                                    'status'       => self::STATUS_ERROR,
                                    'response'     => $t->getMessage(),
