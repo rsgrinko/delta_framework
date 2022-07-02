@@ -14,6 +14,11 @@
         const TABLE = 'threads';
 
         /**
+         * Таблица истории заданий
+         */
+        const TABLE_HISTORY = 'threads_history';
+
+        /**
          * Имя файла логов
          */
         const LOG_FILE = 'MQ.log';
@@ -41,7 +46,7 @@
         /**
          * Количество задач для обработки
          */
-        const EXECUTION_TASKS_LIMIT = 10;
+        const EXECUTION_TASKS_LIMIT = 2;
 
         /**
          * @var DB|null $DB Объект базы
@@ -78,7 +83,7 @@
          */
         public static function test2(): int
         {
-            sleep(5);
+            sleep(2);
             return Log::logToFile('Тестирование2', 'MQ_test.log', func_get_args());
         }
 
@@ -154,12 +159,6 @@
                 Log::logToFile('Запущено выполнение заданий из очереди', self::LOG_FILE, ['count' => count($arTasks)]);
                 foreach ($arTasks as $task) {
                     $this->execute($task['id']);
-                    SystemFunctions::sendTelegram(
-                        'Выполнено задание с ID ' . $task['id'] . PHP_EOL . $task['class'] . '::' . $task['method'] . '()' . PHP_EOL . print_r(
-                            $task['params'],
-                            true
-                        )
-                    );
                 }
             }
         }
@@ -202,8 +201,13 @@
          */
         public function execute(int $taskId): bool
         {
-            $executeStatus    = true;
-            $arTask           = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+            $executeStatus = true;
+            $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+            if ($arTask['in_progress'] === self::VALUE_Y) {
+                // Данное задание уже выполняется другим воркером
+                SystemFunctions::sendTelegram('Задание ' . $taskId . ' уже выполняется другим воркером');
+                return false;
+            }
             $arTask['class']  = str_replace('\\\\', '\\', $arTask['class']);
             $arTask['params'] = json_decode($arTask['params'], true);
             $this->DB->update(
@@ -236,35 +240,75 @@
                     $result = call_user_func_array($arTask['class'] . '::' . $arTask['method'], $arTask['params']);
                 }
 
+                $endTime = round(microtime(true) - $startTime, 4);
 
-                //$this->DB->remove(self::TABLE, ['id' => $taskId]);
                 $this->DB->update(
                     self::TABLE, ['id' => $taskId], [
                                    'active'         => self::VALUE_N,
                                    'in_progress'    => self::VALUE_N,
                                    'executed'       => self::VALUE_Y,
-                                   'execution_time' => round(microtime(true) - $startTime, 4),
+                                   'execution_time' => $endTime,
                                    'status'         => self::STATUS_OK,
                                    'date_updated'   => date('Y-m-d H:i:s'),
                                    'response'       => json_encode($result, JSON_UNESCAPED_UNICODE),
                                ]
                 );
+
+                $this->saveExecutedTask($taskId);
             } catch (\Throwable|CoreException $t) {
+                $endTime = round(microtime(true) - $startTime, 4);
                 $this->DB->update(
                     self::TABLE, ['id' => $taskId], [
-                                   'active'       => self::VALUE_N,
-                                   'in_progress'  => self::VALUE_N,
-                                   'executed'     => self::VALUE_Y,
-                                   'execution_time' => round(microtime(true) - $startTime, 4),
-                                   'date_updated' => date('Y-m-d H:i:s'),
-                                   'status'       => self::STATUS_ERROR,
-                                   'response'     => $t->getMessage(),
+                                   'active'         => self::VALUE_N,
+                                   'in_progress'    => self::VALUE_N,
+                                   'executed'       => self::VALUE_Y,
+                                   'execution_time' => $endTime,
+                                   'date_updated'   => date('Y-m-d H:i:s'),
+                                   'status'         => self::STATUS_ERROR,
+                                   'response'       => $t->getMessage(),
                                ]
                 );
                 $executeStatus = false;
                 echo $t->getMessage();
             }
 
+            SystemFunctions::sendTelegram(
+                'Выполнено задание с ID ' . $arTask['id'] . PHP_EOL . 'Время выполнения: ' . $endTime . ' cek.' . PHP_EOL . $arTask['class'] . '::'
+                . $arTask['method'] . '()' . PHP_EOL . print_r(
+                    $arTask['params'],
+                    true
+                )
+            );
+
+
             return $executeStatus;
+        }
+
+        /**
+         * @param int $taskId Идентификатор задачи
+         *
+         * @return int|null Идентификатор задачи в истории
+         */
+        private function saveExecutedTask(int $taskId): ?int
+        {
+            $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+
+            $taskHistoryId = $this->DB->addItem(
+                self::TABLE_HISTORY, [
+                               'task_id'        => $arTask['id'],
+                               'execution_time' => $arTask['execution_time'],
+                               'attempts'       => $arTask['attempts'],
+                               'date_created'   => $arTask['date_created'],
+                               'date_updated'   => $arTask['date_updated'],
+                               'class'          => $arTask['class'],
+                               'method'         => $arTask['method'],
+                               'params'         => $arTask['params'],
+                               'status'         => $arTask['status'],
+                               'response'       => $arTask['response'],
+                           ]
+            );
+            $this->DB->remove(self::TABLE, ['id' => $taskId]);
+
+            return $taskHistoryId;
         }
     }
