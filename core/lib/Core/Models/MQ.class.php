@@ -211,7 +211,7 @@
         private function checkDuplicates(?string $class, string $method, string $params): bool
         {
             $count = $this->DB->query(
-                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE class="' . addslashes($class) . '" and method="' . $method
+                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE executed="' . self::VALUE_N . '" AND class="' . addslashes($class) . '" and method="' . $method
                 . '" and params="' . addslashes($params) . '"'
             )[0]['count'];
             return ($count > 0);
