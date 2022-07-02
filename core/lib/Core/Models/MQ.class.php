@@ -46,7 +46,7 @@
         /**
          * Количество задач для обработки
          */
-        const EXECUTION_TASKS_LIMIT = 2;
+        const EXECUTION_TASKS_LIMIT = 10;
 
         /**
          * @var DB|null $DB Объект базы
@@ -83,7 +83,7 @@
          */
         public static function test2(): int
         {
-            sleep(2);
+            sleep(5);
             return Log::logToFile('Тестирование2', 'MQ_test.log', func_get_args());
         }
 
@@ -166,16 +166,22 @@
         /**
          * Добавление задания в очередь
          *
-         * @param string $class  Класс
-         * @param string $method Метод класса
-         * @param ?array $params Массив параметров
+         * @param string|null $class  Класс
+         * @param string      $method Метод класса
+         * @param ?array      $params Массив параметров
          *
          * @return int|null Идентификатор созданного задания
+         * @throws CoreException
          */
         public function createTask(?string $class = null, string $method, ?array $params = null): ?int
         {
             if (empty($params)) {
                 $params = [];
+            }
+            $params = json_encode($params, JSON_UNESCAPED_UNICODE);
+
+            if ($this->checkDuplicates($class, $method, $params)) {
+                throw new CoreException('Попытка создания дубликата задания', CoreException::ERROR_DIPLICATE_TASK);
             }
 
             Log::logToFile('Добавлено новое задание в очередь', self::LOG_FILE, func_get_args());
@@ -185,11 +191,30 @@
                                'active'      => self::VALUE_N,
                                'in_progress' => self::VALUE_N,
                                'attempts'    => '0',
-                               'class'       => !empty($class) ? str_replace('\\', '\\\\', $class) : '',
+                               'class'       => !empty($class) ? addslashes($class) : '',
                                'method'      => $method,
-                               'params'      => json_encode($params, JSON_UNESCAPED_UNICODE),
+                               'params'      => $params,
                            ]
             );
+        }
+
+
+        /**
+         * Проверка задания на дубликат
+         *
+         * @param string|null $class  Класс
+         * @param string      $method Метод класса
+         * @param string      $params Json параметры
+         *
+         * @return bool
+         */
+        private function checkDuplicates(?string $class, string $method, string $params): bool
+        {
+            $count = $this->DB->query(
+                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE class="' . addslashes($class) . '" and method="' . $method
+                . '" and params="' . addslashes($params) . '"'
+            )[0]['count'];
+            return ($count > 0);
         }
 
         /**
@@ -208,7 +233,7 @@
                 SystemFunctions::sendTelegram('Задание ' . $taskId . ' уже выполняется другим воркером');
                 return false;
             }
-            $arTask['class']  = str_replace('\\\\', '\\', $arTask['class']);
+
             $arTask['params'] = json_decode($arTask['params'], true);
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
@@ -295,17 +320,17 @@
 
             $taskHistoryId = $this->DB->addItem(
                 self::TABLE_HISTORY, [
-                               'task_id'        => $arTask['id'],
-                               'execution_time' => $arTask['execution_time'],
-                               'attempts'       => $arTask['attempts'],
-                               'date_created'   => $arTask['date_created'],
-                               'date_updated'   => $arTask['date_updated'],
-                               'class'          => $arTask['class'],
-                               'method'         => $arTask['method'],
-                               'params'         => $arTask['params'],
-                               'status'         => $arTask['status'],
-                               'response'       => $arTask['response'],
-                           ]
+                                       'task_id'        => $arTask['id'],
+                                       'execution_time' => $arTask['execution_time'],
+                                       'attempts'       => $arTask['attempts'],
+                                       'date_created'   => $arTask['date_created'],
+                                       'date_updated'   => $arTask['date_updated'],
+                                       'class'          => $arTask['class'],
+                                       'method'         => $arTask['method'],
+                                       'params'         => $arTask['params'],
+                                       'status'         => $arTask['status'],
+                                       'response'       => $arTask['response'],
+                                   ]
             );
             $this->DB->remove(self::TABLE, ['id' => $taskId]);
 
