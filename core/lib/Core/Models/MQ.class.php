@@ -81,10 +81,10 @@
          * @return int
          * @throws \Core\CoreException
          */
-        public static function test2(): int
+        public static function test2(): string
         {
             sleep(5);
-            return Log::logToFile('Тестирование2', 'MQ_test.log', func_get_args());
+            return 'Logged ' . Log::logToFile('Тестирование2', 'MQ_test.log', func_get_args()) . ' bytes';
         }
 
         /**
