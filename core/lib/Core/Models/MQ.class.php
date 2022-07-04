@@ -163,9 +163,7 @@
         {
             $this->setTasksActiveStatus();
             if ($this->hasMaxWorkers()) {
-                SystemFunctions::sendTelegram(
-                    'Превышено максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT
-                );
+                Log::logToFile('Превышено максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT, self::LOG_FILE);
                 return;
             }
             $arTasks = $this->getActiveTasks();
