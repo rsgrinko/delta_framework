@@ -46,7 +46,7 @@
         /**
          * Количество задач для обработки
          */
-        const EXECUTION_TASKS_LIMIT = 10;
+        const EXECUTION_TASKS_LIMIT = 100;
 
         /**
          * @var DB|null $DB Объект базы
@@ -211,8 +211,8 @@
         private function checkDuplicates(?string $class, string $method, string $params): bool
         {
             $count = $this->DB->query(
-                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE executed="' . self::VALUE_N . '" AND class="' . addslashes($class) . '" and method="' . $method
-                . '" and params="' . addslashes($params) . '"'
+                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE executed="' . self::VALUE_N . '" AND class="' . addslashes($class)
+                . '" and method="' . $method . '" and params="' . addslashes($params) . '"'
             )[0]['count'];
             return ($count > 0);
         }
@@ -297,13 +297,13 @@
                 echo $t->getMessage();
             }
 
-            SystemFunctions::sendTelegram(
+            /*SystemFunctions::sendTelegram(
                 'Выполнено задание с ID ' . $arTask['id'] . PHP_EOL . 'Время выполнения: ' . $endTime . ' cek.' . PHP_EOL . $arTask['class'] . '::'
                 . $arTask['method'] . '()' . PHP_EOL . print_r(
                     $arTask['params'],
                     true
                 )
-            );
+            );*/
 
 
             return $executeStatus;
@@ -335,5 +335,50 @@
             $this->DB->remove(self::TABLE, ['id' => $taskId]);
 
             return $taskHistoryId;
+        }
+
+
+        /**
+         * Получение списка всех заданий из очереди
+         *
+         * @param string $limit Лимит
+         *
+         * @return mixed|null
+         */
+        public function getTasks(string $limit = '10'): ?array
+        {
+            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' ORDER BY id DESC LIMIT ' . $limit) ?? [];
+        }
+
+        /**
+         * Получение количества заданий в очереди
+         *
+         * @param array|null $filter Фильтр
+         *
+         * @return int
+         */
+        public function getCountTasks(?array $filter = null): int
+        {
+            $filterString = '';
+            if (!empty($filter)) {
+                $filterString = ' WHERE ' . $this->DB->createWhere($filter);
+            }
+            return (int)$this->DB->query('SELECT count(id) as count FROM ' . self::TABLE . $filterString)[0]['count'];
+        }
+
+        /**
+         * Получение количества заданий в очереди
+         *
+         * @param array|null $filter Фильтр
+         *
+         * @return int
+         */
+        public function getCountTasksHistory(?array $filter = null): int
+        {
+            $filterString = '';
+            if (!empty($filter)) {
+                $filterString = ' WHERE ' . $this->DB->createWhere($filter);
+            }
+            return (int)$this->DB->query('SELECT count(id) as count FROM ' . self::TABLE_HISTORY . $filterString)[0]['count'];
         }
     }

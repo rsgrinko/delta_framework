@@ -72,11 +72,12 @@
         /**
          * Вспомогательный метод, формирует WHERE из массива
          *
-         * @param $where
+         * @param        $where
+         * @param string $logic
          *
          * @return string
          */
-        private function createWhere($where, $logic = 'AND'): string
+        public function createWhere($where, $logic = 'AND'): string
         {
             if (!is_array($where)) {
                 return $where;
