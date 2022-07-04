@@ -83,8 +83,8 @@
         /**
          * Тестовая функция 2
          *
-         * @return int
-         * @throws \Core\CoreException
+         * @return string
+         * @throws CoreException
          */
         public static function test2(): string
         {
