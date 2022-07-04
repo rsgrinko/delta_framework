@@ -155,7 +155,7 @@
             $this->setTasksActiveStatus();
             if ($this->hasMaxWorkers()) {
                 Log::logToFile(
-                    'Превышено максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
+                    'Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                     self::LOG_FILE,
                     [],
                     LOG_DEBUG,
