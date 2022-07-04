@@ -49,6 +49,11 @@
         const EXECUTION_TASKS_LIMIT = 100;
 
         /**
+         * Лимит количества одновременно выполняемых задач
+         */
+        const WORKERS_LIMIT = 5;
+
+        /**
          * @var DB|null $DB Объект базы
          */
         private $DB = null;
@@ -83,7 +88,11 @@
          */
         public static function test2(): string
         {
-            sleep(5);
+            sleep(rand(10, 30));
+            $result = rand(0, 100);
+            if ((int)$result === 27) {
+                throw new CoreException('Сервер обмена временно недоступен');
+            }
             return 'Logged ' . Log::logToFile('Тестирование2', 'MQ_test.log', func_get_args()) . ' bytes';
         }
 
@@ -150,9 +159,15 @@
          *
          * @return void
          */
-        public function run()
+        public function run(): void
         {
             $this->setTasksActiveStatus();
+            if ($this->hasMaxWorkers()) {
+                SystemFunctions::sendTelegram(
+                    'Превышено максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT
+                );
+                return;
+            }
             $arTasks = $this->getActiveTasks();
 
             if (!empty($arTasks)) {
@@ -230,7 +245,6 @@
             $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
             if ($arTask['in_progress'] === self::VALUE_Y) {
                 // Данное задание уже выполняется другим воркером
-                SystemFunctions::sendTelegram('Задание ' . $taskId . ' уже выполняется другим воркером');
                 return false;
             }
 
@@ -380,5 +394,29 @@
                 $filterString = ' WHERE ' . $this->DB->createWhere($filter);
             }
             return (int)$this->DB->query('SELECT count(id) as count FROM ' . self::TABLE_HISTORY . $filterString)[0]['count'];
+        }
+
+        /**
+         * Получение текущего количества выполняемых задач
+         *
+         * @return int
+         */
+        private function getCountWorkers(): int
+        {
+            return (int)$this->DB->query(
+                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_Y
+                . '"'
+            )[0]['count'];
+        }
+
+
+        /**
+         * Проверка на максимальное количество выполняемых задач
+         *
+         * @return bool
+         */
+        private function hasMaxWorkers(): bool
+        {
+            return $this->getCountWorkers() >= self::WORKERS_LIMIT;
         }
     }
