@@ -67,20 +67,6 @@
         }
 
         /**
-         * Тестовая функция
-         *
-         * @param $name
-         * @param $age
-         *
-         * @return int
-         * @throws \Core\CoreException
-         */
-        public static function test($name, $age): int
-        {
-            return Log::logToFile('Тестирование сработало видимо.', 'MQ_test.log', func_get_args());
-        }
-
-        /**
          * Тестовая функция 2
          *
          * @return string
@@ -93,13 +79,13 @@
             if ((int)$result === 27) {
                 throw new CoreException('Сервер обмена временно недоступен');
             }
-            return 'Logged ' . Log::logToFile('Тестирование2', 'MQ_test.log', func_get_args()) . ' bytes';
+            return 'Generated num: ' . $result;
         }
 
         /**
          * Выборка активных невыполненных заданий из очереди
          *
-         * @return array|null
+         * @return int
          */
         private function getActiveTasksCount(): int
         {
@@ -147,7 +133,12 @@
                         $arTaskIds[] = $task['id'];
                     }
                     Log::logToFile(
-                        'Взято в работу заданий ' . count($arTaskIds), self::LOG_FILE, ['added' => count($arTaskIds), 'defore' => $countTasks]
+                        'Взято в работу заданий ' . count($arTaskIds),
+                        self::LOG_FILE,
+                        ['added' => count($arTaskIds), 'defore' => $countTasks],
+                        LOG_DEBUG,
+                        null,
+                        false
                     );
                     $this->DB->query('UPDATE ' . self::TABLE . ' SET active="Y" WHERE id IN (' . implode(',', $arTaskIds) . ')');
                 }
@@ -163,13 +154,27 @@
         {
             $this->setTasksActiveStatus();
             if ($this->hasMaxWorkers()) {
-                Log::logToFile('Превышено максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT, self::LOG_FILE);
+                Log::logToFile(
+                    'Превышено максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
+                    self::LOG_FILE,
+                    [],
+                    LOG_DEBUG,
+                    null,
+                    false
+                );
                 return;
             }
             $arTasks = $this->getActiveTasks();
 
             if (!empty($arTasks)) {
-                Log::logToFile('Запущено выполнение заданий из очереди', self::LOG_FILE, ['count' => count($arTasks)]);
+                Log::logToFile(
+                    'Запущено выполнение заданий из очереди',
+                    self::LOG_FILE,
+                    ['count' => count($arTasks)],
+                    LOG_DEBUG,
+                    null,
+                    false
+                );
                 foreach ($arTasks as $task) {
                     $this->execute($task['id']);
                 }
@@ -197,7 +202,14 @@
                 throw new CoreException('Попытка создания дубликата задания', CoreException::ERROR_DIPLICATE_TASK);
             }
 
-            Log::logToFile('Добавлено новое задание в очередь', self::LOG_FILE, func_get_args());
+            Log::logToFile(
+                'Добавлено новое задание в очередь',
+                self::LOG_FILE,
+                func_get_args(),
+                LOG_DEBUG,
+                null,
+                false
+            );
 
             return $this->DB->addItem(
                 self::TABLE, [
@@ -292,6 +304,16 @@
                 );
 
                 $this->saveExecutedTask($taskId);
+
+                Log::logToFile(
+                    'Выполнено задание с ID ' . $taskId,
+                    self::LOG_FILE,
+                    ['response' => json_encode($result, JSON_UNESCAPED_UNICODE)],
+                    LOG_DEBUG,
+                    null,
+                    false
+                );
+
             } catch (\Throwable|CoreException $t) {
                 $endTime = round(microtime(true) - $startTime, 4);
                 $this->DB->update(
@@ -306,6 +328,15 @@
                                ]
                 );
                 $executeStatus = false;
+                Log::logToFile(
+                    'Ошибка выполнения задания с ID ' . $taskId,
+                    self::LOG_FILE,
+                    ['response' => json_encode($result, JSON_UNESCAPED_UNICODE)],
+                    LOG_DEBUG,
+                    null,
+                    false
+                );
+
                 echo $t->getMessage();
             }
 
@@ -402,8 +433,7 @@
         private function getCountWorkers(): int
         {
             return (int)$this->DB->query(
-                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_Y
-                . '"'
+                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_Y . '"'
             )[0]['count'];
         }
 
