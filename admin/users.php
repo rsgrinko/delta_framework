@@ -47,7 +47,7 @@
                                 $userObject = new User($elUser['id']);
                                 ?>
                                 <tr>
-                                    <td><?= $elUser['id']; ?></td>
+                                    <td><a href="profile.php?userId=<?= $elUser['id'];?>"><?= $elUser['id']; ?></a></td>
                                     <td><?= $elUser['login']; ?></td>
                                     <td><?= $elUser['password']; ?></td>
                                     <td><?= $elUser['name']; ?></td>

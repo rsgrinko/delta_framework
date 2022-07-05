@@ -1,4 +1,4 @@
-CREATE TABLE `users`
+CREATE TABLE if not exists `users`
 (
     `id`           int(11)      NOT NULL,
     `login`        varchar(100) NOT NULL,

@@ -6,8 +6,14 @@
 
     use Core\Models\File;
     use Core\Helpers\Thumbs;
+
     global $USER;
 
+    if (isset($_REQUEST['userId']) && !empty($_REQUEST['userId'])) {
+        $objectUser = new User($_REQUEST['userId']);
+    } else {
+        $objectUser = $USER;
+    }
 ?>
     <div class="pageheader">
         <div class="media">
@@ -40,7 +46,7 @@
                             $image->save();
                         }
 
-                        $USER->update($newUserFields);
+                        $objectUser->update($newUserFields);
                     ?>
                     <div class="alert alert-success">
                         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -53,38 +59,47 @@
             <div class="col-md-12">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4 class="panel-title"><?= $USER->getName(); ?></h4>
-                        <p><?= $USER->getAllUserData()['date_created']; ?></p>
+                        <h4 class="panel-title"><?= $objectUser->getName(); ?></h4>
+                        <p><?= $objectUser->getAllUserData()['date_created']; ?></p>
                     </div><!-- panel-heading -->
 
                     <div class="panel-body nopadding">
 
                         <form class="form-horizontal form-bordered" method="POST" action="profile.php" enctype="multipart/form-data">
+                            <input type="hidden" name="userId" value="<?= $objectUser->getId(); ?>">
                             <div class="form-group">
                                 <label class="col-sm-4 control-label">Логин</label>
                                 <div class="col-sm-8">
-                                    <input type="text" name="login" value="<?= $USER->getAllUserData()['login']; ?>" class="form-control" disabled>
+                                    <input type="text" name="login" value="<?= $objectUser->getAllUserData()['login']; ?>" class="form-control"
+                                           disabled>
                                 </div>
                             </div><!-- form-group -->
 
                             <div class="form-group">
                                 <label class="col-sm-4 control-label">Имя</label>
                                 <div class="col-sm-8">
-                                    <input type="text" name="name" value="<?= $USER->getAllUserData()['name']; ?>" class="form-control">
+                                    <input type="text" name="name" value="<?= $objectUser->getAllUserData()['name']; ?>" class="form-control">
                                 </div>
                             </div><!-- form-group -->
 
                             <div class="form-group">
                                 <label class="col-sm-4 control-label">E-Mail</label>
                                 <div class="col-sm-8">
-                                    <input type="text" name="email" value="<?= $USER->getAllUserData()['email']; ?>" class="form-control">
+                                    <input type="text" name="email" value="<?= $objectUser->getAllUserData()['email']; ?>" class="form-control">
                                 </div>
                             </div><!-- form-group -->
 
                             <div class="form-group">
                                 <label class="col-sm-4 control-label">Фотография</label>
                                 <div class="col-sm-1"><img width="100px"
-                                                           src="<?= ($USER->getAllUserData()['image'] ?? '/uploads/users/system.png'); ?>"></div>
+                                                           src="<?php
+                                                               $image = $objectUser->getImage();
+                                                               if (!empty($image)) {
+                                                                   echo $image['path'];
+                                                               } else {
+                                                                   echo '/uploads/users/system.png';
+                                                               }
+                                                           ?>"></div>
                                 <div class="col-sm-7">
 
                                     <input type="file" name="image" class="form-control">
@@ -94,7 +109,8 @@
                             <div class="form-group">
                                 <label class="col-sm-4 control-label">Токен</label>
                                 <div class="col-sm-8">
-                                    <input type="text" name="token" value="<?= $USER->getAllUserData()['token']; ?>" class="form-control" disabled>
+                                    <input type="text" name="token" value="<?= $objectUser->getAllUserData()['token']; ?>" class="form-control"
+                                           disabled>
                                 </div>
                             </div><!-- form-group -->
 
