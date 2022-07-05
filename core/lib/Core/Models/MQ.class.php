@@ -83,6 +83,30 @@
         }
 
         /**
+         * Преобразование данных в JSON строку
+         *
+         * @param array $arData Данные
+         *
+         * @return string
+         */
+        private function convertToJson(array $arData): string
+        {
+            return json_encode($arData, JSON_UNESCAPED_UNICODE);
+        }
+
+        /**
+         * Преобразование из JSON строки в данные
+         *
+         * @param string $json Данные
+         *
+         * @return string
+         */
+        private function convertFromJson(string $json): array
+        {
+            return json_decode($json, true);
+        }
+
+        /**
          * Выборка активных невыполненных заданий из очереди
          *
          * @return int
@@ -114,6 +138,7 @@
          * Помечает задания активными с ограничением по количеству
          *
          * @return void
+         * @throws CoreException
          */
         private function setTasksActiveStatus()
         {
@@ -135,12 +160,12 @@
                     Log::logToFile(
                         'Взято в работу заданий ' . count($arTaskIds),
                         self::LOG_FILE,
-                        ['added' => count($arTaskIds), 'defore' => $countTasks],
+                        ['added' => count($arTaskIds), 'before' => $countTasks],
                         LOG_DEBUG,
                         null,
                         false
                     );
-                    $this->DB->query('UPDATE ' . self::TABLE . ' SET active="Y" WHERE id IN (' . implode(',', $arTaskIds) . ')');
+                    $this->DB->query('UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_Y . '" WHERE id IN (' . implode(',', $arTaskIds) . ')');
                 }
             }
         }
@@ -149,6 +174,7 @@
          * Запуск диспетчера очереди
          *
          * @return void
+         * @throws CoreException
          */
         public function run(): void
         {
@@ -196,7 +222,7 @@
             if (empty($params)) {
                 $params = [];
             }
-            $params = json_encode($params, JSON_UNESCAPED_UNICODE);
+            $params = $this->convertToJson($params);
 
             if ($this->checkDuplicates($class, $method, $params)) {
                 throw new CoreException('Попытка создания дубликата задания', CoreException::ERROR_DIPLICATE_TASK);
@@ -258,7 +284,7 @@
                 return false;
             }
 
-            $arTask['params'] = json_decode($arTask['params'], true);
+            $arTask['params'] = $this->convertFromJson($arTask['params']);
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
                                'active'      => self::VALUE_Y,
@@ -299,7 +325,7 @@
                                    'execution_time' => $endTime,
                                    'status'         => self::STATUS_OK,
                                    'date_updated'   => date('Y-m-d H:i:s'),
-                                   'response'       => json_encode($result, JSON_UNESCAPED_UNICODE),
+                                   'response'       => $thos->convertToJson($result),
                                ]
                 );
 
@@ -308,7 +334,7 @@
                 Log::logToFile(
                     'Выполнено задание с ID ' . $taskId,
                     self::LOG_FILE,
-                    ['response' => json_encode($result, JSON_UNESCAPED_UNICODE)],
+                    ['response' => $this->convertToJson($result)],
                     LOG_DEBUG,
                     null,
                     false
