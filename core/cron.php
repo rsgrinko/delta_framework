@@ -8,5 +8,5 @@
     try {
         (new MQ())->run();
     } catch (Throwable $t) {
-        echo 'Error: ' . $t->getMessage();
+        echo 'Error: ' . $t->getMessage() . ' / line: ' . $t->getLine();
     }

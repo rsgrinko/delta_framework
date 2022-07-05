@@ -30,6 +30,16 @@
         const ERROR_DIPLICATE_TASK = 400;
 
         /**
+         * Ошибка файл не найден
+         */
+        const ERROR_FILE_NOT_FOUND = 500;
+
+        /**
+         * Ошибка не удалось скопировать файл
+         */
+        const ERROR_FILE_COPY = 501;
+
+        /**
          * Возвращает обработанный callTrace текущего исключения
          *
          * @return array

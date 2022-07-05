@@ -87,12 +87,15 @@
         /**
          * Преобразование данных в JSON строку
          *
-         * @param array $arData Данные
+         * @param $arData Данные
          *
-         * @return string
+         * @return string|null
          */
-        private function convertToJson(array $arData): string
+        private function convertToJson($arData): ?string
         {
+            if(empty($arData)) {
+                $arData = [];
+            }
             return json_encode($arData, JSON_UNESCAPED_UNICODE);
         }
 
@@ -327,7 +330,7 @@
                                    'execution_time' => $endTime,
                                    'status'         => self::STATUS_OK,
                                    'date_updated'   => date('Y-m-d H:i:s'),
-                                   'response'       => $thos->convertToJson($result),
+                                   'response'       => $this->convertToJson($result),
                                ]
                 );
 
@@ -365,7 +368,7 @@
                     false
                 );
 
-                echo $t->getMessage();
+                echo $t->getMessage() . ' on line ' . $t->getLine();
             }
 
             /*SystemFunctions::sendTelegram(
