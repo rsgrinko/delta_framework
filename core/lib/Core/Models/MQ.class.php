@@ -51,7 +51,7 @@
         /**
          * Лимит количества одновременно выполняемых задач
          */
-        const WORKERS_LIMIT = 5;
+        const WORKERS_LIMIT = 10;
 
         /**
          * @var DB|null $DB Объект базы
@@ -69,10 +69,12 @@
         /**
          * Тестовая функция 2
          *
+         * @param mixed ...$params
+         *
          * @return string
          * @throws CoreException
          */
-        public static function test2(): string
+        public static function test2(...$params): string
         {
             sleep(rand(10, 30));
             $result = rand(0, 100);

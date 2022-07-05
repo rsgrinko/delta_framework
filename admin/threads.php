@@ -12,9 +12,9 @@
             <div class="media-body">
                 <ul class="breadcrumb">
                     <li><a href=""><i class="glyphicon glyphicon-home"></i></a></li>
-                    <li>Список пользователей</li>
+                    <li>Диспетчер очереди</li>
                 </ul>
-                <h4>Список пользователей</h4>
+                <h4>Диспетчер очереди</h4>
             </div>
         </div><!-- media -->
     </div><!-- pageheader -->
