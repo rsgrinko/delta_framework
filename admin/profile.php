@@ -5,7 +5,7 @@
     require_once __DIR__ . '/inc/header.php';
 
     use Core\Models\File;
-
+    use Core\Helpers\Thumbs;
     global $USER;
 
 ?>
@@ -33,7 +33,11 @@
                         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                             $File = new File();
                             $File->saveFile($_FILES['image']['tmp_name'], $_FILES['image']['name'], true);
-                            $newUserFields['image'] = $File->getPath();
+                            $newUserFields['image_id'] = $File->getId();
+
+                            $image = new Thumbs($_SERVER['DOCUMENT_ROOT'] . $File->getPath());
+                            $image->thumb(300, 300);
+                            $image->save();
                         }
 
                         $USER->update($newUserFields);

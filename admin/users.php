@@ -1,8 +1,9 @@
 <?php
+
     use Core\Models\User;
 
     require_once __DIR__ . '/inc/header.php';
-    ?>
+?>
     <div class="pageheader">
         <div class="media">
             <div class="pageicon pull-left">
@@ -19,7 +20,7 @@
     </div><!-- pageheader -->
 
     <div class="contentpanel">
-<!-- table -->
+        <!-- table -->
         <div class="row">
             <div class="col-md-12r">
                 <div class="table-responsive">
@@ -41,37 +42,42 @@
                         </thead>
                         <tbody>
                         <?php
-                        $arUsers = User::getUsers();
-                        foreach($arUsers as $elUser){
-                            $userObject = new User($elUser['id']);
-                        ?>
-                        <tr>
-                            <td><?=$elUser['id'];?></td>
-                            <td><?=$elUser['login'];?></td>
-                            <td><?=$elUser['password'];?></td>
-                            <td><?=$elUser['name'];?></td>
-                            <td><?=$elUser['email'];?></td>
-                            <td><?=$elUser['image'] ? '<img src="'.$elUser['image'].'" width="50px">' : ''; ?></td>
-                            <td><?php
-                                    $arRoles = [];
-                                    foreach($userObject->getRolesObject()->getFullRoles() as $userRole) {
-                                        $arRoles[] = $userRole['name'] . ' (' . $userRole['id'] . ')';
-                                    }
-                                    echo implode(', ', $arRoles);
-                                ?></td>
-                            <td><?=$elUser['token'];?></td>
-                            <td><?=date('d.m.Y H:i:s', $elUser['last_active']);?></td>
-                            <td><?=$elUser['date_created'] ? date('d.m.Y H:i:s', strtotime($elUser['date_created'])) : '-';?></td>
-                            <td><?=$elUser['date_updated'] ? date('d.m.Y H:i:s', strtotime($elUser['date_updated'])) : '-';?></td>
-                        </tr>
-                        <?php
-                        }
+                            $arUsers = User::getUsers();
+                            foreach ($arUsers as $elUser) {
+                                $userObject = new User($elUser['id']);
+                                ?>
+                                <tr>
+                                    <td><?= $elUser['id']; ?></td>
+                                    <td><?= $elUser['login']; ?></td>
+                                    <td><?= $elUser['password']; ?></td>
+                                    <td><?= $elUser['name']; ?></td>
+                                    <td><?= $elUser['email']; ?></td>
+                                    <td><?php
+                                            $image = $userObject->getImage();
+                                            if (!empty($image)) {
+                                                echo '<img src="' . $image['path'] . '" alt="' . $image['name'] . '" width="50px">';
+                                            }
+                                        ?></td>
+                                    <td><?php
+                                            $arRoles = [];
+                                            foreach ($userObject->getRolesObject()->getFullRoles() as $userRole) {
+                                                $arRoles[] = $userRole['name'] . ' (' . $userRole['id'] . ')';
+                                            }
+                                            echo implode(', ', $arRoles);
+                                        ?></td>
+                                    <td><?= $elUser['token']; ?></td>
+                                    <td><?= date('d.m.Y H:i:s', $elUser['last_active']); ?></td>
+                                    <td><?= $elUser['date_created'] ? date('d.m.Y H:i:s', strtotime($elUser['date_created'])) : '-'; ?></td>
+                                    <td><?= $elUser['date_updated'] ? date('d.m.Y H:i:s', strtotime($elUser['date_updated'])) : '-'; ?></td>
+                                </tr>
+                                <?php
+                            }
                         ?>
                         </tbody>
                     </table>
                 </div><!-- table-responsive -->
             </div>
         </div>
-<!-- end table -->
+        <!-- end table -->
     </div><!-- contentpanel -->
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

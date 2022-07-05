@@ -50,7 +50,7 @@
         public function __construct(?int $id = null)
         {
             $this->folder = $_SERVER['DOCUMENT_ROOT'] . self::FOLDER;
-            $this->DB = DB::getInstance();
+            $this->DB     = DB::getInstance();
             if (!empty($id)) {
                 $this->id = $id;
                 $this->loadFileProps();
@@ -135,13 +135,11 @@
         /**
          * Получение файла по идентификатору
          *
-         * @param int $id Идентификатор
-         *
          * @return array|null
          */
-        public function getById(int $id): ?array
+        public function getAllProps(): ?array
         {
-            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id="' . $id . '"');
+            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id="' . $this->id . '"')[0];
         }
 
 
@@ -154,7 +152,6 @@
         {
             $this->DB->update(self::TABLE, ['id' => $this->id], ['name' => $this->name, 'path' => $this->path]);
             return $this;
-
         }
 
         /**
@@ -171,14 +168,14 @@
         {
             $storageFileName = md5(time() . $fileName . rand(1, 9999));
             if (empty($fileName)) {
-                $fileName = $storageFileName . '.' . static::getExt($filePath);
+                $fileName        = $storageFileName . '.' . static::getExt($filePath);
                 $storageFileName .= '.' . static::getExt($filePath);
             } else {
                 $storageFileName .= '.' . static::getExt($fileName);
             }
             $storageFullPath = $this->folder . '/' . $storageFileName;
 
-            if($useMove) {
+            if ($useMove) {
                 if (!move_uploaded_file($filePath, $storageFullPath)) {
                     throw new CoreException('Не удалось скопировать загруженный файл', CoreException::ERROR_FILE_COPY);
                 }

@@ -197,7 +197,14 @@
         <div class="leftpanel">
             <div class="media profile-left">
                 <a class="pull-left profile-thumb" href="profile.php">
-                    <img class="img-circle" src="<?=$arUser['image']; ?>" alt="">
+                    <img class="img-circle" src="<?php
+                        $image = $USER->getImage();
+                        if (!empty($image)) {
+                            echo $image['path'];
+                        } else {
+                            echo '/uploads/users/system.png';
+                        }
+                        ?>" alt="">
                 </a>
                 <div class="media-body">
                     <h4 class="media-heading"><?=$arUser['name']; ?></h4>

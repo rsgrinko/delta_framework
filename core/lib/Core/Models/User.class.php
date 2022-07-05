@@ -58,6 +58,26 @@
         }
 
         /**
+         * Получение аватара пользователя
+         *
+         * @return array|null
+         */
+        public function getImage(): ?array
+        {
+            $result  = null;
+            $imageId = $this->getAllUserData()['image_id'];
+
+            if (!empty($imageId)) {
+                try {
+                    $result = (new File($imageId))->getAllProps();
+                } catch (CoreException $e) {
+                }
+            }
+
+            return $result;
+        }
+
+        /**
          * Получение всех полей пользователя
          *
          * @return array|null
@@ -107,16 +127,6 @@
         public function getName(): ?string
         {
             return $this->getAllUserData() ? $this->getAllUserData()['name'] : null;
-        }
-
-        /**
-         * Получение аватарки текущего пользователя
-         *
-         * @return string|null
-         */
-        public function getImage(): ?string
-        {
-            return $this->getAllUserData() ? $this->getAllUserData()['image'] : null;
         }
 
         /**
@@ -298,7 +308,7 @@
             Log::logToFile(__METHOD__, 'User.log', func_get_args());
 
             /** @var  $DB DB */
-            $DB = DB::getInstance();
+            $DB     = DB::getInstance();
             $userId = $DB->addItem(self::USERS_TABLE, [
                 'login'       => $login,
                 'password'    => self::passwordEncryption($password),
