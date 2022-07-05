@@ -196,7 +196,7 @@
     <div class="mainwrapper">
         <div class="leftpanel">
             <div class="media profile-left">
-                <a class="pull-left profile-thumb" href="profile.html">
+                <a class="pull-left profile-thumb" href="profile.php">
                     <img class="img-circle" src="<?=$arUser['image']; ?>" alt="">
                 </a>
                 <div class="media-body">

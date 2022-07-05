@@ -167,19 +167,28 @@
             return end(explode('.', $filename));
         }
 
-        public function saveFile(string $filePath, ?string $fileName = null): self
+        public function saveFile(string $filePath, ?string $fileName = null, bool $useMove = false): self
         {
-            $storageFileName = md5(time() . $fileName . rand(1, 9999)) . '.' . static::getExt($filePath);
-            $storageFullPath = $this->folder . '/' . $storageFileName;
+            $storageFileName = md5(time() . $fileName . rand(1, 9999));
             if (empty($fileName)) {
-                $fileName = $storageFileName;
+                $fileName = $storageFileName . '.' . static::getExt($filePath);
+                $storageFileName .= '.' . static::getExt($filePath);
+            } else {
+                $storageFileName .= '.' . static::getExt($fileName);
             }
+            $storageFullPath = $this->folder . '/' . $storageFileName;
 
-            if (!copy($filePath, $storageFullPath)) {
-                throw new CoreException('Не удалось скопировать файл', CoreException::ERROR_FILE_COPY);
+            if($useMove) {
+                if (!move_uploaded_file($filePath, $storageFullPath)) {
+                    throw new CoreException('Не удалось скопировать загруженный файл', CoreException::ERROR_FILE_COPY);
+                }
+            } else {
+                if (!copy($filePath, $storageFullPath)) {
+                    throw new CoreException('Не удалось скопировать файл', CoreException::ERROR_FILE_COPY);
+                }
             }
             $this->name = $fileName;
-            $this->path = $storageFullPath;
+            $this->path = self::FOLDER . '/' . $storageFileName;
 
             $this->id = $this->DB->addItem(self::TABLE, ['name' => $this->name, 'path' => $this->path]);
 
