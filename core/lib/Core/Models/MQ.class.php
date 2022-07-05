@@ -81,7 +81,7 @@
             if ((int)$result === 27) {
                 throw new CoreException('Сервер обмена временно недоступен');
             }
-            return 'Generated num: ' . $result;
+            return 'Пользователь с ID ' . $params['0'] . ' обновлен';
         }
 
         /**
@@ -93,7 +93,7 @@
          */
         private function convertToJson($arData): ?string
         {
-            if(empty($arData)) {
+            if (empty($arData)) {
                 $arData = [];
             }
             return json_encode($arData, JSON_UNESCAPED_UNICODE);
@@ -344,7 +344,6 @@
                     null,
                     false
                 );
-
             } catch (\Throwable|CoreException $t) {
                 $endTime = round(microtime(true) - $startTime, 4);
                 $this->DB->update(
@@ -399,7 +398,7 @@
                                        'attempts'       => $arTask['attempts'],
                                        'date_created'   => $arTask['date_created'],
                                        'date_updated'   => $arTask['date_updated'],
-                                       'class'          => $arTask['class'],
+                                       'class'          => addslashes($arTask['class']),
                                        'method'         => $arTask['method'],
                                        'params'         => $arTask['params'],
                                        'status'         => $arTask['status'],

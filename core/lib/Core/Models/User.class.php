@@ -177,7 +177,6 @@
                 $res = (DB::getInstance())->query('SELECT * FROM `' . self::USERS_TABLE . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
                 Cache::set($cacheId, $res);
             }
-            Log::logToFile(__METHOD__, 'User.log', func_get_args());
             return $res;
         }
 
@@ -417,7 +416,6 @@
                     setcookie('userLogin', $result['login'], time() + 3600 * 24);
                     setcookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']), time() + 3600 * 24);
                 }
-                Log::logToFile(__METHOD__, 'User.log', func_get_args());
                 return true;
             } else {
                 return false;
@@ -435,8 +433,6 @@
          */
         public static function securityAuthorize(string $login, string $password, bool $remember = false): bool
         {
-            Log::logToFile(__METHOD__, 'User.log', func_get_args());
-
             /** @var  $DB DB */
             $DB     = DB::getInstance();
             $result = $DB->getItem(self::USERS_TABLE, ['login' => $login, 'password' => self::passwordEncryption($password)], true);
@@ -527,7 +523,6 @@
          */
         public static function logout(): void
         {
-            Log::logToFile(__METHOD__, 'User.log', func_get_args());
             $_SESSION['id']        = '';
             $_SESSION['authorize'] = '';
             $_SESSION['login']     = '';

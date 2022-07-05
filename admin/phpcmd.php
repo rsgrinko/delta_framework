@@ -31,6 +31,7 @@
                     <div class="mb-3">
                         <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Models\\DB;');">DB</button>
                         <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Models\\User;');">User</button>
+                        <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Models\\MQ;');">MQ</button>
                         <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Cache;');">Cache</button>
                         <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Log;');">Log</button>
                         <button class="btn btn-primary" type="button" onClick="addUseSection(this, 'use Core\\Helpers\\Files;');">Files</button>
