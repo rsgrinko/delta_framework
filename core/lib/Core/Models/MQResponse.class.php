@@ -37,7 +37,7 @@
         private $paramsJson = null;
 
         /**
-         * @var $response Результат выполнения задания
+         * @var string|null $response Результат выполнения задания
          */
         private $response = null;
 
@@ -82,12 +82,31 @@
         }
 
         /**
+         * Получение параметров
+         *
+         * @return array|null
+         */
+        public function getParams(): ?array
+        {
+            return $this->params;
+        }
+
+        /**
+         * Получение JSON параметров
+         *
+         * @return string|null
+         */
+        public function getParamsJson(): ?string
+        {
+            return $this->paramsJson;
+        }
+
+        /**
          * Установка текстового кода ответа внешней службы
          *
          * @param string $status Текстовый код ответа
          *
          * @return $this
-         * @throws CoreException
          */
         public function setStatus(string $status): self
         {
@@ -112,7 +131,7 @@
          *
          * @param string|null $response Результат работы задания
          *
-         * @return Response
+         * @return $this
          */
         public function setResponse(?string $response = null): self
         {
@@ -122,7 +141,7 @@
 
 
         /**
-         * Установка массива парамтров задания
+         * Установка массива параметров задания
          *
          * @param array|null $params
          *
@@ -135,7 +154,7 @@
         }
 
         /**
-         * Установка массива парамтров задания
+         * Установка массива параметров задания
          *
          * @param array $params
          *

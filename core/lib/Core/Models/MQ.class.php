@@ -502,7 +502,8 @@
                     false
                 );
 
-                echo $t->getMessage() . ' on line ' . $t->getLine() . PHP_EOL;
+                // TODO: Следующая строка нужна больше для отладки - в дальнейшем нужно удалить ее
+                echo 'Exception: ' . $t->getFile() . ' в строке ' . $t->getLine() . PHP_EOL . $t->getMessage() . PHP_EOL;
             }
 
             return $response;
@@ -519,22 +520,27 @@
         private function saveExecutedTask(int $taskId): ?int
         {
             $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
-            $taskHistoryId = $this->DB->addItem(
-                self::TABLE_HISTORY, [
-                                       'task_id'        => $arTask['id'],
-                                       'execution_time' => $arTask['execution_time'],
-                                       'attempts'       => $arTask['attempts'],
-                                       'date_created'   => $arTask['date_created'],
-                                       'date_updated'   => $arTask['date_updated'],
-                                       'class'          => addslashes($arTask['class']),
-                                       'method'         => $arTask['method'],
-                                       'params'         => $arTask['params'],
-                                       'status'         => $arTask['status'],
-                                       'response'       => $arTask['response'],
-                                   ]
-            );
-            $this->removeTask($taskId);
-            return $taskHistoryId;
+            if(!empty($arTask)) {
+                $taskHistoryId = $this->DB->addItem(
+                    self::TABLE_HISTORY, [
+                                           'task_id'        => $arTask['id'],
+                                           'execution_time' => $arTask['execution_time'],
+                                           'attempts'       => $arTask['attempts'],
+                                           'date_created'   => $arTask['date_created'],
+                                           'date_updated'   => $arTask['date_updated'],
+                                           'class'          => addslashes($arTask['class']),
+                                           'method'         => $arTask['method'],
+                                           'params'         => $arTask['params'],
+                                           'status'         => $arTask['status'],
+                                           'response'       => $arTask['response'],
+                                       ]
+                );
+                $this->removeTask($taskId);
+                return $taskHistoryId;
+            }
+
+
+            return null;
         }
 
 

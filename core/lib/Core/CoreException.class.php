@@ -40,6 +40,11 @@
         const ERROR_FILE_COPY = 501;
 
         /**
+         * Ошибка SQL запроса
+         */
+        const ERROR_SQL_QUERY = 600;
+
+        /**
          * Возвращает обработанный callTrace текущего исключения
          *
          * @return array

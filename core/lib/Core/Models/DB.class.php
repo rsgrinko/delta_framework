@@ -3,6 +3,8 @@
     namespace Core\Models;
 
 
+    use Core\CoreException;
+
     /**
      * Класс для работы с базой данных
      *
@@ -178,7 +180,11 @@
         {
             $startTime = microtime(true);
             self::$quantity++;
-            $stmt               = $this->db->query($sql);
+            try {
+                $stmt = $this->db->query($sql);
+            } catch (\Throwable $t) {
+                throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
+            }
             $this->lastInsertId = $this->db->lastInsertId() ?? null;
             $endTime            = microtime(true);
             self::$workingTime  += ($endTime - $startTime);
