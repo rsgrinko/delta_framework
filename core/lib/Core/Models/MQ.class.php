@@ -3,7 +3,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\Models\DB;
+    use Core\Models\{DB, MQResponse};
     use Core\Helpers\{SystemFunctions, Log};
 
     class MQ
@@ -81,7 +81,7 @@
             $this->DB = DB::getInstance();
         }
 
-        public function setRunNow(bool $runNow): self
+        public function setRunNow(bool $runNow = true): self
         {
             $this->runNow = $runNow;
             return $this;
@@ -260,7 +260,7 @@
          * @return int|null Идентификатор созданного задания
          * @throws CoreException
          */
-        public function createTask(?string $class = null, string $method, ?array $params = null): ?int
+        public function createTask(?string $class = null, string $method, ?array $params = null): MQResponse
         {
             if (empty($params)) {
                 $params = [];
@@ -300,11 +300,18 @@
             );
 
             if ($this->runNow) {
-                $this->execute($taskId);
+                return $this->execute($taskId);
             }
 
+            $response = new MQResponse();
+            $response->setTaskId($taskId)
+                     ->setStatus(self::STATUS_OK)
+                     ->setParams(self::convertFromJson($params))
+                     ->setParamsJson($params)
+                     ->setResponse('Task ' . $taskId . ' created');
 
-            return $taskId;
+
+            return $response;
         }
 
         /**
@@ -349,16 +356,22 @@
          * @return bool Флаг результата выполнения задания
          * @throws CoreException
          */
-        public function execute(int $taskId): bool
+        public function execute(int $taskId): MQResponse
         {
-            $executeStatus = true;
             $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
             if (empty($arTask) || $arTask['in_progress'] === self::VALUE_Y) {
                 // Данное задание уже выполнено или выполняется другим воркером
                 return false;
             }
 
+            $response = new MQResponse();
+            $response->setTaskId($taskId)
+                     ->setParamsJson($arTask['params']);
+
             $arTask['params'] = $this->convertFromJson($arTask['params']);
+
+            $response->setParams($arTask['params']);
+
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
                                'active'      => self::VALUE_Y,
@@ -401,6 +414,7 @@
                                    'response'       => $this->convertToJson($result),
                                ]
                 );
+                $response->setStatus(self::STATUS_OK)->setResponse($this->convertToJson($result));
 
                 $this->saveExecutedTask($taskId);
 
@@ -425,7 +439,9 @@
                                    'response'       => $t->getMessage(),
                                ]
                 );
-                $executeStatus = false;
+                $response->setStatus(self::STATUS_ERROR)->setResponse($t->getMessage());
+
+
                 Log::logToFile(
                     'Ошибка выполнения задания с ID ' . $taskId,
                     self::LOG_FILE,
@@ -435,19 +451,10 @@
                     false
                 );
 
-                echo $t->getMessage() . ' on line ' . $t->getLine();
+                echo $t->getMessage() . ' on line ' . $t->getLine() . PHP_EOL;
             }
 
-            /*SystemFunctions::sendTelegram(
-                'Выполнено задание с ID ' . $arTask['id'] . PHP_EOL . 'Время выполнения: ' . $endTime . ' cek.' . PHP_EOL . $arTask['class'] . '::'
-                . $arTask['method'] . '()' . PHP_EOL . print_r(
-                    $arTask['params'],
-                    true
-                )
-            );*/
-
-
-            return $executeStatus;
+            return $response;
         }
 
         /**
