@@ -105,9 +105,10 @@
                             <th>ID</th>
                             <th>Активен</th>
                             <th>Выполняется</th>
-                            <th>Выполнен</th>
+                            <th>Приоритет</th>
                             <th>Время выполнения</th>
                             <th>Попытки</th>
+                            <th>Лимит попыток</th>
                             <th>Класс</th>
                             <th>Метод</th>
                             <th>Параметры</th>
@@ -119,16 +120,17 @@
                         </thead>
                         <tbody>
                         <?php
-                            $arTasks = $MQ->getTasks();
+                            $arTasks = $MQ->getTasks(10, 'priority', 'asc');
                             foreach($arTasks as $task) {
                                 ?>
                                 <tr>
                                     <td><?=$task['id'];?></td>
                                     <td><?=$task['active'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
                                     <td><?=$task['in_progress'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
-                                    <td><?=$task['executed'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
+                                    <td><?=$task['priority'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
                                     <td><?=$task['execution_time'];?></td>
                                     <td><?=$task['attempts'];?></td>
+                                    <td><?=$task['attempts_limit'];?></td>
                                     <td><?=$task['class'];?></td>
                                     <td><?=$task['method'];?></td>
                                     <td><?=$task['params'];?></td>

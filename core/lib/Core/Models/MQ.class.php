@@ -19,6 +19,11 @@
         const TABLE_HISTORY = 'threads_history';
 
         /**
+         * Формат даты и времени
+         */
+        const DATETIME_FORMAT = 'Y-m-d H:i:s';
+
+        /**
          * Имя файла логов
          */
         const LOG_FILE = 'MQ.log';
@@ -132,10 +137,9 @@
          */
         public static function test2(...$params): string
         {
-            throw new CoreException('Выполнение заблокировано');
             sleep(rand(10, 30));
             $result = rand(0, 100);
-            if ((int)$result === 27) {
+            if (($result % 2) == 0) {
                 throw new CoreException('Сервер обмена временно недоступен');
             }
             return 'Пользователь с ID ' . $params['0'] . ' обновлен';
@@ -452,7 +456,7 @@
                                    'in_progress'    => self::VALUE_N,
                                    'execution_time' => $endTime,
                                    'status'         => self::STATUS_OK,
-                                   'date_updated'   => date('Y-m-d H:i:s'),
+                                   'date_updated'   => date(self::DATETIME_FORMAT),
                                    'response'       => $this->convertToJson($result),
                                ]
                 );
@@ -475,7 +479,7 @@
                                    'active'         => self::VALUE_Y, // Не снимаем активность пока не израсходуем все попытки
                                    'in_progress'    => self::VALUE_N,
                                    'execution_time' => $endTime,
-                                   'date_updated'   => date('Y-m-d H:i:s'),
+                                   'date_updated'   => date(self::DATETIME_FORMAT),
                                    'status'         => self::STATUS_ERROR,
                                    'response'       => $t->getMessage(),
                                ]
@@ -541,9 +545,9 @@
          *
          * @return mixed|null
          */
-        public function getTasks(string $limit = '10'): ?array
+        public function getTasks(string $limit = '10', string $orderBy = 'id', string $sort = 'DESC'): ?array
         {
-            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' ORDER BY id DESC LIMIT ' . $limit) ?? [];
+            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' ORDER BY ' . $orderBy . ' ' . $sort . ' LIMIT ' . $limit) ?? [];
         }
 
         /**
