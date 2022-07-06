@@ -21,7 +21,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>themelock.com - Chain Responsive Bootstrap3 Admin</title>
+    <title>Delta - CPanel</title>
 
     <link href="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/css/style.default.css" rel="stylesheet">
 

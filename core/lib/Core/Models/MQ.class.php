@@ -128,7 +128,7 @@
         }
 
         /**
-         * Тестовая функция 2
+         * Тестовая функция 50/50
          *
          * @param mixed ...$params
          *
@@ -143,6 +143,56 @@
                 throw new CoreException('Сервер обмена временно недоступен');
             }
             return 'Пользователь с ID ' . $params['0'] . ' обновлен';
+        }
+
+        /**
+         * Тестовая функция с управлением
+         *
+         * @param mixed ...$params
+         *
+         * @return string
+         * @throws CoreException
+         */
+        public static function testManaged(...$params): string
+        {
+            sleep(rand(1, 3));
+            $status = true;
+            if (file_exists(ROOT_PATH . '/allfail.txt')) {
+                $data   = file_get_contents(ROOT_PATH . '/allfail.txt');
+                $status = (int)$data === 1;
+            }
+            if (!$status) {
+                throw new CoreException('Сервер обмена временно недоступен');
+            }
+            return 'Клиент с ID ' . $params['0'] . ' создан';
+        }
+
+        /**
+         * Тестовая функция ok
+         *
+         * @param mixed ...$params
+         *
+         * @return string
+         * @throws CoreException
+         */
+        public static function testOk(...$params): string
+        {
+            sleep(rand(1, 3));
+            return 'Задание успешно выполнено';
+        }
+
+        /**
+         * Тестовая функция fail
+         *
+         * @param mixed ...$params
+         *
+         * @return string
+         * @throws CoreException
+         */
+        public static function testFail(...$params): string
+        {
+            sleep(rand(1, 3));
+            throw new CoreException('Сервер обменов недоступен');
         }
 
         /**
@@ -255,6 +305,15 @@
          */
         public function run(): void
         {
+            Log::logToFile(
+                'Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
+                self::LOG_FILE,
+                [],
+                LOG_DEBUG,
+                null,
+                false
+            );
+
             $this->setTasksActiveStatus();
             if ($this->hasMaxWorkers()) {
                 Log::logToFile(
@@ -429,7 +488,6 @@
             $arTask['attempts'] = ((int)$arTask['attempts'] + 1);
 
 
-
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
                                'active'      => self::VALUE_Y,
@@ -530,8 +588,8 @@
          */
         private function saveExecutedTask(int $taskId): ?int
         {
-            $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
-            if(!empty($arTask)) {
+            $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+            if (!empty($arTask)) {
                 $taskHistoryId = $this->DB->addItem(
                     self::TABLE_HISTORY, [
                                            'task_id'        => $arTask['id'],

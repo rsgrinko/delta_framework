@@ -102,6 +102,7 @@
                     <table class="table table-primary table-hover mb30">
                         <thead>
                         <tr>
+                            <th></th>
                             <th>ID</th>
                             <th>Активен</th>
                             <th>Выполняется</th>
@@ -124,10 +125,11 @@
                             foreach($arTasks as $task) {
                                 ?>
                                 <tr>
+                                    <td><?=$task['in_progress'] === MQ::VALUE_Y ? '<span class="badge badge-success">R</span>' : '';?></td>
                                     <td><?=$task['id'];?></td>
                                     <td><?=$task['active'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
                                     <td><?=$task['in_progress'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
-                                    <td><?=$task['priority'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
+                                    <td><?=$task['priority'];?></td>
                                     <td><?=$task['execution_time'];?></td>
                                     <td><?=$task['attempts'];?></td>
                                     <td><?=$task['attempts_limit'];?></td>
