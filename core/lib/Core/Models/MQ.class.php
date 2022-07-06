@@ -106,8 +106,11 @@
          *
          * @return string
          */
-        private function convertFromJson(string $json): array
+        private function convertFromJson(?string $json): array
         {
+            if(empty($json)) {
+                return [];
+            }
             return json_decode($json, true);
         }
 
