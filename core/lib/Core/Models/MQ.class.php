@@ -191,9 +191,16 @@
          * Выборка активных заданий из очереди
          *
          * @return array|null
+         * @throws CoreException
          */
         private function getActiveTasks(): ?array
         {
+            /*$res = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_N . '" ORDER BY priority, id ASC');
+            if($res) {
+                return $res;
+            } else {
+                return null;
+            }*/
             return $this->DB->getItems(
                 self::TABLE, [
                 'active'      => self::VALUE_Y,
@@ -391,7 +398,7 @@
          *
          * @param int $taskId Идентификатор задания
          *
-         * @return bool Флаг результата выполнения задания
+         * @return \Core\Models\MQResponse Флаг результата выполнения задания
          * @throws CoreException
          */
         public function execute(int $taskId): MQResponse
@@ -418,12 +425,16 @@
                 return $response;
             }
 
+            // Увеличиваем количество попыток выполнения
+            $arTask['attempts'] = ((int)$arTask['attempts'] + 1);
+
+
 
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
                                'active'      => self::VALUE_Y,
                                'in_progress' => self::VALUE_Y,
-                               'attempts'    => ((int)$arTask['attempts'] + 1),
+                               'attempts'    => $arTask['attempts'],
                            ]
             );
 
@@ -464,7 +475,7 @@
                 $this->saveExecutedTask($taskId);
 
                 Log::logToFile(
-                    'Выполнено задание с ID ' . $taskId,
+                    'Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                     self::LOG_FILE,
                     ['response' => $this->convertToJson($result)],
                     LOG_DEBUG,
@@ -486,7 +497,7 @@
                 );
 
 
-                if (((int)$arTask['attempts'] + 1) >= (int)$arTask['attempts_limit']) {
+                if ($arTask['attempts'] >= (int)$arTask['attempts_limit']) {
                     // Если достигнуто максимальное количество попыток выполнения
                     $this->saveExecutedTask($taskId);
                 }
@@ -494,7 +505,7 @@
                 $response->setStatus(self::STATUS_ERROR)->setResponse($t->getMessage());
 
                 Log::logToFile(
-                    'Ошибка выполнения задания с ID ' . $taskId,
+                    'Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                     self::LOG_FILE,
                     ['response' => json_encode($result, JSON_UNESCAPED_UNICODE)],
                     LOG_DEBUG,
