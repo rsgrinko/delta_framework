@@ -398,7 +398,7 @@
                                'active'         => self::VALUE_N,
                                'in_progress'    => self::VALUE_N,
                                'attempts'       => '0',
-                               'attempts_limit' => $this->attempts,
+                               'attempts_limit' => $this->runNow ? '1' : $this->attempts, // Если запускаем немедленно, то попытка одна
                                'class'          => !empty($class) ? addslashes($class) : '',
                                'method'         => $method,
                                'priority'       => $priority,
@@ -504,11 +504,11 @@
                 }
 
                 if (!empty($arTask['class']) && !method_exists($arTask['class'], $arTask['method'])) {
-                    throw new CoreException('Класс или метод не определен, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
+                    throw new CoreException('Класс или метод не существует, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
                 }
 
                 if (empty($arTask['class']) && !empty($arTask['method']) && !function_exists($arTask['method'])) {
-                    throw new CoreException('Функция не определена, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
+                    throw new CoreException('Функция не существует, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
                 }
 
                 if (empty($arTask['class'])) {
@@ -572,7 +572,7 @@
                 );
 
                 // TODO: Следующая строка нужна больше для отладки - в дальнейшем нужно удалить ее
-                echo 'Exception: ' . $t->getFile() . ' в строке ' . $t->getLine() . PHP_EOL . $t->getMessage() . PHP_EOL;
+                //echo 'Exception: ' . $t->getFile() . ' в строке ' . $t->getLine() . PHP_EOL . $t->getMessage() . PHP_EOL;
             }
 
             return $response;

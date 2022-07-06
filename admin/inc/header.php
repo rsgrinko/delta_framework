@@ -208,7 +208,8 @@
                 </a>
                 <div class="media-body">
                     <h4 class="media-heading"><?=$arUser['name']; ?></h4>
-                    <small class="text-muted"><?=$arUser['access_level']; ?></small>
+                    <small class="text-muted"><?=$arUser['email'];?>
+                    </small>
                 </div>
             </div><!-- media -->
 
