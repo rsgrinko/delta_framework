@@ -34,6 +34,11 @@
         const STATUS_ERROR = 'ERROR';
 
         /**
+         * Статус занято
+         */
+        const STATUS_BUSY = 'BUSY';
+
+        /**
          * Значение ДА
          */
         const VALUE_Y = 'Y';
@@ -359,18 +364,25 @@
         public function execute(int $taskId): MQResponse
         {
             $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
-            if (empty($arTask) || $arTask['in_progress'] === self::VALUE_Y) {
-                // Данное задание уже выполнено или выполняется другим воркером
-                return false;
-            }
 
             $response = new MQResponse();
+            $response->setTaskId($taskId)
+                     ->setParamsJson($arTask['params']);
+
             $response->setTaskId($taskId)
                      ->setParamsJson($arTask['params']);
 
             $arTask['params'] = $this->convertFromJson($arTask['params']);
 
             $response->setParams($arTask['params']);
+
+            if (empty($arTask) || $arTask['in_progress'] === self::VALUE_Y) {
+                // Данное задание уже выполнено или выполняется другим воркером
+                $response->setStatus(self::STATUS_BUSY)
+                         ->setResponse('Task ' . $taskId . ' already work');
+
+                return $response;
+            }
 
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
