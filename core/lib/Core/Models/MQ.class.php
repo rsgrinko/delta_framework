@@ -108,7 +108,7 @@
          */
         private function convertFromJson(?string $json): array
         {
-            if(empty($json)) {
+            if (empty($json)) {
                 return [];
             }
             return json_decode($json, true);
@@ -257,6 +257,20 @@
             );
         }
 
+        /**
+         * Удаления задания из очереди
+         *
+         * @param int|null $taskId Идентификатор задания
+         *
+         * @throws CoreException
+         */
+        public function removeTask(?int $taskId = null): bool
+        {
+            if (empty($id)) {
+                throw new CoreException('Не передан идентификатор задания');
+            }
+            return $this->DB->remove(self::TABLE, ['id' => $taskId]);
+        }
 
         /**
          * Проверка задания на дубликат
@@ -282,13 +296,14 @@
          * @param int $taskId Идентификатор задания
          *
          * @return bool Флаг результата выполнения задания
+         * @throws CoreException
          */
         public function execute(int $taskId): bool
         {
             $executeStatus = true;
             $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
-            if ($arTask['in_progress'] === self::VALUE_Y) {
-                // Данное задание уже выполняется другим воркером
+            if (empty($arTask) || $arTask['in_progress'] === self::VALUE_Y) {
+                // Данное задание уже выполнено или выполняется другим воркером
                 return false;
             }
 
@@ -389,11 +404,11 @@
          * @param int $taskId Идентификатор задачи
          *
          * @return int|null Идентификатор задачи в истории
+         * @throws CoreException
          */
         private function saveExecutedTask(int $taskId): ?int
         {
-            $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
-
+            $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
             $taskHistoryId = $this->DB->addItem(
                 self::TABLE_HISTORY, [
                                        'task_id'        => $arTask['id'],
@@ -408,8 +423,7 @@
                                        'response'       => $arTask['response'],
                                    ]
             );
-            $this->DB->remove(self::TABLE, ['id' => $taskId]);
-
+            $this->removeTask($taskId);
             return $taskHistoryId;
         }
 
