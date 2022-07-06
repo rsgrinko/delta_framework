@@ -309,11 +309,9 @@
             }
 
             $response = new MQResponse();
-            $response->setTaskId($taskId)
-                     ->setStatus(self::STATUS_OK)
-                     ->setParams(self::convertFromJson($params))
-                     ->setParamsJson($params)
-                     ->setResponse('Task ' . $taskId . ' created');
+            $response->setTaskId($taskId)->setStatus(self::STATUS_OK)->setParams(self::convertFromJson($params))->setParamsJson($params)->setResponse(
+                    'Task ' . $taskId . ' created'
+                );
 
 
             return $response;
@@ -363,26 +361,28 @@
          */
         public function execute(int $taskId): MQResponse
         {
-            $arTask        = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+            $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
 
             $response = new MQResponse();
-            $response->setTaskId($taskId)
-                     ->setParamsJson($arTask['params']);
+            $response->setTaskId($taskId);
 
-            $response->setTaskId($taskId)
-                     ->setParamsJson($arTask['params']);
+            if (empty($arTask)) {
+                // Если задание не найдено
+                $response->setStatus(self::STATUS_ERROR)->setResponse('Task ' . $taskId . ' not found');
+                return $response;
+            }
 
+            $response->setParamsJson($arTask['params']);
             $arTask['params'] = $this->convertFromJson($arTask['params']);
-
             $response->setParams($arTask['params']);
 
-            if (empty($arTask) || $arTask['in_progress'] === self::VALUE_Y) {
-                // Данное задание уже выполнено или выполняется другим воркером
-                $response->setStatus(self::STATUS_BUSY)
-                         ->setResponse('Task ' . $taskId . ' already work');
+            if ($arTask['in_progress'] === self::VALUE_Y) {
+                // Данное задание уже выполняется другим воркером
+                $response->setStatus(self::STATUS_BUSY)->setResponse('Task ' . $taskId . ' already work');
 
                 return $response;
             }
+
 
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
