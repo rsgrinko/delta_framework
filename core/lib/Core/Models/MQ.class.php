@@ -59,11 +59,32 @@
         private $DB = null;
 
         /**
+         * Приоритет по умолчанию
+         */
+        const DEFAULT_PRIORITY = 5;
+
+        /**
+         * @var null $priority Приоритет задания
+         */
+        private $priority = null;
+
+        /**
+         * @var null $runNow Флаг немедленного запуска
+         */
+        private $runNow = false;
+
+        /**
          * Конструктор
          */
         public function __construct()
         {
             $this->DB = DB::getInstance();
+        }
+
+        public function setRunNow(bool $runNow): self
+        {
+            $this->runNow = $runNow;
+            return $this;
         }
 
         /**
@@ -135,10 +156,12 @@
         {
             return $this->DB->getItems(
                 self::TABLE, [
-                               'active'      => self::VALUE_Y,
-                               'in_progress' => self::VALUE_N,
-                               'executed'    => self::VALUE_N,
-                           ]
+                'active'      => self::VALUE_Y,
+                'in_progress' => self::VALUE_N,
+                'executed'    => self::VALUE_N,
+            ],  [
+                    'priority' => 'ASC',
+                ]
             );
         }
 
@@ -158,7 +181,7 @@
                 $num     = self::EXECUTION_TASKS_LIMIT - $countTasks;
                 $arTasks = $this->DB->query(
                     'SELECT id FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_N . '" AND executed="' . self::VALUE_N . '" AND in_progress="'
-                    . self::VALUE_N . '" LIMIT ' . $num
+                    . self::VALUE_N . '" ORDER BY priority ASC LIMIT ' . $num
                 );
                 if (!empty($arTasks)) {
                     $arTaskIds = [];
@@ -216,6 +239,18 @@
         }
 
         /**
+         * Установка приоритета задания
+         *
+         * @param int $priority Приоритет
+         *
+         * @return void
+         */
+        public function setPriority(int $priority)
+        {
+            $this->priority = $priority;
+        }
+
+        /**
          * Добавление задания в очередь
          *
          * @param string|null $class  Класс
@@ -244,17 +279,32 @@
                 null,
                 false
             );
+            if (!empty($this->priority)) {
+                $priority       = $this->priority;
+                $this->priority = null;
+            } else {
+                $priority = self::DEFAULT_PRIORITY;
+            }
 
-            return $this->DB->addItem(
+
+            $taskId = $this->DB->addItem(
                 self::TABLE, [
                                'active'      => self::VALUE_N,
                                'in_progress' => self::VALUE_N,
                                'attempts'    => '0',
                                'class'       => !empty($class) ? addslashes($class) : '',
                                'method'      => $method,
+                               'priority'    => $priority,
                                'params'      => $params,
                            ]
             );
+
+            if ($this->runNow) {
+                $this->execute($taskId);
+            }
+
+
+            return $taskId;
         }
 
         /**
@@ -266,7 +316,8 @@
          */
         public function removeTask(?int $taskId = null): bool
         {
-            if (empty($id)) {
+            if (empty($taskId)) {
+                SystemFunctions::sendTelegram('Не передан идентификатор задания (' . $taskId . ')' . PHP_EOL . print_r(func_get_args(), true));
                 throw new CoreException('Не передан идентификатор задания');
             }
             return $this->DB->remove(self::TABLE, ['id' => $taskId]);
@@ -315,7 +366,6 @@
                                'attempts'    => ((int)$arTask['attempts'] + 1),
                            ]
             );
-
 
             try {
                 $startTime = microtime(true);
@@ -401,6 +451,8 @@
         }
 
         /**
+         * Сохранение выполненной задачи в историю
+         *
          * @param int $taskId Идентификатор задачи
          *
          * @return int|null Идентификатор задачи в истории

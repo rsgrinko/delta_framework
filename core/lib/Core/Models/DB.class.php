@@ -269,7 +269,7 @@
          *
          * @return array|null
          */
-        public function getItems($table, $where, $sort = ''): ?array
+        public function getItems($table, $where, $sort = []): ?array
         {
             self::$quantity++;
             $result = $this->query('SELECT * FROM `' . $table . '` WHERE ' . $this->createWhere($where) . $this->createSort($sort));
