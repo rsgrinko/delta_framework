@@ -327,7 +327,6 @@
         public function removeTask(?int $taskId = null): bool
         {
             if (empty($taskId)) {
-                SystemFunctions::sendTelegram('Не передан идентификатор задания (' . $taskId . ')' . PHP_EOL . print_r(func_get_args(), true));
                 throw new CoreException('Не передан идентификатор задания');
             }
             return $this->DB->remove(self::TABLE, ['id' => $taskId]);

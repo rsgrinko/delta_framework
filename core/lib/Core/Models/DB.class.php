@@ -77,7 +77,7 @@
          *
          * @return string
          */
-        public function createWhere($where, $logic = 'AND'): string
+        public function createWhere($where, string $logic = 'AND'): string
         {
             if (!is_array($where)) {
                 return $where;
@@ -99,9 +99,10 @@
                 } else {
                     $symbol = '=';
                 }
-                $where_string = $where_string . ' (' . $where_key . $symbol . '\'' . $where_item . '\') ' . $logic;
+                $where_string = $where_string . ' ' . $where_key . $symbol . '\'' . $where_item . '\' ' . $logic;
             }
-            return substr($where_string, 0, -4);
+            $offset = (strlen($logic) + 1);
+            return substr($where_string, 0, -$offset);
         }
 
         /**
