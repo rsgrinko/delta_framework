@@ -731,7 +731,7 @@
         /**
          * Выводит изображение в браузер.
          */
-        public function output($quality = 100)
+        public function output($quality = 100): void
         {
             switch ($this->type) {
                 case 1:
@@ -756,7 +756,7 @@
         /**
          * Выводит изображение в браузер и Сохраняет его.
          */
-        public function saveOut($filename, $quality = 100)
+        public function saveOut($filename, $quality = 100): void
         {
             if (empty($filename)) {
                 $filename = $this->filename;
@@ -781,7 +781,7 @@
             readfile($filename);
         }
 
-        public function destroy()
+        public function destroy(): void
         {
             imagedestroy($this->img);
         }

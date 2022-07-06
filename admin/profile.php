@@ -43,6 +43,7 @@
 
                             $image = new Thumbs($_SERVER['DOCUMENT_ROOT'] . $File->getPath());
                             $image->thumb(300, 300);
+                            $image->watermark(UPLOADS_PATH . '/watermark_small.png', 'bottom-right', 50);
                             $image->save();
                         }
 

@@ -11,6 +11,11 @@
     define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
     /**
+     * Путь до папки загрузок
+     */
+    const UPLOADS_PATH = ROOT_PATH . '/uploads';
+
+    /**
      * Путь до директории с логами
      */
     define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');

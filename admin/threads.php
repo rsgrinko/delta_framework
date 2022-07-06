@@ -99,7 +99,7 @@
             <div class="col-md-12r">
                 <p class="lead">Задания в очереди</p>
                 <div class="table-responsive">
-                    <table class="table table-primary table-hover mb30">
+                    <table class="table table-primary <?/*table-hover*/?> mb30">
                         <thead>
                         <tr>
                             <th></th>
@@ -124,8 +124,20 @@
                             $arTasks = $MQ->getTasks(10, 'priority', 'asc');
                             foreach($arTasks as $task) {
                                 ?>
-                                <tr>
-                                    <td><?=$task['in_progress'] === MQ::VALUE_Y ? '<span class="badge badge-success">R</span>' : '';?></td>
+                                <tr class="<?php
+                                    if($task['active'] === MQ::VALUE_Y && $task['in_progress'] === MQ::VALUE_Y&& $task['status'] === 'ERROR') {
+                                        echo 'alert-warning';
+                                    } elseif($task['active'] === MQ::VALUE_N && $task['status'] === 'ERROR') {
+                                        echo 'alert-danger';
+                                    } elseif($task['in_progress'] === MQ::VALUE_Y) {
+                                        echo 'alert-success';
+                                    } elseif($task['in_progress'] === MQ::VALUE_N && $task['status'] === 'ERROR') {
+                                        echo 'alert-danger';
+                                    } elseif($task['active'] === MQ::VALUE_Y && $task['in_progress'] === MQ::VALUE_N) {
+                                        echo 'alert-info';
+                                    }
+                                    ?>">
+                                    <td><?=$task['in_progress'] === MQ::VALUE_Y ? '<span class="badge badge-success">RUN</span>' : '';?></td>
                                     <td><?=$task['id'];?></td>
                                     <td><?=$task['active'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
                                     <td><?=$task['in_progress'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
