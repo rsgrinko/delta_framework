@@ -69,6 +69,11 @@
         const DEFAULT_PRIORITY = 5;
 
         /**
+         * Попыток выполнения по умолчанию
+         */
+        const DEFAULT_ATTEMPTS = 1;
+
+        /**
          * @var null $priority Приоритет задания
          */
         private $priority = null;
@@ -79,6 +84,11 @@
         private $runNow = false;
 
         /**
+         * @var null $attempts Количество попыток выполнения задания
+         */
+        private $attempts = self::DEFAULT_ATTEMPTS;
+
+        /**
          * Конструктор
          */
         public function __construct()
@@ -86,9 +96,29 @@
             $this->DB = DB::getInstance();
         }
 
+        /**
+         * Установка режима немедленного выполнения задания
+         *
+         * @param bool $runNow Флаг немедленного выполнения
+         *
+         * @return $this
+         */
         public function setRunNow(bool $runNow = true): self
         {
             $this->runNow = $runNow;
+            return $this;
+        }
+
+        /**
+         * Установка количества попыток выполнения задания
+         *
+         * @param int $attempts Количество попыток
+         *
+         * @return $this
+         */
+        public function setAttempts(int $attempts = self::DEFAULT_PRIORITY): self
+        {
+            $this->attempts = $attempts;
             return $this;
         }
 
@@ -102,6 +132,7 @@
          */
         public static function test2(...$params): string
         {
+            throw new CoreException('Выполнение заблокировано');
             sleep(rand(10, 30));
             $result = rand(0, 100);
             if ((int)$result === 27) {
@@ -148,7 +179,7 @@
         private function getActiveTasksCount(): int
         {
             return (int)$this->DB->query(
-                'SELECT count(id) AS count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND executed="' . self::VALUE_N . '"'
+                'SELECT count(id) AS count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '"'
             )[0]['count'];
         }
 
@@ -163,7 +194,6 @@
                 self::TABLE, [
                 'active'      => self::VALUE_Y,
                 'in_progress' => self::VALUE_N,
-                'executed'    => self::VALUE_N,
             ],  [
                     'priority' => 'ASC',
                 ]
@@ -185,8 +215,8 @@
                 // Вычисляем сколько заданий требуется докинуть
                 $num     = self::EXECUTION_TASKS_LIMIT - $countTasks;
                 $arTasks = $this->DB->query(
-                    'SELECT id FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_N . '" AND executed="' . self::VALUE_N . '" AND in_progress="'
-                    . self::VALUE_N . '" ORDER BY priority ASC LIMIT ' . $num
+                    'SELECT id FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_N . '" AND in_progress="' . self::VALUE_N
+                    . '" ORDER BY priority ASC LIMIT ' . $num
                 );
                 if (!empty($arTasks)) {
                     $arTaskIds = [];
@@ -250,9 +280,10 @@
          *
          * @return void
          */
-        public function setPriority(int $priority)
+        public function setPriority(int $priority): self
         {
             $this->priority = $priority;
+            return $this;
         }
 
         /**
@@ -294,13 +325,14 @@
 
             $taskId = $this->DB->addItem(
                 self::TABLE, [
-                               'active'      => self::VALUE_N,
-                               'in_progress' => self::VALUE_N,
-                               'attempts'    => '0',
-                               'class'       => !empty($class) ? addslashes($class) : '',
-                               'method'      => $method,
-                               'priority'    => $priority,
-                               'params'      => $params,
+                               'active'         => self::VALUE_N,
+                               'in_progress'    => self::VALUE_N,
+                               'attempts'       => '0',
+                               'attempts_limit' => $this->attempts,
+                               'class'          => !empty($class) ? addslashes($class) : '',
+                               'method'         => $method,
+                               'priority'       => $priority,
+                               'params'         => $params,
                            ]
             );
 
@@ -310,8 +342,8 @@
 
             $response = new MQResponse();
             $response->setTaskId($taskId)->setStatus(self::STATUS_OK)->setParams(self::convertFromJson($params))->setParamsJson($params)->setResponse(
-                    'Task ' . $taskId . ' created'
-                );
+                'Task ' . $taskId . ' created'
+            );
 
 
             return $response;
@@ -344,8 +376,8 @@
         private function checkDuplicates(?string $class, string $method, string $params): bool
         {
             $count = $this->DB->query(
-                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE executed="' . self::VALUE_N . '" AND class="' . addslashes($class)
-                . '" and method="' . $method . '" and params="' . addslashes($params) . '"'
+                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE class="' . addslashes($class) . '" and method="' . $method
+                . '" and params="' . addslashes($params) . '"'
             )[0]['count'];
             return ($count > 0);
         }
@@ -418,7 +450,6 @@
                     self::TABLE, ['id' => $taskId], [
                                    'active'         => self::VALUE_N,
                                    'in_progress'    => self::VALUE_N,
-                                   'executed'       => self::VALUE_Y,
                                    'execution_time' => $endTime,
                                    'status'         => self::STATUS_OK,
                                    'date_updated'   => date('Y-m-d H:i:s'),
@@ -426,7 +457,6 @@
                                ]
                 );
                 $response->setStatus(self::STATUS_OK)->setResponse($this->convertToJson($result));
-
                 $this->saveExecutedTask($taskId);
 
                 Log::logToFile(
@@ -439,19 +469,25 @@
                 );
             } catch (\Throwable|CoreException $t) {
                 $endTime = round(microtime(true) - $startTime, 4);
+
                 $this->DB->update(
                     self::TABLE, ['id' => $taskId], [
-                                   'active'         => self::VALUE_N,
+                                   'active'         => self::VALUE_Y, // Не снимаем активность пока не израсходуем все попытки
                                    'in_progress'    => self::VALUE_N,
-                                   'executed'       => self::VALUE_Y,
                                    'execution_time' => $endTime,
                                    'date_updated'   => date('Y-m-d H:i:s'),
                                    'status'         => self::STATUS_ERROR,
                                    'response'       => $t->getMessage(),
                                ]
                 );
-                $response->setStatus(self::STATUS_ERROR)->setResponse($t->getMessage());
 
+
+                if (((int)$arTask['attempts'] + 1) >= (int)$arTask['attempts_limit']) {
+                    // Если достигнуто максимальное количество попыток выполнения
+                    $this->saveExecutedTask($taskId);
+                }
+
+                $response->setStatus(self::STATUS_ERROR)->setResponse($t->getMessage());
 
                 Log::logToFile(
                     'Ошибка выполнения задания с ID ' . $taskId,
