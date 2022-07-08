@@ -511,6 +511,7 @@
                 self::TABLE, ['id' => $taskId], [
                                'active'      => self::VALUE_Y,
                                'in_progress' => self::VALUE_Y,
+                               'date_updated' => date(self::DATETIME_FORMAT),
                                'attempts'    => $arTask['attempts'],
                            ]
             );
