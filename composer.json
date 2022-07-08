@@ -16,6 +16,7 @@
     ],
     "require": {
         "twig/twig": "^3.0",
-        "sentry/sdk": "^3.2"
+        "sentry/sdk": "^3.2",
+      "ext-iconv": "*"
     }
 }
