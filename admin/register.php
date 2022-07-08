@@ -26,7 +26,7 @@ if (User::isAuthorized()) {
         }
 
         if(empty($arErrors)) {
-            $userId = User::create($_REQUEST['login'], $_REQUEST['pass'], $_REQUEST['email'], $_REQUEST['name'], '/uploads/users/system.png');
+            $userId = User::create($_REQUEST['login'], $_REQUEST['pass'], $_REQUEST['email'], $_REQUEST['name']);
 
             User::authorize($userId);
             header('Location: index.php');

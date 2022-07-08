@@ -35,7 +35,7 @@
         /**
          * ID последней добавленной записи
          *
-         * @var int|null
+         * @var string|null
          */
         private ?string $lastInsertId = null;
 
@@ -49,14 +49,28 @@
          */
         public function __construct(string $db_server = DB_HOST, string $db_user = DB_USER, ?string $db_pass = DB_PASSWORD, string $db_name = DB_NAME)
         {
-            $dsn      = 'mysql:host=' . $db_server . ';dbname=' . $db_name . ';charset=utf8';
-            $opt      = [
-                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                \PDO::ATTR_EMULATE_PREPARES   => false,
-            ];
-            $this->db = new \PDO($dsn, $db_user, $db_pass, $opt);
+            if (DB_TYPE === DB_TYPE_SQL) {
+                $dsn      = 'mysql:host=' . $db_server . ';dbname=' . $db_name . ';charset=utf8';
+                $opt      = [
+                    \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+                    \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                    \PDO::ATTR_EMULATE_PREPARES   => false,
+                ];
+                $this->db = new \PDO($dsn, $db_user, $db_pass, $opt);
+            } elseif (DB_TYPE === DB_TYPE_SQLITE) {
+                $this->db = new \SQLite3(SQLITE_DB_FILE);
+            }
         }
+
+        /**
+         * Деструктор
+         */
+        public function __destruct()
+        {
+            unset($this->instance);
+            unset($this->db);
+        }
+
 
         /**
          * Получить объект класса
@@ -180,20 +194,28 @@
         {
             $startTime = microtime(true);
             self::$quantity++;
-            try {
-                $stmt = $this->db->query($sql);
-            } catch (\Throwable $t) {
-                throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
-            }
-            $this->lastInsertId = $this->db->lastInsertId() ?? null;
-            $endTime            = microtime(true);
-            self::$workingTime  += ($endTime - $startTime);
 
-            if ($returnObject) {
-                return $stmt;
-            } else {
-                $result = $stmt->fetchAll();
-                return $result ?: null;
+            if(DB_TYPE === DB_TYPE_SQL) {
+                try {
+                    $stmt = $this->db->query($sql);
+                } catch (\Throwable $t) {
+                    throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
+                }
+                $this->lastInsertId = $this->db->lastInsertId() ?? null;
+
+
+                $endTime           = microtime(true);
+                self::$workingTime += ($endTime - $startTime);
+
+                if ($returnObject) {
+                    return $stmt;
+                } else {
+                    $result = $stmt->fetchAll();
+                    return $result ?: null;
+                }
+            } elseif(DB_TYPE === DB_TYPE_SQLITE) {
+                $result = $this->db->query($sql);
+                return $result->fetchArray(SQLITE3_ASSOC);
             }
         }
 

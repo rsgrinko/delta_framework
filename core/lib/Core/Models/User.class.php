@@ -302,7 +302,7 @@
          *
          * @throws CoreException
          */
-        public static function create(string $login, string $password, string $email, string $name = '', string $image = ''): int
+        public static function create(string $login, string $password, string $email, string $name = ''): int
         {
             Log::logToFile(__METHOD__, 'User.log', func_get_args());
 
@@ -312,7 +312,7 @@
                 'login'       => $login,
                 'password'    => self::passwordEncryption($password),
                 'name'        => $name,
-                'image'       => $image,
+                'image_id'    => null,
                 'token'       => '',
                 'email'       => $email,
                 'last_active' => time(),
