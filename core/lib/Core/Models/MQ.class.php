@@ -726,15 +726,16 @@
                             $arStuckTasks
                         ) . ')'
                     );
+
+                    Log::logToFile(
+                        'Задания были возвращены в работу',
+                        self::LOG_FILE,
+                        ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
+                        LOG_DEBUG,
+                        null,
+                        false
+                    );
                 }
-                Log::logToFile(
-                    'Задания были возвращены в работу',
-                    self::LOG_FILE,
-                    ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
-                    LOG_DEBUG,
-                    null,
-                    false
-                );
             }
         }
     }
