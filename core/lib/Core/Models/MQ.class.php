@@ -727,6 +727,8 @@
                         ) . ')'
                     );
 
+                    sendTelegram('Задания были возвращены в работу (' . count($arStuckTasks) . ' шт)' . PHP_EOL . implode(', ', $arStuckTasks));
+
                     Log::logToFile(
                         'Задания были возвращены в работу (' . count($arStuckTasks) . ')',
                         self::LOG_FILE,

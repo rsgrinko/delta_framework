@@ -105,11 +105,18 @@
     }
 
     // debug
-    function sendTelegram(?string $message): void
+    function sendTelegram(?string $message, ?string $file = null): void
     {
         (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))
             ->setChat(TELEGRAM_NOTIFICATION_CHANNEL)
             ->sendMessage($message);
+
+        if(!empty($file)) {
+            (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))
+                ->setChat(TELEGRAM_NOTIFICATION_CHANNEL)
+                ->sendDocument($file);
+        }
+
     }
 
     //end debug
