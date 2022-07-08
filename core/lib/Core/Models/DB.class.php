@@ -178,7 +178,6 @@
          */
         public function query(string $sql, bool $returnObject = false)
         {
-            sendTelegram($sql);
             $startTime = microtime(true);
             self::$quantity++;
             try {
