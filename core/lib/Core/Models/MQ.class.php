@@ -79,6 +79,11 @@
         const DEFAULT_ATTEMPTS = 1;
 
         /**
+         * Время, после которого задача считается повисшей (10 минут)
+         */
+        const STUCK_TIME = 60*10;
+
+        /**
          * @var null $priority Приоритет задания
          */
         private $priority = null;
@@ -314,7 +319,12 @@
                 false
             );
 
+            // Поиск и исправление зависших заданий
+            $this->searchAndFixStuckTasks();
+
+            // Добор заданий
             $this->setTasksActiveStatus();
+
             if ($this->hasMaxWorkers()) {
                 Log::logToFile(
                     'Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
@@ -678,5 +688,46 @@
         private function hasMaxWorkers(): bool
         {
             return $this->getCountWorkers() >= self::WORKERS_LIMIT;
+        }
+
+        /**
+         * Поиск зависших заданий и возврат их в работу
+         *
+         * @return void
+         * @throws CoreException
+         */
+        private function searchAndFixStuckTasks(): void
+        {
+
+            $arStuckTasks = [];
+            $runTasks = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_Y . '"');
+            if(!empty($runTasks)) {
+                foreach($runTasks as $task) {
+                    if(
+                        !empty($task['date_updated'])
+                        && (time() - strtotime($task['date_updated'])) > self::STUCK_TIME
+                    ) {
+                        $arStuckTasks[] = (int)$task['id'];
+                        Log::logToFile(
+                            'Задание ' . $task['id'] . ' зависло',
+                            self::LOG_FILE,
+                            ['task' => json_encode($task, JSON_UNESCAPED_UNICODE)],
+                            LOG_DEBUG,
+                            null,
+                            false
+                        );
+                    }
+                }
+
+                $this->DB->query('UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_N . '", in_progress="' . self::VALUE_N . '" WHERE id in(' . implode(',', $arStuckTasks) . ')');
+                Log::logToFile(
+                    'Задания были возвращены в работу',
+                    self::LOG_FILE,
+                    ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
+                    LOG_DEBUG,
+                    null,
+                    false
+                );
+            }
         }
     }

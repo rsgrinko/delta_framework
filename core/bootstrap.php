@@ -104,6 +104,16 @@
         $USER = null;
     }
 
+    // debug
+    function sendTelegram(?string $message): void
+    {
+        (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))
+            ->setChat(TELEGRAM_NOTIFICATION_CHANNEL)
+            ->sendMessage($message);
+    }
+
+    //end debug
+
     /**
      * Запускаем маршрутизатор если не сказано иного
      */
