@@ -3,12 +3,17 @@
     /**
      * Версия сервиса
      */
-    const VERSION = '1.0.0';
+    const CORE_VERSION = '1.0.0_dev';
 
     /**
      * Путь до корня проекта
      */
     define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
+
+    /**
+     * Путь до папки ядра
+     */
+    const CORE_PATH = ROOT_PATH . '/core';
 
     /**
      * Путь до папки загрузок
@@ -20,9 +25,8 @@
      */
     define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');
 
-
     /**
-     * БД
+     * Параметры SQL базы
      */
     const DB_HOST     = 'localhost';
     const DB_USER     = 'rsgrinko_delta';
@@ -72,5 +76,5 @@
     /**
      * Флаг использования логирования
      */
-    const USE_LOG = true;
+    const USE_LOG = false;
 

@@ -49,7 +49,6 @@
          */
         public function __construct(string $db_server = DB_HOST, string $db_user = DB_USER, ?string $db_pass = DB_PASSWORD, string $db_name = DB_NAME)
         {
-            if (DB_TYPE === DB_TYPE_SQL) {
                 $dsn      = 'mysql:host=' . $db_server . ';dbname=' . $db_name . ';charset=utf8';
                 $opt      = [
                     \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
@@ -57,9 +56,6 @@
                     \PDO::ATTR_EMULATE_PREPARES   => false,
                 ];
                 $this->db = new \PDO($dsn, $db_user, $db_pass, $opt);
-            } elseif (DB_TYPE === DB_TYPE_SQLITE) {
-                $this->db = new \SQLite3(SQLITE_DB_FILE);
-            }
         }
 
         /**
@@ -194,8 +190,6 @@
         {
             $startTime = microtime(true);
             self::$quantity++;
-
-            if(DB_TYPE === DB_TYPE_SQL) {
                 try {
                     $stmt = $this->db->query($sql);
                 } catch (\Throwable $t) {
@@ -213,10 +207,6 @@
                     $result = $stmt->fetchAll();
                     return $result ?: null;
                 }
-            } elseif(DB_TYPE === DB_TYPE_SQLITE) {
-                $result = $this->db->query($sql);
-                return $result->fetchArray(SQLITE3_ASSOC);
-            }
         }
 
         /**
