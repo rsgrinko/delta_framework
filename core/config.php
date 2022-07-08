@@ -69,3 +69,8 @@
      */
     const CODE_VALUE_Y = 'Y';
 
+    /**
+     * Флаг использования логирования
+     */
+    const USE_LOG = true;
+
