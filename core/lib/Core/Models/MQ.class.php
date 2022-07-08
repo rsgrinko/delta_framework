@@ -79,9 +79,9 @@
         const DEFAULT_ATTEMPTS = 1;
 
         /**
-         * Время, после которого задача считается повисшей (10 минут)
+         * Время, после которого задача считается повисшей (5 минут)
          */
-        const STUCK_TIME = 60*10;
+        const STUCK_TIME = 60*5;
 
         /**
          * @var null $priority Приоритет задания
@@ -142,7 +142,7 @@
          */
         public static function test2(...$params): string
         {
-            //sleep(rand(10, 30));
+            sleep(rand(10, 30));
             $result = rand(0, 100);
             if (($result % 2) == 0) {
                 throw new CoreException('Сервер обмена временно недоступен');
@@ -728,7 +728,7 @@
                     );
 
                     Log::logToFile(
-                        'Задания были возвращены в работу',
+                        'Задания были возвращены в работу (' . count($arStuckTasks) . ')',
                         self::LOG_FILE,
                         ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
                         LOG_DEBUG,
