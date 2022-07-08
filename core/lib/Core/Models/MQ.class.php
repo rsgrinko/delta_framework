@@ -717,8 +717,10 @@
             );
             if (!empty($runTasks)) {
                 foreach ($runTasks as $task) {
-                    if (!empty($task['date_updated'])
-                        && (time() - strtotime($task['date_updated'])) > self::STUCK_TIME) {
+                    if (
+                        (!empty($task['date_updated']) && (time() - strtotime($task['date_updated'])) > self::STUCK_TIME) // Повисшие надолго
+                        || empty($task['date_updated']) // Криво запущенные
+                    ) {
                         $arStuckTasks[] = (int)$task['id'];
                         if (USE_LOG) {
                             Log::logToFile(
