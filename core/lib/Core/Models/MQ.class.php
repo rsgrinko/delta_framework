@@ -142,7 +142,7 @@
          */
         public static function test2(...$params): string
         {
-            sleep(rand(10, 30));
+            //sleep(rand(10, 30));
             $result = rand(0, 100);
             if (($result % 2) == 0) {
                 throw new CoreException('Сервер обмена временно недоступен');
@@ -719,7 +719,14 @@
                     }
                 }
 
-                $this->DB->query('UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_N . '", in_progress="' . self::VALUE_N . '" WHERE id in(' . implode(',', $arStuckTasks) . ')');
+                if (!empty($arStuckTasks)) {
+                    $this->DB->query(
+                        'UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_N . '", in_progress="' . self::VALUE_N . '" WHERE id in(' . implode(
+                            ',',
+                            $arStuckTasks
+                        ) . ')'
+                    );
+                }
                 Log::logToFile(
                     'Задания были возвращены в работу',
                     self::LOG_FILE,

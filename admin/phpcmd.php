@@ -3,6 +3,10 @@
     use Core\Models\{User, Roles};
 
     require_once __DIR__ . '/inc/header.php';
+
+    if (isset($_REQUEST['execute']) && $_REQUEST['execute'] == 'Y') {
+        $_SESSION['phpcmd_query'] = $_REQUEST['query'];
+    }
 ?>
     <div class="pageheader">
         <div class="media">
@@ -51,7 +55,14 @@
                     <div class="mb-3">
                         <label for="query" class="form-label">Введите PHP код для выполнения</label>
                         <textarea class="form-control" rows="8" id="query"
-                                  name="query"><?php echo isset($_REQUEST['query']) ? $_REQUEST['query'] : ''; ?></textarea>
+                                  name="query"><?php
+                                if (isset($_REQUEST['query']) && !empty($_REQUEST['query'])) {
+                                    echo $_REQUEST['query'];
+                                } elseif (isset($_SESSION['phpcmd_query']) && !empty($_SESSION['phpcmd_query'])) {
+                                    echo $_SESSION['phpcmd_query'];
+                                }
+
+                            ?></textarea>
                     </div>
                     <div class="mb-3">
                         <input id="use_pre" type="checkbox" name="use_pre" value="Y" <?php if (isset($_REQUEST['use_pre']) and $_REQUEST['use_pre']
