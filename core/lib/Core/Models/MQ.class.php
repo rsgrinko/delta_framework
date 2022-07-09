@@ -502,12 +502,35 @@
         {
             $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
 
+            if (USE_LOG) {
+                Log::logToFile(
+                    'Заданиt ' . $taskId . ' взято в работу',
+                    self::LOG_FILE,
+                    ['taskId' => $taskId],
+                    LOG_DEBUG,
+                    null,
+                    false
+                );
+            }
+
             $response = new MQResponse();
             $response->setTaskId($taskId);
 
             if (empty($arTask)) {
                 // Если задание не найдено
                 $response->setStatus(self::STATUS_ERROR)->setResponse('Task ' . $taskId . ' not found');
+
+                if (USE_LOG) {
+                    Log::logToFile(
+                        'Задания ' . $taskId . ' не найдено',
+                        self::LOG_FILE,
+                        ['taskId' => $taskId],
+                        LOG_ERR,
+                        null,
+                        false
+                    );
+                }
+
                 return $response;
             }
 
@@ -518,6 +541,17 @@
             if ($arTask['in_progress'] === self::VALUE_Y) {
                 // Данное задание уже выполняется другим воркером
                 $response->setStatus(self::STATUS_BUSY)->setResponse('Task ' . $taskId . ' already work');
+
+                if (USE_LOG) {
+                    Log::logToFile(
+                        'Задание ' . $taskId . ' уже выполняется другим воркером',
+                        self::LOG_FILE,
+                        ['taskId' => $taskId],
+                        LOG_DEBUG,
+                        null,
+                        false
+                    );
+                }
 
                 return $response;
             }
@@ -569,7 +603,7 @@
                                ]
                 );
                 $response->setStatus(self::STATUS_OK)->setExecutionTime($endTime)->setResponse($this->convertToJson($result));
-                $this->saveExecutedTask($taskId);
+                $this->saveTaskToHistory($taskId);
 
                 if (USE_LOG) {
                     Log::logToFile(
@@ -598,7 +632,7 @@
 
                 if ($arTask['attempts'] >= (int)$arTask['attempts_limit']) {
                     // Если достигнуто максимальное количество попыток выполнения
-                    $this->saveExecutedTask($taskId);
+                    $this->saveTaskToHistory($taskId);
                 }
 
                 $response->setStatus(self::STATUS_ERROR)->setExecutionTime($endTime)->setResponse($t->getMessage());
@@ -626,7 +660,7 @@
          * @return int|null Идентификатор задачи в истории
          * @throws CoreException
          */
-        private function saveExecutedTask(int $taskId): ?int
+        private function saveTaskToHistory(int $taskId): ?int
         {
             $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
             if (!empty($arTask)) {
@@ -659,6 +693,7 @@
          * @param string $limit Лимит
          *
          * @return mixed|null
+         * @throws CoreException
          */
         public function getTasks(string $limit = '10', string $orderBy = 'id', string $sort = 'DESC'): ?array
         {
@@ -671,6 +706,7 @@
          * @param array|null $filter Фильтр
          *
          * @return int
+         * @throws CoreException
          */
         public function getCountTasks(?array $filter = null): int
         {
@@ -701,6 +737,7 @@
          * Получение текущего количества выполняемых задач
          *
          * @return int
+         * @throws CoreException
          */
         private function getCountWorkers(): int
         {
@@ -714,6 +751,7 @@
          * Проверка на максимальное количество выполняемых задач
          *
          * @return bool
+         * @throws CoreException
          */
         private function hasMaxWorkers(): bool
         {

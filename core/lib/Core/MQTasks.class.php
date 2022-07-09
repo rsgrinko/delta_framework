@@ -98,10 +98,13 @@
             $file = \iconv('windows-1251//IGNORE', 'UTF-8//IGNORE', $file);
             preg_match_all('|(?<=<div\ class="q">)[\w\W]*?(?=<hr)|U', $file, $frazes);
             $frazes = $frazes[0][0];
-            // тут готовй массив блоков с постами
+            // тут готовый массив блоков с постами
 
             preg_match_all('|<div class="quote">(.+)</div>|U', $frazes, $posts);
             $posts = $posts[1];
+            if(empty($posts)) {
+                throw new CoreException('Ошибка обработки данных');
+            }
 
             preg_match_all('|Цитата #(.+)</a>|U', $frazes, $ids);
             $ids = $ids[1];
@@ -139,7 +142,7 @@
                     $DB->update('bashorg', ['hash' => $hash], ['ext_id' => (int)$element['id'], 'date' => $element['date'], 'rating' => $element['rating']]);
                 }
             }
-            sleep(2);
+            sleep(5);
             return 'bashMeta: Добавлено ' . $i . ', обновлено ' . $j . ' записей из ' . count($result);
         }
     }
