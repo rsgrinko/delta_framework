@@ -312,9 +312,7 @@
                             'Взято в работу заданий ' . count($arTaskIds),
                             self::LOG_FILE,
                             ['added' => count($arTaskIds), 'before' => $countTasks],
-                            LOG_DEBUG,
-                            null,
-                            false
+                            LOG_DEBUG
                         );
                     }
                     $this->DB->query('UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_Y . '" WHERE id IN (' . implode(',', $arTaskIds) . ')');
@@ -335,9 +333,7 @@
                     'Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                     self::LOG_FILE,
                     [],
-                    LOG_DEBUG,
-                    null,
-                    false
+                    LOG_DEBUG
                 );
             }
             // Поиск и исправление зависших заданий
@@ -352,9 +348,7 @@
                         'Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                         self::LOG_FILE,
                         [],
-                        LOG_DEBUG,
-                        null,
-                        false
+                        LOG_DEBUG
                     );
                 }
                 return;
@@ -367,9 +361,7 @@
                         'Запущено выполнение заданий из очереди',
                         self::LOG_FILE,
                         ['count' => count($arTasks)],
-                        LOG_DEBUG,
-                        null,
-                        false
+                        LOG_DEBUG
                     );
                 }
                 foreach ($arTasks as $task) {
@@ -418,9 +410,7 @@
                     'Добавлено новое задание в очередь',
                     self::LOG_FILE,
                     func_get_args(),
-                    LOG_DEBUG,
-                    null,
-                    false
+                    LOG_DEBUG
                 );
             }
             if (!empty($this->priority)) {
@@ -507,9 +497,7 @@
                     'Заданиt ' . $taskId . ' взято в работу',
                     self::LOG_FILE,
                     ['taskId' => $taskId],
-                    LOG_DEBUG,
-                    null,
-                    false
+                    LOG_DEBUG
                 );
             }
 
@@ -525,9 +513,7 @@
                         'Задания ' . $taskId . ' не найдено',
                         self::LOG_FILE,
                         ['taskId' => $taskId],
-                        LOG_ERR,
-                        null,
-                        false
+                        LOG_ERR
                     );
                 }
 
@@ -547,9 +533,7 @@
                         'Задание ' . $taskId . ' уже выполняется другим воркером',
                         self::LOG_FILE,
                         ['taskId' => $taskId],
-                        LOG_DEBUG,
-                        null,
-                        false
+                        LOG_DEBUG
                     );
                 }
 
@@ -610,9 +594,7 @@
                         'Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
                         ['response' => $this->convertToJson($result)],
-                        LOG_DEBUG,
-                        null,
-                        false
+                        LOG_DEBUG
                     );
                 }
             } catch (\Throwable|CoreException $t) {
@@ -642,9 +624,7 @@
                         'Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
                         ['response' => json_encode($result, JSON_UNESCAPED_UNICODE)],
-                        LOG_WARNING,
-                        null,
-                        false
+                        LOG_WARNING
                     );
                 }
             }
@@ -781,9 +761,7 @@
                                 'Задание ' . $task['id'] . ' зависло',
                                 self::LOG_FILE,
                                 ['task' => json_encode($task, JSON_UNESCAPED_UNICODE)],
-                                LOG_WARNING,
-                                null,
-                                false
+                                LOG_WARNING
                             );
                         }
                     }
@@ -804,9 +782,7 @@
                             'Задания были возвращены в работу (' . count($arStuckTasks) . ')',
                             self::LOG_FILE,
                             ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
-                            LOG_DEBUG,
-                            null,
-                            false
+                            LOG_DEBUG
                         );
                     }
                 }
