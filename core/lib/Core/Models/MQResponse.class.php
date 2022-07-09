@@ -37,6 +37,11 @@
         private $paramsJson = null;
 
         /**
+         * @var string|null $executionTime Время выполнения задания
+         */
+        private $executionTime = null;
+
+        /**
          * @var string|null $response Результат выполнения задания
          */
         private $response = null;
@@ -68,6 +73,29 @@
         public function setTaskId(int $taskId = 0): self
         {
             $this->taskId = $taskId;
+            return $this;
+        }
+
+        /**
+         * Получение времени выполнения задания
+         *
+         * @return ?string
+         */
+        public function getExecutionTime(): ?string
+        {
+            return $this->executionTime;
+        }
+
+        /**
+         * Установка времени выполнения задания
+         *
+         * @param string|null $executionTime Время выполнения
+         *
+         * @return $this
+         */
+        public function setExecutionTime(?string $executionTime = null): self
+        {
+            $this->executionTime = $executionTime;
             return $this;
         }
 

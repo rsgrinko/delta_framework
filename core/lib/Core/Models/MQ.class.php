@@ -94,6 +94,11 @@
         private $runNow = false;
 
         /**
+         * @var bool $useCheckDuplicates Флаг проверки задания на дубликат
+         */
+        private $useCheckDuplicates = true;
+
+        /**
          * @var null $attempts Количество попыток выполнения задания
          */
         private $attempts = self::DEFAULT_ATTEMPTS;
@@ -116,6 +121,19 @@
         public function setRunNow(bool $runNow = true): self
         {
             $this->runNow = $runNow;
+            return $this;
+        }
+
+        /**
+         * Установка режима проверки задания на дубликат при создании
+         *
+         * @param bool useCheckDuplicates Флаг проверки задания на дубликат
+         *
+         * @return $this
+         */
+        public function setCheckDuplicates(bool $useCheckDuplicates = true): self
+        {
+            $this->useCheckDuplicates = $useCheckDuplicates;
             return $this;
         }
 
@@ -390,7 +408,8 @@
             }
             $params = $this->convertToJson($params);
 
-            if ($this->checkDuplicates($class, $method, $params)) {
+            if ($this->useCheckDuplicates === true
+                && $this->checkDuplicates($class, $method, $params)) {
                 throw new CoreException('Попытка создания дубликата задания', CoreException::ERROR_DIPLICATE_TASK);
             }
 
@@ -549,7 +568,7 @@
                                    'response'       => $this->convertToJson($result),
                                ]
                 );
-                $response->setStatus(self::STATUS_OK)->setResponse($this->convertToJson($result));
+                $response->setStatus(self::STATUS_OK)->setExecutionTime($endTime)->setResponse($this->convertToJson($result));
                 $this->saveExecutedTask($taskId);
 
                 if (USE_LOG) {
@@ -582,7 +601,7 @@
                     $this->saveExecutedTask($taskId);
                 }
 
-                $response->setStatus(self::STATUS_ERROR)->setResponse($t->getMessage());
+                $response->setStatus(self::STATUS_ERROR)->setExecutionTime($endTime)->setResponse($t->getMessage());
 
                 if (USE_LOG) {
                     Log::logToFile(
@@ -594,8 +613,6 @@
                         false
                     );
                 }
-                // TODO: Следующая строка нужна больше для отладки - в дальнейшем нужно удалить ее
-                //echo 'Exception: ' . $t->getFile() . ' в строке ' . $t->getLine() . PHP_EOL . $t->getMessage() . PHP_EOL;
             }
 
             return $response;
