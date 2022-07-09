@@ -562,10 +562,10 @@
 
             $this->DB->update(
                 self::TABLE, ['id' => $taskId], [
-                               'active'      => self::VALUE_Y,
-                               'in_progress' => self::VALUE_Y,
+                               'active'       => self::VALUE_Y,
+                               'in_progress'  => self::VALUE_Y,
                                'date_updated' => date(self::DATETIME_FORMAT),
-                               'attempts'    => $arTask['attempts'],
+                               'attempts'     => $arTask['attempts'],
                            ]
             );
 
@@ -772,8 +772,7 @@
             );
             if (!empty($runTasks)) {
                 foreach ($runTasks as $task) {
-                    if (
-                        (!empty($task['date_updated']) && (time() - strtotime($task['date_updated'])) > self::STUCK_TIME) // Повисшие надолго
+                    if ((!empty($task['date_updated']) && (time() - strtotime($task['date_updated'])) > self::STUCK_TIME) // Повисшие надолго
                         || empty($task['date_updated']) // Криво запущенные
                     ) {
                         $arStuckTasks[] = (int)$task['id'];
