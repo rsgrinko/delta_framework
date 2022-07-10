@@ -59,9 +59,9 @@
         const EXECUTION_TASKS_LIMIT = 100;
 
         /**
-         * Лимит количества одновременно выполняемых задач
+         * Лимит количества запущенных воркеров
          */
-        const WORKERS_LIMIT = 5;
+        const WORKERS_LIMIT = 10;
 
         /**
          * @var DB|null $DB Объект базы
@@ -81,7 +81,7 @@
         /**
          * Время, после которого задача считается повисшей (5 минут)
          */
-        const STUCK_TIME = 60 * 5;
+        const STUCK_TIME = 60 * 10;
 
         /**
          * @var null $priority Приоритет задания
@@ -715,6 +715,17 @@
         public function getCountWorkers(): int
         {
             return (int)exec('ps -awx | grep \'threadsWorker.php\' | grep -v \'grep\' | wc -l');
+        }
+
+        /**
+         * Принудительная остановка всех запущенных воркеров
+         *
+         * @return void
+         */
+        public function stopAllWorkers(): void
+        {
+            exec('pkill -f threadsWorker.php');
+            $this->DB->update(self::TABLE, [], ['active' => 'N', 'in_progress' => 'N']);
         }
 
 

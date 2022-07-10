@@ -132,12 +132,8 @@
                 $text = htmlspecialchars_decode($text);
                 $text = str_replace('\'', '\\\'', $text);
                 $hash = md5($text);
-                $res  = $DB->query('SELECT * FROM bashorg WHERE hash="' . $hash . '"');
-                if (!$res) {
-                    $i++;
-                    $itemId = $DB->addItem('bashorg', ['hash' => $hash, 'text' => $text, 'etx_id' => (int)$element['id'], 'date' => $element['date'], 'rating' => $element['rating']]);
-                    sendTelegram('<b>Добавлена цитата ID ' . $itemId . ' (' . $page . ' страница)</b>' . PHP_EOL . $text);
-                } else {
+                $res  = $DB->query('SELECT * FROM bashorg WHERE hash="' . $hash . '" AND date is null');
+                if ($res) {
                     $j++;
                     $DB->update('bashorg', ['hash' => $hash], ['ext_id' => (int)$element['id'], 'date' => $element['date'], 'rating' => $element['rating']]);
                 }

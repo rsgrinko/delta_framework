@@ -93,6 +93,8 @@
         {
             if (!is_array($where)) {
                 return $where;
+            }elseif (empty($where)){
+                return '1';
             }
             $where_string = '';
             foreach ($where as $where_key => $where_item) {

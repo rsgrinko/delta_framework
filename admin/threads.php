@@ -34,6 +34,7 @@
                             <thead>
                             <tr>
                                 <th>Всего</th>
+                                <th>Воркеров</th>
                                 <th>Активных</th>
                                 <th>Выполняются</th>
                                 <th>С ошибкой</th>
@@ -43,6 +44,7 @@
                             <tbody>
                             <tr>
                                 <td><?=$MQ->getCountTasks();?></td>
+                                <td><?=$MQ->getCountWorkers() . ' / ' . MQ::WORKERS_LIMIT;?></td>
                                 <td><?=$MQ->getCountTasks(['active' => 'Y']);?></td>
                                 <td><?=$MQ->getCountTasks(['active' => 'Y', 'in_progress' => 'Y']);?></td>
                                 <td><?=$MQ->getCountTasks(['in_progress' => 'N', 'status' => MQ::STATUS_ERROR]);?></td>
