@@ -61,7 +61,7 @@
         /**
          * Лимит количества одновременно выполняемых задач
          */
-        const WORKERS_LIMIT = 10;
+        const WORKERS_LIMIT = 2;
 
         /**
          * @var DB|null $DB Объект базы

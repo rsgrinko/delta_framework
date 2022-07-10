@@ -145,4 +145,36 @@
             sleep(5);
             return 'bashMeta: Добавлено ' . $i . ', обновлено ' . $j . ' записей из ' . count($result);
         }
+
+        public static function anekdot()
+        {
+            /** @var DB $DB */
+            $DB = DB::getInstance();
+
+            $file = file_get_contents('https://www.anekdot.ru/rss/randomu.html');
+            $file = explode('JSON.parse(\'', $file)[1];
+            $file = explode('\');', $file)[0];
+            $file = stripcslashes($file);
+            $arJokes = json_decode($file);
+
+            if(empty($arJokes)) {
+                throw new CoreException('Ошибка получения данных с сайта');
+            }
+            $i = 0;
+            foreach($arJokes as $joke) {
+                $hash = md5($joke);
+                $joke = str_replace('<br>', PHP_EOL, $joke);
+                $res  = $DB->query('SELECT * FROM jokes WHERE hash="' . $hash . '"');
+                if (!$res) {
+                    $i++;
+                    $itemId = $DB->addItem('jokes', ['hash' => $hash, 'text' => $joke]);
+                    //sendTelegram('<b>Добавлена шутка ID ' . $itemId . '</b>' . PHP_EOL . $joke);
+                }
+            }
+
+
+
+            sleep(2);
+            return 'Добавлено ' . $i . ' шуток из ' . count($arJokes);
+        }
     }

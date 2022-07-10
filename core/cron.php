@@ -12,7 +12,6 @@
 
     try {
         (new MQ())->run();
-        Core\MQTasks::sendBash();// test bash loading
     } catch (Throwable $t) {
         SystemFunctions::sendTelegram('CRON: Произошла ошибка' . PHP_EOL . $t->getMessage() . PHP_EOL . 'File: ' . $t->getFile() . PHP_EOL . 'Line: ' . $t->getLine());
         echo 'Error: ' . $t->getMessage() . ' / line: ' . $t->getLine();
