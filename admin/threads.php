@@ -94,12 +94,17 @@
 
 
 
-        <!-- table -->
-        <div class="row">
-            <div class="col-md-12r">
-                <p class="lead">Задания в очереди</p>
+    <!-- table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Очередь</h4>
+                    <p>Список текущих заданий очереди</p>
+                </div><!-- panel-heading -->
+
                 <div class="table-responsive">
-                    <table class="table table-primary <?/*table-hover*/?> mb30">
+                    <table class="table table-primary mb30">
                         <thead>
                         <tr>
                             <th></th>
@@ -136,7 +141,7 @@
                                     } elseif($task['active'] === MQ::VALUE_Y && $task['in_progress'] === MQ::VALUE_N) {
                                         echo 'alert-info';
                                     }
-                                    ?>">
+                                ?>">
                                     <td><?=$task['in_progress'] === MQ::VALUE_Y ? '<span class="badge badge-success">RUN</span>' : '';?></td>
                                     <td><?=$task['id'];?></td>
                                     <td><?=$task['active'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
@@ -159,8 +164,10 @@
                         </tbody>
                     </table>
                 </div><!-- table-responsive -->
+
             </div>
         </div>
         <!-- end table -->
+
     </div><!-- contentpanel -->
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

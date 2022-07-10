@@ -193,6 +193,7 @@
                 try {
                     $stmt = $this->db->query($sql);
                 } catch (\Throwable $t) {
+                    sendTelegram('SQL ERROR: ' . $sql);
                     throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
                 }
                 $this->lastInsertId = $this->db->lastInsertId() ?? null;

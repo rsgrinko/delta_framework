@@ -268,12 +268,6 @@
          */
         private function getActiveTasks(): ?array
         {
-            /*$res = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_N . '" ORDER BY priority, id ASC');
-            if($res) {
-                return $res;
-            } else {
-                return null;
-            }*/
             return $this->DB->getItems(
                 self::TABLE, [
                 'active'      => self::VALUE_Y,
@@ -290,7 +284,7 @@
          * @return void
          * @throws CoreException
          */
-        private function setTasksActiveStatus()
+        private function setTasksActiveStatus(): void
         {
             $countTasks = $this->getActiveTasksCount();
 
@@ -375,7 +369,7 @@
          *
          * @param int $priority Приоритет
          *
-         * @return void
+         * @return MQ
          */
         public function setPriority(int $priority): self
         {
@@ -390,7 +384,7 @@
          * @param string      $method Метод класса
          * @param ?array      $params Массив параметров
          *
-         * @return int|null Идентификатор созданного задания
+         * @return \Core\Models\MQResponse Идентификатор созданного задания
          * @throws CoreException
          */
         public function createTask(?string $class = null, string $method, ?array $params = null): MQResponse
@@ -494,7 +488,7 @@
 
             if (USE_LOG) {
                 Log::logToFile(
-                    'Заданиt ' . $taskId . ' взято в работу',
+                    'Задание ' . $taskId . ' взято в работу',
                     self::LOG_FILE,
                     ['taskId' => $taskId],
                     LOG_DEBUG
