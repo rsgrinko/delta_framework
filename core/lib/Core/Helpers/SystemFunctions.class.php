@@ -65,7 +65,12 @@
          */
         public static function getOS(): string
         {
-            $userAgent = $_SERVER['HTTP_USER_AGENT'];
+            $undefinedOS = 'Unknown OS';
+
+            if(empty($_SERVER['HTTP_USER_AGENT'])) {
+                return $undefinedOS;
+            }
+
             $oses = [
                 'iOS' => '/(iPhone)|(iPad)/i',
                 'Windows 3.11' => '/Win16/i',
@@ -93,11 +98,11 @@
             ];
 
             foreach ($oses as $os => $pattern) {
-                if (preg_match($pattern, $userAgent)) {
+                if (preg_match($pattern, $_SERVER['HTTP_USER_AGENT'])) {
                     return $os;
                 }
             }
-            return 'Unknown OS';
+            return $undefinedOS;
         }
 
         /**
