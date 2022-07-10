@@ -11,32 +11,6 @@
     }
     date_default_timezone_set('Europe/Moscow');
 
-    require_once __DIR__ . '/../vendor/autoload.php';
-    \Sentry\init(
-        [
-            'dsn'         => 'https://8657ac1a900c44e5bc51714bb4c00dbb@o1303100.ingest.sentry.io/6541634',
-            'error_types' => E_ALL & ~E_NOTICE,
-        ]
-    );
-
-    Sentry\configureScope(function (Sentry\State\Scope $sentryScope) {
-        $sentryScope->setExtra('user_id', $_SESSION['id'] ?? '');
-        $sentryScope->setExtra('user_login', $_SESSION['login'] ?? '');
-        $sentryScope->setExtra('user_token', $_SESSION['token'] ?? '');
-    });
-    /*
-        try {
-        $this->functionFailsForSure();
-    } catch (\Throwable $exception) {
-        \Sentry\captureException($exception);
-    }
-
-    // OR
-
-    \Sentry\captureLastError();
-        */
-
-
     ob_start(function ($buffer) {
         try {
             Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');

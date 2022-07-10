@@ -14,7 +14,7 @@ CREATE TABLE if not exists `users`
   DEFAULT CHARSET = utf8;
 
 INSERT INTO `users` (`id`, `login`, `password`, `name`, `email`, `image_id`, `token`, `last_active`, `date_created`, `date_updated`)
-VALUES (1, 'admin', '5321ef98bd96cccf03f50979fdd8c893', 'Роман Гринько', 'rsgrinko@yandex.ru', 18, 'RG1819-1000-77EB-8F7A-9B112FB69D3A0',
+VALUES (1, 'admin', 'c7e82c3d2bed998ea1f4c1aca09c282b', 'Роман Гринько', 'rsgrinko@yandex.ru', 18, 'RG1819-1000-77EB-8F7A-9B112FB69D3A0',
         '1657051585', '2022-06-17 16:18:56', NULL),
        (2, 'a.kirilcev', 'c7e82c3d2bed998ea1f4c1aca09c282b', 'Александр Кирильцев', 'a.kirilcev@it-tula.ru', 20,
         'RG17DE-1000-26FC-837F-8F9C47E643970', '1655471459', '2022-06-17 16:18:56', NULL),
