@@ -29,9 +29,9 @@
      * Параметры SQL базы
      */
     const DB_HOST     = 'localhost';
-    const DB_USER     = 'james_bond';
-    const DB_PASSWORD = 'erogvMnounu1345';
-    const DB_NAME     = 'delta_base';
+    const DB_USER     = 'rsgrinko_delta';
+    const DB_PASSWORD = '2670135';
+    const DB_NAME     = 'rsgrinko_delta';
 
     /**
      * Путь до шаблонов
