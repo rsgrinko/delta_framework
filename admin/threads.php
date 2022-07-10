@@ -43,7 +43,7 @@
                             <tbody>
                             <tr>
                                 <td><?=$MQ->getCountTasks();?></td>
-                                <td><?=$MQ->getCountTasks(['active' => 'Y', 'in_progress' => 'N']);?></td>
+                                <td><?=$MQ->getCountTasks(['active' => 'Y']);?></td>
                                 <td><?=$MQ->getCountTasks(['active' => 'Y', 'in_progress' => 'Y']);?></td>
                                 <td><?=$MQ->getCountTasks(['in_progress' => 'N', 'status' => MQ::STATUS_ERROR]);?></td>
                             </tr>

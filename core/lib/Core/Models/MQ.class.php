@@ -61,7 +61,7 @@
         /**
          * Лимит количества одновременно выполняемых задач
          */
-        const WORKERS_LIMIT = 2;
+        const WORKERS_LIMIT = 5;
 
         /**
          * @var DB|null $DB Объект базы
@@ -464,6 +464,7 @@
          * @param string      $params Json параметры
          *
          * @return bool
+         * @throws CoreException
          */
         private function checkDuplicates(?string $class, string $method, string $params): bool
         {
@@ -561,7 +562,6 @@
                 if (empty($arTask['class']) && !empty($arTask['method']) && !function_exists($arTask['method'])) {
                     throw new CoreException('Функция не существует, невозможно выполнить', CoreException::ERROR_CLASS_OR_METHOD_NOT_FOUND);
                 }
-
                 if (empty($arTask['class'])) {
                     $result = call_user_func_array($arTask['method'], $arTask['params']);
                 } else {
@@ -708,28 +708,24 @@
         }
 
         /**
-         * Получение текущего количества выполняемых задач
+         * Получение количества запущенных воркеров
          *
          * @return int
-         * @throws CoreException
          */
-        private function getCountWorkers(): int
+        public function getCountWorkers(): int
         {
-            return (int)$this->DB->query(
-                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_Y . '"'
-            )[0]['count'];
+            return (int)exec('ps -awx | grep \'threadsWorker.php\' | grep -v \'grep\' | wc -l');
         }
 
 
         /**
-         * Проверка на максимальное количество выполняемых задач
+         * Проверка на максимальное количество работающих воркеров
          *
          * @return bool
-         * @throws CoreException
          */
         private function hasMaxWorkers(): bool
         {
-            return $this->getCountWorkers() >= self::WORKERS_LIMIT;
+            return $this->getCountWorkers() > self::WORKERS_LIMIT;
         }
 
         /**

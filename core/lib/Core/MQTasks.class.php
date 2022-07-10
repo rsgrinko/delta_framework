@@ -142,7 +142,7 @@
                     $DB->update('bashorg', ['hash' => $hash], ['ext_id' => (int)$element['id'], 'date' => $element['date'], 'rating' => $element['rating']]);
                 }
             }
-            sleep(5);
+            //sleep(5);
             return 'bashMeta: Добавлено ' . $i . ', обновлено ' . $j . ' записей из ' . count($result);
         }
 
@@ -164,6 +164,7 @@
             foreach($arJokes as $joke) {
                 $hash = md5($joke);
                 $joke = str_replace('<br>', PHP_EOL, $joke);
+                $joke = addslashes($joke);
                 $res  = $DB->query('SELECT * FROM jokes WHERE hash="' . $hash . '"');
                 if (!$res) {
                     $i++;
@@ -174,7 +175,7 @@
 
 
 
-            sleep(2);
+            //sleep(2);
             return 'Добавлено ' . $i . ' шуток из ' . count($arJokes);
         }
     }
