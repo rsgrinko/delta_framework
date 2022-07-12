@@ -56,7 +56,7 @@
         /**
          * Количество задач для обработки
          */
-        const EXECUTION_TASKS_LIMIT = 100;
+        const EXECUTION_TASKS_LIMIT = 1000;
 
         /**
          * Лимит количества запущенных воркеров
@@ -378,6 +378,75 @@
         }
 
         /**
+         * Массовое создание заданий
+         *
+         * @param int         $count  Количество заданий
+         * @param string|null $class  Класс
+         * @param string      $method Метод класса
+         * @param ?array      $params Массив параметров
+         *
+         * @return \Core\Models\MQResponse
+         * @throws CoreException
+         */
+        public function massCreateTasks(int $count = 1, ?string $class = null, string $method, ?array $params = null): MQResponse
+        {
+            if (empty($params)) {
+                $params = [];
+            }
+            if (!empty($this->priority)) {
+                $priority = $this->priority;
+            } else {
+                $priority = self::DEFAULT_PRIORITY;
+            }
+
+            $params = $this->convertToJson($params);
+
+            if (USE_LOG) {
+                Log::logToFile(
+                    'Запущено массовое создание заданий',
+                    self::LOG_FILE,
+                    func_get_args(),
+                    LOG_DEBUG
+                );
+            }
+
+
+            $arData = [];
+            for ($i = 0; $i < $count; $i++) {
+                $arData[] = [
+                    'active'         => self::VALUE_N,
+                    'in_progress'    => self::VALUE_N,
+                    'attempts'       => '0',
+                    'attempts_limit' => $this->attempts,
+                    'class'          => !empty($class) ? addslashes($class) : '',
+                    'method'         => $method,
+                    'priority'       => $priority,
+                    'params'         => $params,
+                ];
+            }
+
+            $this->DB->addItems(self::TABLE, $arData);
+
+            $this->priority = null;
+
+            $response = new MQResponse();
+            $response->setTaskId(0)->setStatus(self::STATUS_OK)->setParams(self::convertFromJson($params))->setParamsJson($params)->setResponse(
+                $count . ' tasks were created'
+            );
+
+            if (USE_LOG) {
+                Log::logToFile(
+                    'Массовое создание заданий завершено',
+                    self::LOG_FILE,
+                    func_get_args(),
+                    LOG_DEBUG
+                );
+            }
+
+            return $response;
+        }
+
+        /**
          * Добавление задания в очередь
          *
          * @param string|null $class  Класс
@@ -672,6 +741,19 @@
         public function getTasks(string $limit = '10', string $orderBy = 'id', string $sort = 'DESC'): ?array
         {
             return $this->DB->query('SELECT * FROM ' . self::TABLE . ' ORDER BY ' . $orderBy . ' ' . $sort . ' LIMIT ' . $limit) ?? [];
+        }
+
+        /**
+         * Получение списка истории заданий из очереди
+         *
+         * @param string $limit Лимит
+         *
+         * @return mixed|null
+         * @throws CoreException
+         */
+        public function getTasksHistory(string $limit = '10', string $orderBy = 'id', string $sort = 'DESC'): ?array
+        {
+            return $this->DB->query('SELECT * FROM ' . self::TABLE_HISTORY . ' ORDER BY ' . $orderBy . ' ' . $sort . ' LIMIT ' . $limit) ?? [];
         }
 
         /**

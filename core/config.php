@@ -56,7 +56,7 @@
     /**
      * Использование кэша
      */
-    const USE_CACHE = false;
+    const USE_CACHE = true;
 
     /**
      * Папка кэша
@@ -76,5 +76,5 @@
     /**
      * Флаг использования логирования
      */
-    const USE_LOG = true;
+    const USE_LOG = false;
 

@@ -18,7 +18,7 @@
             $keys = [
                 'HTTP_CLIENT_IP',
                 'HTTP_X_FORWARDED_FOR',
-                'REMOTE_ADDR'
+                'REMOTE_ADDR',
             ];
             foreach ($keys as $key) {
                 if (!empty($_SERVER[$key])) {
@@ -35,6 +35,7 @@
          * Преобразование байт в человеческий вид
          *
          * @param int $size Размер в байтах
+         *
          * @return string
          */
         public static function convertBytes(int $size): string
@@ -67,34 +68,34 @@
         {
             $undefinedOS = 'Unknown OS';
 
-            if(empty($_SERVER['HTTP_USER_AGENT'])) {
+            if (empty($_SERVER['HTTP_USER_AGENT'])) {
                 return $undefinedOS;
             }
 
             $oses = [
-                'iOS' => '/(iPhone)|(iPad)/i',
-                'Windows 3.11' => '/Win16/i',
-                'Windows 95' => '/(Windows 95)|(Win95)|(Windows_95)/i',
-                'Windows 98' => '/(Windows 98)|(Win98)/i',
-                'Windows 2000' => '/(Windows NT 5.0)|(Windows 2000)/i',
-                'Windows XP' => '/(Windows NT 5.1)|(Windows XP)/i',
-                'Windows 2003' => '/(Windows NT 5.2)/i',
-                'Windows Vista' => '/(Windows NT 6.0)|(Windows Vista)/i',
-                'Windows 7' => '/(Windows NT 6.1)|(Windows 7)/i',
-                'Windows 8' => '/(Windows NT 6.2)|(Windows 8)/i',
-                'Windows 8.1' => '/(Windows NT 6.3)|(Windows 8.1)/i',
-                'Windows 10' => '/(Windows NT 10.0)|(Windows 10)/i',
+                'iOS'            => '/(iPhone)|(iPad)/i',
+                'Windows 3.11'   => '/Win16/i',
+                'Windows 95'     => '/(Windows 95)|(Win95)|(Windows_95)/i',
+                'Windows 98'     => '/(Windows 98)|(Win98)/i',
+                'Windows 2000'   => '/(Windows NT 5.0)|(Windows 2000)/i',
+                'Windows XP'     => '/(Windows NT 5.1)|(Windows XP)/i',
+                'Windows 2003'   => '/(Windows NT 5.2)/i',
+                'Windows Vista'  => '/(Windows NT 6.0)|(Windows Vista)/i',
+                'Windows 7'      => '/(Windows NT 6.1)|(Windows 7)/i',
+                'Windows 8'      => '/(Windows NT 6.2)|(Windows 8)/i',
+                'Windows 8.1'    => '/(Windows NT 6.3)|(Windows 8.1)/i',
+                'Windows 10'     => '/(Windows NT 10.0)|(Windows 10)/i',
                 'Windows NT 4.0' => '/(Windows NT 4.0)|(WinNT4.0)|(WinNT)|(Windows NT)/i',
-                'Windows ME' => '/Windows ME/i',
-                'Open BSD' => '/OpenBSD/i',
-                'Sun OS' => '/SunOS/i',
-                'Android' => '/Android/i',
-                'Linux' => '/(Linux)|(X11)/i',
-                'Macintosh' => '/(Mac_PowerPC)|(Macintosh)/i',
-                'QNX' => '/QNX/i',
-                'BeOS' => '/BeOS/i',
-                'OS/2' => '/OS/2/i',
-                'Search Bot' => '/(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(msnbot)|(ia_archiver)/i',
+                'Windows ME'     => '/Windows ME/i',
+                'Open BSD'       => '/OpenBSD/i',
+                'Sun OS'         => '/SunOS/i',
+                'Android'        => '/Android/i',
+                'Linux'          => '/(Linux)|(X11)/i',
+                'Macintosh'      => '/(Mac_PowerPC)|(Macintosh)/i',
+                'QNX'            => '/QNX/i',
+                'BeOS'           => '/BeOS/i',
+                'OS/2'           => '/OS/2/i',
+                'Search Bot'     => '/(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(msnbot)|(ia_archiver)/i',
             ];
 
             foreach ($oses as $os => $pattern) {
@@ -110,7 +111,7 @@
          */
         public static function generateGUID(): string
         {
-            $uid = dechex(microtime(true) * 1000) . bin2hex(random_bytes(8));
+            $uid  = dechex(microtime(true) * 1000) . bin2hex(random_bytes(8));
             $guid = vsprintf('DLT%s-1000-%s-8%.3s-%s%s%s0', str_split($uid, 4));
             return strtoupper($guid);
         }
@@ -127,22 +128,89 @@
         {
             $number = ($number > 0) ? $number : 1;
 
-            $arChars = [
-                'a', 'b', 'c', 'd', 'e', 'f',
-                'g', 'h', 'i', 'j', 'k', 'l',
-                'm', 'n', 'o', 'p', 'r', 's',
-                't', 'u', 'v', 'x', 'y', 'z',
-                'A', 'B', 'C', 'D', 'E', 'F',
-                'G', 'H', 'I', 'J', 'K', 'L',
-                'M', 'N', 'O', 'P', 'R', 'S',
-                'T', 'U', 'V', 'X', 'Y', 'Z',
-                '1', '2', '3', '4', '5', '6',
-                '7', '8', '9', '0'];
+            $arChars        = [
+                'a',
+                'b',
+                'c',
+                'd',
+                'e',
+                'f',
+                'g',
+                'h',
+                'i',
+                'j',
+                'k',
+                'l',
+                'm',
+                'n',
+                'o',
+                'p',
+                'r',
+                's',
+                't',
+                'u',
+                'v',
+                'x',
+                'y',
+                'z',
+                'A',
+                'B',
+                'C',
+                'D',
+                'E',
+                'F',
+                'G',
+                'H',
+                'I',
+                'J',
+                'K',
+                'L',
+                'M',
+                'N',
+                'O',
+                'P',
+                'R',
+                'S',
+                'T',
+                'U',
+                'V',
+                'X',
+                'Y',
+                'Z',
+                '1',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                '7',
+                '8',
+                '9',
+                '0',
+            ];
             $arSpecialChars = [
-                '(', ')', '[', ']', '!', '?',
-                '&', '^', '%', '@', '*', '$',
-                '<', '>', '/', '|', '+', '-',
-                '{', '}', '~'];
+                '(',
+                ')',
+                '[',
+                ']',
+                '!',
+                '?',
+                '&',
+                '^',
+                '%',
+                '@',
+                '*',
+                '$',
+                '<',
+                '>',
+                '/',
+                '|',
+                '+',
+                '-',
+                '{',
+                '}',
+                '~',
+            ];
 
             if ($useSpecialChars) {
                 $arChars = array_merge($arChars, $arSpecialChars);
@@ -151,7 +219,7 @@
             $pass = '';
             for ($i = 0; $i < $number; $i++) {
                 $index = rand(0, count($arChars) - 1);
-                $pass .= $arChars[$index];
+                $pass  .= $arChars[$index];
             }
             return $pass;
         }
@@ -172,26 +240,95 @@
 
             $bots = [
                 // Yandex
-                'YandexBot', 'YandexAccessibilityBot', 'YandexMobileBot', 'YandexDirectDyn', 'YandexScreenshotBot',
-                'YandexImages', 'YandexVideo', 'YandexVideoParser', 'YandexMedia', 'YandexBlogs', 'YandexFavicons',
-                'YandexWebmaster', 'YandexPagechecker', 'YandexImageResizer', 'YandexAdNet', 'YandexDirect',
-                'YaDirectFetcher', 'YandexCalendar', 'YandexSitelinks', 'YandexMetrika', 'YandexNews',
-                'YandexNewslinks', 'YandexCatalog', 'YandexAntivirus', 'YandexMarket', 'YandexVertis',
-                'YandexForDomain', 'YandexSpravBot', 'YandexSearchShop', 'YandexMedianaBot', 'YandexOntoDB',
-                'YandexOntoDBAPI', 'YandexTurbo', 'YandexVerticals',
+                'YandexBot',
+                'YandexAccessibilityBot',
+                'YandexMobileBot',
+                'YandexDirectDyn',
+                'YandexScreenshotBot',
+                'YandexImages',
+                'YandexVideo',
+                'YandexVideoParser',
+                'YandexMedia',
+                'YandexBlogs',
+                'YandexFavicons',
+                'YandexWebmaster',
+                'YandexPagechecker',
+                'YandexImageResizer',
+                'YandexAdNet',
+                'YandexDirect',
+                'YaDirectFetcher',
+                'YandexCalendar',
+                'YandexSitelinks',
+                'YandexMetrika',
+                'YandexNews',
+                'YandexNewslinks',
+                'YandexCatalog',
+                'YandexAntivirus',
+                'YandexMarket',
+                'YandexVertis',
+                'YandexForDomain',
+                'YandexSpravBot',
+                'YandexSearchShop',
+                'YandexMedianaBot',
+                'YandexOntoDB',
+                'YandexOntoDBAPI',
+                'YandexTurbo',
+                'YandexVerticals',
 
                 // Google
-                'Googlebot', 'Googlebot-Image', 'Mediapartners-Google', 'AdsBot-Google', 'APIs-Google',
-                'AdsBot-Google-Mobile', 'AdsBot-Google-Mobile', 'Googlebot-News', 'Googlebot-Video',
+                'Googlebot',
+                'Googlebot-Image',
+                'Mediapartners-Google',
+                'AdsBot-Google',
+                'APIs-Google',
+                'AdsBot-Google-Mobile',
+                'AdsBot-Google-Mobile',
+                'Googlebot-News',
+                'Googlebot-Video',
                 'AdsBot-Google-Mobile-Apps',
 
                 // Other
-                'Mail.RU_Bot', 'bingbot', 'Accoona', 'ia_archiver', 'Ask Jeeves', 'OmniExplorer_Bot', 'W3C_Validator',
-                'WebAlta', 'YahooFeedSeeker', 'Yahoo!', 'Ezooms', 'Tourlentabot', 'MJ12bot', 'AhrefsBot',
-                'SearchBot', 'SiteStatus', 'Nigma.ru', 'Baiduspider', 'Statsbot', 'SISTRIX', 'AcoonBot', 'findlinks',
-                'proximic', 'OpenindexSpider', 'statdom.ru', 'Exabot', 'Spider', 'SeznamBot', 'oBot', 'C-T bot',
-                'Updownerbot', 'Snoopy', 'heritrix', 'Yeti', 'DomainVader', 'DCPbot', 'PaperLiBot', 'StackRambler',
-                'msnbot', 'msnbot-media', 'msnbot-news',
+                'Mail.RU_Bot',
+                'bingbot',
+                'Accoona',
+                'ia_archiver',
+                'Ask Jeeves',
+                'OmniExplorer_Bot',
+                'W3C_Validator',
+                'WebAlta',
+                'YahooFeedSeeker',
+                'Yahoo!',
+                'Ezooms',
+                'Tourlentabot',
+                'MJ12bot',
+                'AhrefsBot',
+                'SearchBot',
+                'SiteStatus',
+                'Nigma.ru',
+                'Baiduspider',
+                'Statsbot',
+                'SISTRIX',
+                'AcoonBot',
+                'findlinks',
+                'proximic',
+                'OpenindexSpider',
+                'statdom.ru',
+                'Exabot',
+                'Spider',
+                'SeznamBot',
+                'oBot',
+                'C-T bot',
+                'Updownerbot',
+                'Snoopy',
+                'heritrix',
+                'Yeti',
+                'DomainVader',
+                'DCPbot',
+                'PaperLiBot',
+                'StackRambler',
+                'msnbot',
+                'msnbot-media',
+                'msnbot-news',
             ];
 
             foreach ($bots as $bot) {
@@ -255,13 +392,13 @@
             }
 
             $hours = floor($secs / 3600);
-            $secs = $secs % 3600;
+            $secs  = $secs % 3600;
             if ($hours > 0) {
                 $res .= $hours . ' ' . self::numWord($hours, ['час', 'часа', 'часов']) . ', ';
             }
 
             $minutes = floor($secs / 60);
-            $secs = $secs % 60;
+            $secs    = $secs % 60;
             if ($minutes > 0) {
                 $res .= $minutes . ' ' . self::numWord($minutes, ['минута', 'минуты', 'минут']) . ', ';
             }
@@ -298,21 +435,73 @@
             }
 
             $converter = [
-                'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd',
-                'е' => 'e', 'ё' => 'e', 'ж' => 'zh', 'з' => 'z', 'и' => 'i',
-                'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm', 'н' => 'n',
-                'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't',
-                'у' => 'u', 'ф' => 'f', 'х' => 'h', 'ц' => 'c', 'ч' => 'ch',
-                'ш' => 'sh', 'щ' => 'sch', 'ь' => '', 'ы' => 'y', 'ъ' => '',
-                'э' => 'e', 'ю' => 'yu', 'я' => 'ya',
+                'а' => 'a',
+                'б' => 'b',
+                'в' => 'v',
+                'г' => 'g',
+                'д' => 'd',
+                'е' => 'e',
+                'ё' => 'e',
+                'ж' => 'zh',
+                'з' => 'z',
+                'и' => 'i',
+                'й' => 'y',
+                'к' => 'k',
+                'л' => 'l',
+                'м' => 'm',
+                'н' => 'n',
+                'о' => 'o',
+                'п' => 'p',
+                'р' => 'r',
+                'с' => 's',
+                'т' => 't',
+                'у' => 'u',
+                'ф' => 'f',
+                'х' => 'h',
+                'ц' => 'c',
+                'ч' => 'ch',
+                'ш' => 'sh',
+                'щ' => 'sch',
+                'ь' => '',
+                'ы' => 'y',
+                'ъ' => '',
+                'э' => 'e',
+                'ю' => 'yu',
+                'я' => 'ya',
 
-                'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D',
-                'Е' => 'E', 'Ё' => 'E', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I',
-                'Й' => 'Y', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N',
-                'О' => 'O', 'П' => 'P', 'Р' => 'R', 'С' => 'S', 'Т' => 'T',
-                'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch',
-                'Ш' => 'Sh', 'Щ' => 'Sch', 'Ь' => '', 'Ы' => 'Y', 'Ъ' => '',
-                'Э' => 'E', 'Ю' => 'Yu', 'Я' => 'Ya',
+                'А' => 'A',
+                'Б' => 'B',
+                'В' => 'V',
+                'Г' => 'G',
+                'Д' => 'D',
+                'Е' => 'E',
+                'Ё' => 'E',
+                'Ж' => 'Zh',
+                'З' => 'Z',
+                'И' => 'I',
+                'Й' => 'Y',
+                'К' => 'K',
+                'Л' => 'L',
+                'М' => 'M',
+                'Н' => 'N',
+                'О' => 'O',
+                'П' => 'P',
+                'Р' => 'R',
+                'С' => 'S',
+                'Т' => 'T',
+                'У' => 'U',
+                'Ф' => 'F',
+                'Х' => 'H',
+                'Ц' => 'C',
+                'Ч' => 'Ch',
+                'Ш' => 'Sh',
+                'Щ' => 'Sch',
+                'Ь' => '',
+                'Ы' => 'Y',
+                'Ъ' => '',
+                'Э' => 'E',
+                'Ю' => 'Yu',
+                'Я' => 'Ya',
             ];
 
             $result = strtr($text, $converter);
@@ -335,9 +524,7 @@
          */
         public static function sendTelegram(string $message): void
         {
-            (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))
-                ->setChat(TELEGRAM_NOTIFICATION_CHANNEL)
-                ->sendMessage($message);
+            (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))->setChat(TELEGRAM_NOTIFICATION_CHANNEL)->sendMessage($message);
         }
 
         /**
@@ -350,10 +537,10 @@
          */
         public static function arrayToTable($var, string $title = ''): ?string
         {
-            $tableStyle = 'border: 1px solid #7b9ea3;border-collapse: collapse;';
+            $tableStyle  = 'border: 1px solid #7b9ea3;border-collapse: collapse;';
             $tdBoldStyle = 'padding: 10px;border: 1px solid #7b9ea3;background: powderblue;font-weight: bold; text-align: center;color: #226770;text-shadow: #7b9ea3 0px 0px 2px;';
-            $tdStyle = 'padding: 10px;border: 1px solid #7b9ea3;';
-            $thStyle = 'text-align: center;font-size: 1.3em;padding: 10px;background: linear-gradient(0deg, #b0e0e6, #90c1c7);color: #226770;text-shadow: #7b9ea3 1px 1px 0px;';
+            $tdStyle     = 'padding: 10px;border: 1px solid #7b9ea3;';
+            $thStyle     = 'text-align: center;font-size: 1.3em;padding: 10px;background: linear-gradient(0deg, #b0e0e6, #90c1c7);color: #226770;text-shadow: #7b9ea3 1px 1px 0px;';
             if (is_array($var)) {
                 $table = '<table style="' . $tableStyle . '">';
                 if ($title) {
@@ -378,15 +565,51 @@
             return $table;
         }
 
+        /**
+         * Анонс из теста
+         *
+         * @param string $text  Текст
+         * @param int    $limit Ограничение на количество символов
+         *
+         * @return string
+         */
+        public static function previewText(string $text, int $limit = 300): string
+        {
+            $text = stripslashes($text);
+            $text = htmlspecialchars_decode($text, ENT_QUOTES);
+            $text = str_ireplace(['<br>', '<br />', '<br/>'], ' ', $text);
+            $text = strip_tags($text);
+            $text = trim($text);
+
+            if (mb_strlen($text) < $limit) {
+                return $text;
+            } else {
+                $text  = mb_substr($text, 0, $limit);
+                $length = mb_strripos($text, ' ');
+                $end    = mb_substr($text, $length - 1, 1);
+
+                if (empty($length)) {
+                    return $text;
+                } elseif (in_array($end, ['.', '!', '?'])) {
+                    return mb_substr($text, 0, $length);
+                } elseif (in_array($end, [',', ':', ';', '«', '»', '…', '(', ')', '—', '–', '-'])) {
+                    return trim(mb_substr($text, 0, $length - 1)) . '...';
+                } else {
+                    return trim(mb_substr($text, 0, $length)) . '...';
+                }
+
+                return trim($text);
+            }
+        }
+
 
         public static function showPage()
         {
             $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
-            $twig = new \Twig\Environment($loader, [
+            $twig   = new \Twig\Environment($loader, [
                 'cache' => CACHE_DIR,
             ]);
 
             echo $twig->render('index.tpl', ['name' => 'Roman']);
-
         }
     }

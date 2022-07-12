@@ -172,4 +172,68 @@
         <!-- end table -->
 
     </div><!-- contentpanel -->
+
+
+    <!-- table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Выполненные задания</h4>
+                    <p>Список заверщившихся заданий</p>
+                </div><!-- panel-heading -->
+
+                <div class="table-responsive">
+                    <table class="table table-primary mb30">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ID задания</th>
+                            <th>Время выполнения</th>
+                            <th>Попыток</th>
+                            <th>Класс</th>
+                            <th>Метод</th>
+                            <th>Параметры</th>
+                            <th>Статус</th>
+                            <th>Результат</th>
+                            <th>Создан</th>
+                            <th>Обновлен</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                            $arTasks = $MQ->getTasksHistory(10, 'id', 'desc');
+                            foreach($arTasks as $task) {
+                                ?>
+                                <tr class="<?php
+                                    if($task['status'] === MQ::STATUS_OK) {
+                                        echo 'alert-success';
+                                    } elseif($task['status'] === MQ::STATUS_ERROR) {
+                                        echo 'alert-danger';
+                                    }
+                                ?>">
+                                    <td><?=$task['id'];?></td>
+                                    <td><?=$task['task_id'];?></td>
+                                    <td><?=$task['execution_time'];?></td>
+                                    <td><?=$task['attempts'];?></td>
+                                    <td><?=$task['class'];?></td>
+                                    <td><?=$task['method'];?></td>
+                                    <td><?=$task['params'];?></td>
+                                    <td><?=$task['status'];?></td>
+                                    <td><?=$task['response'];?></td>
+                                    <td><?=$task['date_created'];?></td>
+                                    <td><?=$task['date_updated'];?></td>
+                                </tr>
+                                <?php
+                            }
+                        ?>
+                        </tbody>
+                    </table>
+                </div><!-- table-responsive -->
+
+            </div>
+        </div>
+        <!-- end table -->
+
+    </div><!-- contentpanel -->
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

@@ -49,13 +49,13 @@
          */
         public function __construct(string $db_server = DB_HOST, string $db_user = DB_USER, ?string $db_pass = DB_PASSWORD, string $db_name = DB_NAME)
         {
-                $dsn      = 'mysql:host=' . $db_server . ';dbname=' . $db_name . ';charset=utf8';
-                $opt      = [
-                    \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-                    \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                    \PDO::ATTR_EMULATE_PREPARES   => false,
-                ];
-                $this->db = new \PDO($dsn, $db_user, $db_pass, $opt);
+            $dsn      = 'mysql:host=' . $db_server . ';dbname=' . $db_name . ';charset=utf8';
+            $opt      = [
+                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                \PDO::ATTR_EMULATE_PREPARES   => false,
+            ];
+            $this->db = new \PDO($dsn, $db_user, $db_pass, $opt);
         }
 
         /**
@@ -93,7 +93,7 @@
         {
             if (!is_array($where)) {
                 return $where;
-            }elseif (empty($where)){
+            } elseif (empty($where)) {
                 return '1';
             }
             $where_string = '';
@@ -192,24 +192,24 @@
         {
             $startTime = microtime(true);
             self::$quantity++;
-                try {
-                    $stmt = $this->db->query($sql);
-                } catch (\Throwable $t) {
-                    sendTelegram('SQL ERROR: ' . $sql);
-                    throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
-                }
-                $this->lastInsertId = $this->db->lastInsertId() ?? null;
+            try {
+                $stmt = $this->db->query($sql);
+            } catch (\Throwable $t) {
+                sendTelegram('SQL ERROR: ' . $sql);
+                throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
+            }
+            $this->lastInsertId = $this->db->lastInsertId() ?? null;
 
 
-                $endTime           = microtime(true);
-                self::$workingTime += ($endTime - $startTime);
+            $endTime           = microtime(true);
+            self::$workingTime += ($endTime - $startTime);
 
-                if ($returnObject) {
-                    return $stmt;
-                } else {
-                    $result = $stmt->fetchAll();
-                    return $result ?: null;
-                }
+            if ($returnObject) {
+                return $stmt;
+            } else {
+                $result = $stmt->fetchAll();
+                return $result ?: null;
+            }
         }
 
         /**
@@ -252,10 +252,16 @@
         /**
          * Добавить элемент в базу
          *
-         * @param $table
-         * @param $data
+         * @param string $table   Таблица
+         * @param array  $data    Данные <pre>
+         *                        [
+         *                        'name' => 'Roman',
+         *                        'age' => 27
+         *                        ]
+         *                        </pre>
          *
          * @return int|null
+         * @throws CoreException
          */
         public function addItem($table, $data): ?int
         {
@@ -265,6 +271,43 @@
                 . ')'
             );
             return (int)$this->lastInsertId;
+        }
+
+        /**
+         * Добавить несколько элементов в базу
+         *
+         * @param string $table   Таблица
+         * @param array  $data    Данные <pre>
+         *                        [
+         *                        ['name' => 'Roman', 'age' => 27],
+         *                        ['name' => 'Dmitry', 'age' => 31],
+         *                        ]
+         *                        </pre>
+         *
+         * @return int|null
+         * @throws CoreException
+         */
+        public function addItems($table, $data)
+        {
+            self::$quantity++;
+
+            if (empty($data)) {
+                return null;
+            }
+
+            $sql = 'INSERT INTO ' . $table . ' (' . implode(', ', array_keys(reset($data))) . ') VALUES ';
+
+            $arValues = [];
+            foreach ($data as $element) {
+                $element    = array_map(function ($el) {
+                    return '"' . $el . '"';
+                }, $element);
+                $arValues[] = '(' . implode(', ', $element) . ')';
+            }
+
+            $sql .= implode(', ', $arValues) . ';';
+
+            return $this->query($sql);
         }
 
         /**
