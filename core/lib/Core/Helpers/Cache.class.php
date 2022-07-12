@@ -162,14 +162,10 @@
          */
         public static function flush(): bool
         {
-            foreach (scandir(self::$cacheDir) as $file) {
-                if ($file == '.' || $file == '..')
-                    continue;
-                self::$quantity++;
-                self::$quantityWrite++;
-                if (!unlink(self::$cacheDir . $file)) {
-                    return false;
-                }
+            $di = new \RecursiveDirectoryIterator(self::$cacheDir, \FilesystemIterator::SKIP_DOTS);
+            $ri = new \RecursiveIteratorIterator($di, \RecursiveIteratorIterator::CHILD_FIRST);
+            foreach ($ri as $file) {
+                $file->isDir() ? rmdir($file) : unlink($file);
             }
             return true;
         }
