@@ -162,6 +162,7 @@
          */
         public static function flush(): bool
         {
+            sendTelegram('Произведена очистка кэша' . PHP_EOL . 'IP: ' . SystemFunctions::getOS());
             $di = new \RecursiveDirectoryIterator(self::$cacheDir, \FilesystemIterator::SKIP_DOTS);
             $ri = new \RecursiveIteratorIterator($di, \RecursiveIteratorIterator::CHILD_FIRST);
             foreach ($ri as $file) {
