@@ -66,12 +66,12 @@
          */
         public function encode(string $string): string
         {
-            $ivlen          = openssl_cipher_iv_length($this->method);
-            $iv             = openssl_random_pseudo_bytes($ivlen);
-            $ciphertext_raw = openssl_encrypt($string, $this->method, $this->key, OPENSSL_RAW_DATA, $iv);
-            $hmac           = hash_hmac($this->algorithm, $ciphertext_raw, $this->key, true);
-            $ciphertext     = base64_encode($iv . $hmac . $ciphertext_raw);
-            return $ciphertext;
+            $ivLength      = openssl_cipher_iv_length($this->method);
+            $iv            = openssl_random_pseudo_bytes($ivLength);
+            $cipherTextRaw = openssl_encrypt($string, $this->method, $this->key, OPENSSL_RAW_DATA, $iv);
+            $hmac          = hash_hmac($this->algorithm, $cipherTextRaw, $this->key, true);
+            $cipherText    = base64_encode($iv . $hmac . $cipherTextRaw);
+            return $cipherText;
         }
 
         /**
@@ -83,15 +83,15 @@
          */
         public function decode(string $string): ?string
         {
-            $c              = base64_decode($string);
-            $ivlen          = openssl_cipher_iv_length($this->method);
-            $iv             = substr($c, 0, $ivlen);
-            $hmac           = substr($c, $ivlen, $sha2len = 32);
-            $ciphertext_raw = substr($c, $ivlen + $sha2len);
-            $plaintext      = openssl_decrypt($ciphertext_raw, $this->method, $this->key, OPENSSL_RAW_DATA, $iv);
-            $calcmac        = hash_hmac($this->algorithm, $ciphertext_raw, $this->key, true);
-            if (hash_equals($hmac, $calcmac)) {
-                return $plaintext;
+            $c             = base64_decode($string);
+            $ivLength      = openssl_cipher_iv_length($this->method);
+            $iv            = substr($c, 0, $ivLength);
+            $hmac          = substr($c, $ivLength, $sha2len = 32);
+            $cipherTextRaw = substr($c, $ivLength + $sha2len);
+            $result        = openssl_decrypt($cipherTextRaw, $this->method, $this->key, OPENSSL_RAW_DATA, $iv);
+            $calcMac       = hash_hmac($this->algorithm, $cipherTextRaw, $this->key, true);
+            if (hash_equals($hmac, $calcMac)) {
+                return $result;
             }
             return null;
         }
