@@ -646,7 +646,7 @@
                                    'execution_time' => $endTime,
                                    'status'         => self::STATUS_OK,
                                    'date_updated'   => date(self::DATETIME_FORMAT),
-                                   'response'       => $this->convertToJson($result),
+                                   'response'       => addslashes($this->convertToJson($result)),
                                ]
                 );
                 $response->setStatus(self::STATUS_OK)->setExecutionTime($endTime)->setResponse($this->convertToJson($result));
@@ -670,7 +670,7 @@
                                    'execution_time' => $endTime,
                                    'date_updated'   => date(self::DATETIME_FORMAT),
                                    'status'         => self::STATUS_ERROR,
-                                   'response'       => $t->getMessage(),
+                                   'response'       => addslashes($t->getMessage()),
                                ]
                 );
 
