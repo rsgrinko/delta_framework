@@ -17,6 +17,9 @@
     "require": {
         "twig/twig": "^3.0",
         "sentry/sdk": "^3.2",
-      "ext-iconv": "*"
+      "ext-iconv": "*",
+      "ext-curl": "*",
+      "ext-json": "*",
+      "ext-openssl": "*"
     }
 }

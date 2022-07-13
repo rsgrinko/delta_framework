@@ -160,7 +160,7 @@
          */
         public static function test2(...$params): string
         {
-            sleep(rand(10, 60));
+            sleep(rand(1, 5));
             $result = rand(0, 100);
             if (($result % 2) == 0) {
                 throw new CoreException('Сервер обмена временно недоступен');

@@ -29,29 +29,8 @@
                         <h4 class="panel-title">Задания в очереди</h4>
                         <p>Задания, ожидающие выполнения и задания, выполнение которых завершилось ошибкой</p>
                     </div><!-- panel-heading -->
-                    <div class="panel-body">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>Всего</th>
-                                <th>Воркеров</th>
-                                <th>Активных</th>
-                                <th>Выполняются</th>
-                                <th>С ошибкой</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            <tr>
-                                <td><?=$MQ->getCountTasks();?></td>
-                                <td><?=$MQ->getCountWorkers() . ' / ' . MQ::WORKERS_LIMIT;?></td>
-                                <td><?=$MQ->getCountTasks(['active' => 'Y']);?></td>
-                                <td><?=$MQ->getCountTasks(['active' => 'Y', 'in_progress' => 'Y']);?></td>
-                                <td><?=$MQ->getCountTasks(['in_progress' => 'N', 'status' => MQ::STATUS_ERROR]);?></td>
-                            </tr>
-                            </tbody>
-                        </table>
-
+                    <div class="panel-body" id="info_threads">
+                        <div class="preloader"></div>
                     </div>
                 </div><!-- panel -->
 
@@ -64,26 +43,8 @@
                         <h4 class="panel-title">Завершенные задания</h4>
                         <p>Задания, которые были успешно выполнены</p>
                     </div><!-- panel-heading -->
-                    <div class="panel-body">
-
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>Всего</th>
-                                <th>Успешных</th>
-                                <th>Неудачных</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            <tr>
-                                <td><?=$MQ->getCountTasksHistory();?></td>
-                                <td><?=$MQ->getCountTasksHistory(['status' => MQ::STATUS_OK]);?></td>
-                                <td><?=$MQ->getCountTasksHistory(['status' => MQ::STATUS_ERROR]);?></td>
-                            </tr>
-                            </tbody>
-                        </table>
-
+                    <div class="panel-body"  id="info_threads_history">
+                        <div class="preloader"></div>
                     </div>
                 </div><!-- panel -->
 
@@ -93,7 +54,19 @@
 
         </div>
 
-
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Текущая нагрузка на диспетчер очереди</h4>
+                    <p>Чем больше количество активных воркеров - тем больше нагрузка</p>
+                </div><!-- panel-heading -->
+                <div class="panel-body" id="progress">
+                    <div class="preloader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <!-- table -->
@@ -105,66 +78,8 @@
                     <p>Список текущих заданий очереди</p>
                 </div><!-- panel-heading -->
 
-                <div class="table-responsive">
-                    <table class="table table-primary mb30">
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>ID</th>
-                            <th>Активен</th>
-                            <th>Выполняется</th>
-                            <th>Приоритет</th>
-                            <th>Время выполнения</th>
-                            <th>Попытки</th>
-                            <th>Лимит попыток</th>
-                            <th>Класс</th>
-                            <th>Метод</th>
-                            <th>Параметры</th>
-                            <th>Статус</th>
-                            <th>Результат</th>
-                            <th>Создан</th>
-                            <th>Обновлен</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                            $arTasks = $MQ->getTasks(10, 'priority', 'asc');
-                            foreach($arTasks as $task) {
-                                ?>
-                                <tr class="<?php
-                                    if($task['active'] === MQ::VALUE_Y && $task['in_progress'] === MQ::VALUE_Y&& $task['status'] === 'ERROR') {
-                                        echo 'alert-warning';
-                                    } elseif($task['active'] === MQ::VALUE_N && $task['status'] === 'ERROR') {
-                                        echo 'alert-danger';
-                                    } elseif($task['in_progress'] === MQ::VALUE_Y) {
-                                        echo 'alert-success';
-                                    } elseif($task['in_progress'] === MQ::VALUE_N && $task['status'] === 'ERROR') {
-                                        echo 'alert-danger';
-                                    } elseif($task['active'] === MQ::VALUE_Y && $task['in_progress'] === MQ::VALUE_N) {
-                                        echo 'alert-info';
-                                    }
-                                ?>">
-                                    <td><?=$task['in_progress'] === MQ::VALUE_Y ? '<span class="badge badge-success">RUN</span>' : '';?></td>
-                                    <td><?=$task['id'];?></td>
-                                    <td><?=$task['active'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
-                                    <td><?=$task['in_progress'] === MQ::VALUE_Y ? 'Да' : 'Нет';?></td>
-                                    <td><?=$task['priority'];?></td>
-                                    <td><?=$task['execution_time'];?></td>
-                                    <td><?=$task['attempts'];?></td>
-                                    <td><?=$task['attempts_limit'];?></td>
-                                    <td><?=$task['class'];?></td>
-                                    <td><?=$task['method'];?></td>
-                                    <td><?=$task['params'];?></td>
-                                    <td><?=$task['status'];?></td>
-                                    <td><?=$task['response'];?></td>
-                                    <td><?=$task['date_created'];?></td>
-                                    <td><?=$task['date_updated'];?></td>
-                                </tr>
-                                <?php
-                            }
-                        ?>
-                        </tbody>
-                    </table>
+                <div class="table-responsive" id="threads_table">
+                    <div class="preloader"></div>
                 </div><!-- table-responsive -->
 
             </div>
@@ -183,52 +98,8 @@
                     <p>Список заверщившихся заданий</p>
                 </div><!-- panel-heading -->
 
-                <div class="table-responsive">
-                    <table class="table table-primary mb30">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>ID задания</th>
-                            <th>Время выполнения</th>
-                            <th>Попыток</th>
-                            <th>Класс</th>
-                            <th>Метод</th>
-                            <th>Параметры</th>
-                            <th>Статус</th>
-                            <th>Результат</th>
-                            <th>Создан</th>
-                            <th>Обновлен</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                            $arTasks = $MQ->getTasksHistory(10, 'id', 'desc');
-                            foreach($arTasks as $task) {
-                                ?>
-                                <tr class="<?php
-                                    if($task['status'] === MQ::STATUS_OK) {
-                                        echo 'alert-success';
-                                    } elseif($task['status'] === MQ::STATUS_ERROR) {
-                                        echo 'alert-danger';
-                                    }
-                                ?>">
-                                    <td><?=$task['id'];?></td>
-                                    <td><?=$task['task_id'];?></td>
-                                    <td><?=$task['execution_time'];?></td>
-                                    <td><?=$task['attempts'];?></td>
-                                    <td><?=$task['class'];?></td>
-                                    <td><?=$task['method'];?></td>
-                                    <td><?=$task['params'];?></td>
-                                    <td><?=$task['status'];?></td>
-                                    <td><?=$task['response'];?></td>
-                                    <td><?=$task['date_created'];?></td>
-                                    <td><?=$task['date_updated'];?></td>
-                                </tr>
-                                <?php
-                            }
-                        ?>
-                        </tbody>
-                    </table>
+                <div class="table-responsive" id="threads_history_table">
+                    <div class="preloader"></div>
                 </div><!-- table-responsive -->
 
             </div>
@@ -236,4 +107,33 @@
         <!-- end table -->
 
     </div><!-- contentpanel -->
+    <script>
+        var isPaused = false;
+        function update()
+        {
+            isPaused = true;
+            $.ajax({
+                url: 'ajax/threads.php',
+                cache: false,
+                success: function(data){
+                    data = JSON.parse(data);
+                    $('#info_threads').html(data.info_threads);
+                    $('#info_threads_history').html(data.info_threads_history);
+                    $('#progress').html(data.progress);
+                    $('#threads_table').html(data.threads);
+                    $('#threads_history_table').html(data.threads_history);
+
+                    isPaused = false;
+                }
+            });
+        }
+        $(document).ready(function(){
+            update();
+            setInterval(function () {
+                if(!isPaused){
+                    update();
+                }
+            },500);
+        });
+    </script>
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

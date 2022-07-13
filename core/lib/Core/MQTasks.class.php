@@ -259,6 +259,8 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
 
 
             if($oldLink !== $link) {
+                sendTelegram('OLD (' .strlen($oldLink).'): ' . $oldLink . PHP_EOL . 'NEW (' .strlen($link).'): ' . $link);
+                sendTelegram('Обнаружен новый пост');
                 $full = file_get_contents($link);
 
                 preg_match_all('/<div class="h3 lid"><p>(.*?)<\/p><\/div>/us', $full, $lidArticle);
@@ -286,10 +288,10 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 $post .= PHP_EOL . '<a href="' . $link . '">Подробнее</a>';
 
                 $telegram = new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN);
-                $telegram->setChat(TELEGRAM_NOTIFICATION_CHANNEL);
+                $telegram->setChat('-1001789206618');
                 $res = $telegram->sendPhoto($tmpFile, $post);
                 @unlink($tmpFile);
-                Cache::set($cacheId, $link);
+                Cache::set($cacheId, trim($link));
                 return $res;
             } else {
                 return 'Обновление не требуется';

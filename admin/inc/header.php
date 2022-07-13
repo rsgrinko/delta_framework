@@ -24,12 +24,21 @@
     <title>Delta - CPanel</title>
 
     <link href="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/css/style.default.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
     <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/html5shiv.js"></script>
     <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/respond.min.js"></script>
     <![endif]-->
+    <style>
+        .preloader {
+            text-align: center;
+            background: url(//<?=$_SERVER['SERVER_NAME']; ?>/uploads/preloader.gif) no-repeat center;
+            width: 100%;
+            height: 70px;
+        }
+    </style>
 </head>
 
 <body>
