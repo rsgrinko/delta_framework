@@ -20,11 +20,9 @@
         if((time() - (int)$cronMyslo) > 600) {
             $runMyslo = true;
             Cache::set($cacheId, time());
-            sendTelegram('cron_myslo if if set (' . $cronMyslo . ')');
         }
     } else {
         $runMyslo = true;
-        sendTelegram('cron_myslo global else (' . $cronMyslo . ')');
         Cache::set($cacheId, time());
     }
 
