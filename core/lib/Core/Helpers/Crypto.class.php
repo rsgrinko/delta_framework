@@ -7,7 +7,7 @@
         /**
          * @var string|null $key Ключ шифрования
          */
-        private $key = null;
+        private $key = CRYPTO_KEY;
 
         /**
          * @var string $method Метод шифрования
