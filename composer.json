@@ -20,6 +20,8 @@
       "ext-iconv": "*",
       "ext-curl": "*",
       "ext-json": "*",
-      "ext-openssl": "*"
+      "ext-openssl": "*",
+      "ext-simplexml": "*",
+      "ext-dom": "*"
     }
 }

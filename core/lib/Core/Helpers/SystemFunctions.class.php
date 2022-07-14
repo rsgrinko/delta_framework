@@ -603,6 +603,50 @@
         }
 
 
+        /**
+         * Хелпер для метода преобразования массива в XML
+         *
+         * @param array             $data     Массив данных
+         * @param \SimpleXmlElement $xml_data Объект SimpleXmlElement
+         *
+         * @return void
+         */
+        public static function arrayToXmlHelper(array $data, \SimpleXmlElement &$xml_data): void
+        {
+            foreach ($data as $key => $value) {
+                if (is_numeric($key)) {
+                    $key = 'element_' . $key;
+                }
+                if (is_array($value)) {
+                    $subnode = $xml_data->addChild($key);
+                    static::arrayToXmlHelper($value, $subnode);
+                } else {
+                    $xml_data->addChild($key, htmlspecialchars($value));
+                }
+            }
+        }
+
+        /**
+         * Преобразование массива в XML
+         *
+         * @param array $arData Массив данных
+         *
+         * @return void
+         */
+        public static function arrayToXml(array $arData = [], bool $format = false): string
+        {
+            $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><delta/>');
+            static::arrayToXmlHelper($arData ,$xml);
+
+            if($format){
+                $dom = dom_import_simplexml($xml)->ownerDocument;
+                $dom->preserveWhiteSpace = false;
+                $dom->formatOutput = true;
+                return $dom->saveXML();
+            }
+            return $xml->asXML();
+        }
+
         public static function showPage()
         {
             $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
