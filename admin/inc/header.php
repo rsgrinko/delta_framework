@@ -1,4 +1,23 @@
 <?php
+    /**
+     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Permission is hereby granted, free of charge, to any person obtaining
+     * a copy of this software and associated documentation files (the
+     * "Software"), to deal in the Software without restriction, including
+     * without limitation the rights to use, copy, modify, merge, publish,
+     * distribute, sublicense, and/or sell copies of the Software, and to
+     * permit persons to whom the Software is furnished to do so, subject to
+     * the following conditions:
+     * The above copyright notice and this permission notice shall be included
+     * in all copies or substantial portions of the Software.
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+     * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+     * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+     * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+     * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+     * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+     * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
 
     use Core\Models\User;
 
@@ -23,13 +42,13 @@
 
     <title>Delta - CPanel</title>
 
-    <link href="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/css/style.default.css" rel="stylesheet">
+    <link href="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/css/style.default.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-    <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/html5shiv.js"></script>
-    <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/respond.min.js"></script>
+    <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/html5shiv.js"></script>
+    <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/respond.min.js"></script>
     <![endif]-->
     <style>
         .preloader {
@@ -47,7 +66,7 @@
     <div class="headerwrapper">
         <div class="header-left">
             <a href="index.php" class="logo">
-                <img src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/logo.png" alt=""/>
+                <img src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/logo.png" alt=""/>
             </a>
             <div class="pull-right">
                 <a href="" class="menu-collapse">
@@ -71,7 +90,7 @@
                         <ul class="media-list dropdown-list">
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
                                 <div class="media-body">
                                     <strong>Nusja Nawancali</strong> likes a photo of you
                                     <small class="date"><i class="fa fa-thumbs-up"></i> 15 minutes ago</small>
@@ -79,7 +98,7 @@
                             </li>
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user2.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user2.png" alt="">
                                 <div class="media-body">
                                     <strong>Weno Carasbong</strong> shared a photo of you in your <strong>Mobile Uploads</strong> album.
                                     <small class="date"><i class="fa fa-calendar"></i> July 04, 2014</small>
@@ -87,7 +106,7 @@
                             </li>
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user3.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user3.png" alt="">
                                 <div class="media-body">
                                     <strong>Venro Leonga</strong> likes a photo of you
                                     <small class="date"><i class="fa fa-thumbs-up"></i> July 03, 2014</small>
@@ -95,7 +114,7 @@
                             </li>
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user4.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user4.png" alt="">
                                 <div class="media-body">
                                     <strong>Nanterey Reslaba</strong> shared a photo of you in your <strong>Mobile Uploads</strong> album.
                                     <small class="date"><i class="fa fa-calendar"></i> July 03, 2014</small>
@@ -103,7 +122,7 @@
                             </li>
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
                                 <div class="media-body">
                                     <strong>Nusja Nawancali</strong> shared a photo of you in your <strong>Mobile Uploads</strong> album.
                                     <small class="date"><i class="fa fa-calendar"></i> July 02, 2014</small>
@@ -128,7 +147,7 @@
                             <li class="media">
                                 <span class="badge badge-success">New</span>
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
                                 <div class="media-body">
                                     <strong>Nusja Nawancali</strong>
                                     <p>Hi! How are you?...</p>
@@ -138,7 +157,7 @@
                             <li class="media">
                                 <span class="badge badge-success">New</span>
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user2.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user2.png" alt="">
                                 <div class="media-body">
                                     <strong>Weno Carasbong</strong>
                                     <p>Lorem ipsum dolor sit amet...</p>
@@ -147,7 +166,7 @@
                             </li>
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user3.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user3.png" alt="">
                                 <div class="media-body">
                                     <strong>Venro Leonga</strong>
                                     <p>Do you have the time to listen to me...</p>
@@ -156,7 +175,7 @@
                             </li>
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user4.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user4.png" alt="">
                                 <div class="media-body">
                                     <strong>Nanterey Reslaba</strong>
                                     <p>It might seem crazy what I'm about to say...</p>
@@ -165,7 +184,7 @@
                             </li>
                             <li class="media">
                                 <img class="img-circle pull-left noti-thumb"
-                                     src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
+                                     src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/photos/user1.png" alt="">
                                 <div class="media-body">
                                     <strong>Nusja Nawancali</strong>
                                     <p>Hey I just met you and this is crazy...</p>
@@ -189,7 +208,7 @@
                         <li><a href="#"><i class="glyphicon glyphicon-cog"></i> Account Settings</a></li>
                         <li><a href="#"><i class="glyphicon glyphicon-question-sign"></i> Help</a></li>
                         <li class="divider"></li>
-                        <li><a href="//<?=$_SERVER['SERVER_NAME']; ?>/admin/logout.php"><i class="glyphicon glyphicon-log-out"></i>Выход</a>
+                        <li><a href="//<?= $_SERVER['SERVER_NAME']; ?>/admin/logout.php"><i class="glyphicon glyphicon-log-out"></i>Выход</a>
                         </li>
                     </ul>
                 </div><!-- btn-group -->
@@ -213,11 +232,11 @@
                         } else {
                             echo '/uploads/users/system.png';
                         }
-                        ?>" alt="">
+                    ?>" alt="">
                 </a>
                 <div class="media-body">
-                    <h4 class="media-heading"><?=$arUser['name']; ?></h4>
-                    <small class="text-muted"><?=$arUser['email'];?>
+                    <h4 class="media-heading"><?= $arUser['name']; ?></h4>
+                    <small class="text-muted"><?= $arUser['email']; ?>
                     </small>
                 </div>
             </div><!-- media -->

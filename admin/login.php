@@ -1,4 +1,23 @@
 <?php
+    /**
+     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Permission is hereby granted, free of charge, to any person obtaining
+     * a copy of this software and associated documentation files (the
+     * "Software"), to deal in the Software without restriction, including
+     * without limitation the rights to use, copy, modify, merge, publish,
+     * distribute, sublicense, and/or sell copies of the Software, and to
+     * permit persons to whom the Software is furnished to do so, subject to
+     * the following conditions:
+     * The above copyright notice and this permission notice shall be included
+     * in all copies or substantial portions of the Software.
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+     * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+     * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+     * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+     * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+     * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+     * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
 
     use Core\Models\User;
 
@@ -9,7 +28,6 @@
     } else {
         $auth = false;
         if (!empty($_REQUEST['login'] && !empty($_REQUEST['pass']))) {
-
             if (User::securityAuthorize(
                 $_REQUEST['login'],
                 $_REQUEST['pass'],
@@ -43,8 +61,8 @@
 
             <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
             <!--[if lt IE 9]>
-            <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/html5shiv.js"></script>
-            <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/respond.min.js"></script>
+            <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/html5shiv.js"></script>
+            <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/respond.min.js"></script>
             <![endif]-->
         </head>
 
@@ -56,14 +74,14 @@
             <div class="panel panel-signin">
                 <div class="panel-body">
                     <div class="logo text-center">
-                        <img src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/images/logo-primary.png" alt="Chain Logo">
+                        <img src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/logo-primary.png" alt="Chain Logo">
                     </div>
                     <br/>
                     <h4 class="text-center mb5">Авторизация в системе</h4>
                     <p class="text-center">Войдите в свой аккаунт</p>
 
                     <div class="mb30"></div>
-                    <?php if($err_mess) { ?>
+                    <?php if ($err_mess) { ?>
                         <div class="alert alert-danger">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
                             Ошибка авторизации
@@ -101,15 +119,15 @@
 
         </section>
 
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/jquery-1.11.1.min.js"></script>
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/jquery-migrate-1.2.1.min.js"></script>
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/bootstrap.min.js"></script>
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/modernizr.min.js"></script>
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/pace.min.js"></script>
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/retina.min.js"></script>
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/jquery.cookies.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/jquery-1.11.1.min.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/jquery-migrate-1.2.1.min.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/bootstrap.min.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/modernizr.min.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/pace.min.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/retina.min.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/jquery.cookies.js"></script>
 
-        <script src="//<?=$_SERVER['SERVER_NAME']; ?>/admin/styles/js/custom.js"></script>
+        <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/custom.js"></script>
 
         </body>
         </html>

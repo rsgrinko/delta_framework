@@ -1,4 +1,24 @@
 <?php
+    /**
+     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Permission is hereby granted, free of charge, to any person obtaining
+     * a copy of this software and associated documentation files (the
+     * "Software"), to deal in the Software without restriction, including
+     * without limitation the rights to use, copy, modify, merge, publish,
+     * distribute, sublicense, and/or sell copies of the Software, and to
+     * permit persons to whom the Software is furnished to do so, subject to
+     * the following conditions:
+     * The above copyright notice and this permission notice shall be included
+     * in all copies or substantial portions of the Software.
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+     * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+     * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+     * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+     * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+     * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+     * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
+
     use Core\Models\{User, MQ};
 
     require_once __DIR__ . '/inc/header.php';
@@ -43,7 +63,7 @@
                         <h4 class="panel-title">Завершенные задания</h4>
                         <p>Задания, которые были успешно выполнены</p>
                     </div><!-- panel-heading -->
-                    <div class="panel-body"  id="info_threads_history">
+                    <div class="panel-body" id="info_threads_history">
                         <div class="preloader"></div>
                     </div>
                 </div><!-- panel -->
@@ -51,89 +71,89 @@
             </div>
 
 
-
         </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Текущая нагрузка на диспетчер очереди</h4>
-                    <p>Чем больше количество активных воркеров - тем больше нагрузка</p>
-                </div><!-- panel-heading -->
-                <div class="panel-body" id="progress">
-                    <div class="preloader"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Текущая нагрузка на диспетчер очереди</h4>
+                        <p>Чем больше количество активных воркеров - тем больше нагрузка</p>
+                    </div><!-- panel-heading -->
+                    <div class="panel-body" id="progress">
+                        <div class="preloader"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
-    <!-- table -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Очередь</h4>
-                    <p>Список текущих заданий очереди</p>
-                </div><!-- panel-heading -->
+        <!-- table -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Очередь</h4>
+                        <p>Список текущих заданий очереди</p>
+                    </div><!-- panel-heading -->
 
-                <div class="table-responsive" id="threads_table">
-                    <div class="preloader"></div>
-                </div><!-- table-responsive -->
+                    <div class="table-responsive" id="threads_table">
+                        <div class="preloader"></div>
+                    </div><!-- table-responsive -->
 
+                </div>
             </div>
-        </div>
-        <!-- end table -->
+            <!-- end table -->
 
-    </div><!-- contentpanel -->
+        </div><!-- contentpanel -->
 
 
-    <!-- table -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Выполненные задания</h4>
-                    <p>Список заверщившихся заданий</p>
-                </div><!-- panel-heading -->
+        <!-- table -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Выполненные задания</h4>
+                        <p>Список заверщившихся заданий</p>
+                    </div><!-- panel-heading -->
 
-                <div class="table-responsive" id="threads_history_table">
-                    <div class="preloader"></div>
-                </div><!-- table-responsive -->
+                    <div class="table-responsive" id="threads_history_table">
+                        <div class="preloader"></div>
+                    </div><!-- table-responsive -->
 
+                </div>
             </div>
-        </div>
-        <!-- end table -->
+            <!-- end table -->
 
-    </div><!-- contentpanel -->
-    <script>
-        var isPaused = false;
-        function update()
-        {
-            isPaused = true;
-            $.ajax({
-                url: 'ajax/threads.php',
-                cache: false,
-                success: function(data){
-                    data = JSON.parse(data);
-                    $('#info_threads').html(data.info_threads);
-                    $('#info_threads_history').html(data.info_threads_history);
-                    $('#progress').html(data.progress);
-                    $('#threads_table').html(data.threads);
-                    $('#threads_history_table').html(data.threads_history);
+        </div><!-- contentpanel -->
+        <script>
+            var isPaused = false;
 
-                    isPaused = false;
-                }
+            function update() {
+                isPaused = true;
+                $.ajax({
+                    url: 'ajax/threads.php',
+                    cache: false,
+                    success: function (data) {
+                        data = JSON.parse(data);
+                        $('#info_threads').html(data.info_threads);
+                        $('#info_threads_history').html(data.info_threads_history);
+                        $('#progress').html(data.progress);
+                        $('#threads_table').html(data.threads);
+                        $('#threads_history_table').html(data.threads_history);
+
+                        isPaused = false;
+                    }
+                });
+            }
+
+            $(document).ready(function () {
+                update();
+                setInterval(function () {
+                    if (!isPaused) {
+                        update();
+                    }
+                }, 500);
             });
-        }
-        $(document).ready(function(){
-            update();
-            setInterval(function () {
-                if(!isPaused){
-                    update();
-                }
-            },500);
-        });
-    </script>
+        </script>
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

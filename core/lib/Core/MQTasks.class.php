@@ -1,4 +1,23 @@
 <?php
+    /**
+     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Permission is hereby granted, free of charge, to any person obtaining
+     * a copy of this software and associated documentation files (the
+     * "Software"), to deal in the Software without restriction, including
+     * without limitation the rights to use, copy, modify, merge, publish,
+     * distribute, sublicense, and/or sell copies of the Software, and to
+     * permit persons to whom the Software is furnished to do so, subject to
+     * the following conditions:
+     * The above copyright notice and this permission notice shall be included
+     * in all copies or substantial portions of the Software.
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+     * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+     * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+     * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+     * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+     * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+     * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
 
     namespace Core;
 
@@ -138,9 +157,7 @@
                 if ($res) {
                     $j++;
                     $DB->update(
-                        'bashorg',
-                        ['hash' => $hash],
-                        ['ext_id' => (int)$element['id'], 'date' => $element['date'], 'rating' => $element['rating']]
+                        'bashorg', ['hash' => $hash], ['ext_id' => (int)$element['id'], 'date' => $element['date'], 'rating' => $element['rating']]
                     );
                 }
             }
@@ -217,7 +234,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
 
         public static function sendJokeToTelegram()
         {
-            if(date('H') > 21 || date('H') < 9) {
+            if (date('H') > 21 || date('H') < 9) {
                 return 'Нерабочее время :(';
             }
             $telegram = new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN);
@@ -237,14 +254,14 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
         public static function getMySLO()
         {
             $cacheId = md5('getMySLO_criminal');
-            if(Cache::check($cacheId)) {
+            if (Cache::check($cacheId)) {
                 $oldLink = Cache::get($cacheId);
             } else {
                 $oldLink = '';
             }
 
-            $file = file_get_contents('https://myslo.ru/news/criminal');
-            $file = preg_match_all('/"item width-100-tiny">(.*?)<div class="clear">/us', $file, $file2);
+            $file  = file_get_contents('https://myslo.ru/news/criminal');
+            $file  = preg_match_all('/"item width-100-tiny">(.*?)<div class="clear">/us', $file, $file2);
             $file2 = $file2[1][0];
 
             preg_match_all('/<h1 class="h3">(.*?)<\/h1>/us', $file2, $title);
@@ -257,9 +274,8 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             $link = 'https://myslo.ru' . trim($link[1][0]);
 
 
-
-            if($oldLink !== $link) {
-                sendTelegram('OLD (' .strlen($oldLink).'): ' . $oldLink . PHP_EOL . 'NEW (' .strlen($link).'): ' . $link);
+            if ($oldLink !== $link) {
+                sendTelegram('OLD (' . strlen($oldLink) . '): ' . $oldLink . PHP_EOL . 'NEW (' . strlen($link) . '): ' . $link);
                 sendTelegram('Обнаружен новый пост');
                 $full = file_get_contents($link);
 

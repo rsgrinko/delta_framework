@@ -1,8 +1,28 @@
 <?php
-    if(count($argv) < 2) {
+
+    /**
+     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Permission is hereby granted, free of charge, to any person obtaining
+     * a copy of this software and associated documentation files (the
+     * "Software"), to deal in the Software without restriction, including
+     * without limitation the rights to use, copy, modify, merge, publish,
+     * distribute, sublicense, and/or sell copies of the Software, and to
+     * permit persons to whom the Software is furnished to do so, subject to
+     * the following conditions:
+     * The above copyright notice and this permission notice shall be included
+     * in all copies or substantial portions of the Software.
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+     * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+     * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+     * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+     * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+     * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+     * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
+    if (count($argv) < 2) {
         die('Не выбрано действие. Для справки наберите php -f partizan.php -?' . PHP_EOL);
     }
-    switch($argv[1]) {
+    switch ($argv[1]) {
         case 'migrate':
             define('DB_HOST', 'localhost');
             define('DB_USER', 'rsgrinko_delta');
@@ -10,26 +30,29 @@
             define('DB_NAME', 'rsgrinko_delta');
             define('DB_TABLE_VERSIONS', 'versions');
 
-            function connectDB() {
+            function connectDB()
+            {
                 $errorMessage = 'Невозможно подключиться к серверу базы данных';
-                $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-                if (!$conn)
+                $conn         = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+                if (!$conn) {
                     throw new Exception($errorMessage);
-                else {
+                } else {
                     $query = $conn->query('set names utf8');
-                    if (!$query)
+                    if (!$query) {
                         throw new Exception($errorMessage);
-                    else
+                    } else {
                         return $conn;
+                    }
                 }
             }
 
-            function getMigrationFiles($conn) {
+            function getMigrationFiles($conn)
+            {
                 $sqlFolder = 'migrations/';
-                $allFiles = glob($sqlFolder . '*.sql');
+                $allFiles  = glob($sqlFolder . '*.sql');
 
-                $query = sprintf('show tables from `%s` like "%s"', DB_NAME, DB_TABLE_VERSIONS);
-                $data = $conn->query($query);
+                $query          = sprintf('show tables from `%s` like "%s"', DB_NAME, DB_TABLE_VERSIONS);
+                $data           = $conn->query($query);
                 $firstMigration = !$data->num_rows;
 
                 if ($firstMigration) {
@@ -37,8 +60,8 @@
                 }
 
                 $versionsFiles = [];
-                $query = sprintf('select `name` from `%s`', DB_TABLE_VERSIONS);
-                $data = $conn->query($query)->fetch_all(MYSQLI_ASSOC);
+                $query         = sprintf('select `name` from `%s`', DB_TABLE_VERSIONS);
+                $data          = $conn->query($query)->fetch_all(MYSQLI_ASSOC);
                 foreach ($data as $row) {
                     array_push($versionsFiles, $sqlFolder . $row['name']);
                 }
@@ -46,15 +69,16 @@
             }
 
 
-            function migrate($conn, $file) {
+            function migrate($conn, $file)
+            {
                 $command = sprintf('mysql -u%s -p%s -h %s -D %s < %s', DB_USER, DB_PASSWORD, DB_HOST, DB_NAME, $file);
                 shell_exec($command);
                 $baseName = basename($file);
-                $query = sprintf('insert into `%s` (`name`) values("%s")', DB_TABLE_VERSIONS, $baseName);
+                $query    = sprintf('insert into `%s` (`name`) values("%s")', DB_TABLE_VERSIONS, $baseName);
                 $conn->query($query);
             }
 
-            $conn = connectDB();
+            $conn  = connectDB();
             $files = getMigrationFiles($conn);
             if (empty($files)) {
                 echo 'Ваша база данных в актуальном состоянии.';
@@ -70,7 +94,6 @@
 
                 echo PHP_EOL . 'Миграция завершена.';
             }
-
 
 
             break;

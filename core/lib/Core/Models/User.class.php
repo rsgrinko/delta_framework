@@ -1,8 +1,26 @@
 <?php
     /**
+     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Permission is hereby granted, free of charge, to any person obtaining
+     * a copy of this software and associated documentation files (the
+     * "Software"), to deal in the Software without restriction, including
+     * without limitation the rights to use, copy, modify, merge, publish,
+     * distribute, sublicense, and/or sell copies of the Software, and to
+     * permit persons to whom the Software is furnished to do so, subject to
+     * the following conditions:
+     * The above copyright notice and this permission notice shall be included
+     * in all copies or substantial portions of the Software.
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+     * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+     * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+     * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+     * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+     * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+     * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
+
+    /**
      * Класс для работы с пользователями
-     *
-     * @author Roman Grinko <rsgrinko@gmail.com>
      */
 
     namespace Core\Models;
@@ -190,7 +208,7 @@
         {
             $newToken = self::generateGUID();
             (DB::getInstance())->update(self::TABLE, ['id' => $this->id], ['token' => $newToken]);
-            Log::logToFile('Создан токен ' . $newToken, 'User.log');
+            Log::logToFile('Создан токен ' . $newToken, 'User.log', ['userId' => $this->id]);
             return $newToken;
         }
 
@@ -297,14 +315,15 @@
          *
          * @param string $login    Логин
          * @param string $password Пароль
+         * @param string $email    E-Mail
          * @param string $name     Имя
-         * @param string $image    Аватар
          *
+         * @return int
          * @throws CoreException
          */
         public static function create(string $login, string $password, string $email, string $name = ''): int
         {
-            Log::logToFile(__METHOD__, 'User.log', func_get_args());
+            Log::logToFile('Создание нового пользователя', 'User.log', func_get_args());
 
             /** @var  $DB DB */
             $DB     = DB::getInstance();
@@ -330,8 +349,15 @@
 
         public function update(array $fields): bool
         {
+            $cacheId = md5('User_getAllUserData_' . $this->id);
             /** @var  $DB DB */
             $DB = DB::getInstance();
+            Log::logToFile(
+                'Изменение данных пользователя c ID ' . $this->id,
+                'User.log',
+                ['before' => $this->getAllUserData(), 'after' => func_get_args()]
+            );
+            Cache::delete($cacheId);
             return $DB->update(self::TABLE, ['id' => $this->id], $fields);
         }
 
