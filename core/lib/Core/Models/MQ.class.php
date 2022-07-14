@@ -378,6 +378,18 @@
         }
 
         /**
+         * Очистка очереди
+         *
+         * @return void
+         * @throws CoreException
+         */
+        public function clearThreads():void
+        {
+            $this->DB->query('DELETE FROM ' . self::TABLE);
+
+        }
+
+        /**
          * Массовое создание заданий
          *
          * @param int         $count  Количество заданий
