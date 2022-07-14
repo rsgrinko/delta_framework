@@ -383,10 +383,20 @@
          * @return void
          * @throws CoreException
          */
-        public function clearThreads():void
+        public function clearThreads(): void
         {
             $this->DB->query('DELETE FROM ' . self::TABLE);
+        }
 
+        /**
+         * Очистка истории очереди
+         *
+         * @return void
+         * @throws CoreException
+         */
+        public function clearThreadsHistory(): void
+        {
+            $this->DB->query('DELETE FROM ' . self::TABLE_HISTORY);
         }
 
         /**
