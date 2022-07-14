@@ -633,18 +633,20 @@
          *
          * @return void
          */
-        public static function arrayToXml(array $arData = [], bool $format = false): string
+        public static function arrayToXml(array $arData = [], ?string $objectName = null): string
         {
-            $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><delta/>');
-            static::arrayToXmlHelper($arData ,$xml);
-
-            if($format){
-                $dom = dom_import_simplexml($xml)->ownerDocument;
-                $dom->preserveWhiteSpace = false;
-                $dom->formatOutput = true;
-                return $dom->saveXML();
+            $rootData = '';
+            if(!empty($objectName)) {
+                $rootData = ' object="' . $objectName . '"';
             }
-            return $xml->asXML();
+
+            $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><DeltaCore version="' . CORE_VERSION . '"' . $rootData . ' date="' . date('d.m.Y H:i:s') . '"/>');
+            static::arrayToXmlHelper($arData, $xml);
+
+            $dom                     = dom_import_simplexml($xml)->ownerDocument;
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput       = true;
+            return $dom->saveXML();
         }
 
         public static function showPage()
