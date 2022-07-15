@@ -253,12 +253,10 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
 
         public static function getMySLO()
         {
-            $cacheId = md5('getMySLO_criminal');
-            if (Cache::check($cacheId)) {
-                $oldLink = Cache::get($cacheId);
-            } else {
-                $oldLink = '';
-            }
+            $result = 'Нет данных для обновления';
+            /** @var DB $DB */
+            $DB = DB::getInstance();
+
 
             $file  = file_get_contents('https://myslo.ru/news/criminal');
             $file  = preg_match_all('/"item width-100-tiny">(.*?)<div class="clear">/us', $file, $file2);
@@ -273,10 +271,10 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             preg_match_all('/" href="(.*?)">/us', $file2, $link);
             $link = 'https://myslo.ru' . trim($link[1][0]);
 
+            $hash = md5($link);
+            $res  = $DB->query('SELECT * FROM myslo WHERE hash="' . $hash . '"');
+            if (!$res) {
 
-            if ($oldLink !== $link) {
-                sendTelegram('OLD (' . strlen($oldLink) . '): ' . $oldLink . PHP_EOL . 'NEW (' . strlen($link) . '): ' . $link);
-                sendTelegram('Обнаружен новый пост');
                 $full = file_get_contents($link);
 
                 preg_match_all('/<div class="h3 lid"><p>(.*?)<\/p><\/div>/us', $full, $lidArticle);
@@ -303,16 +301,17 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 $post = '<b>' . $title . '</b>' . PHP_EOL . $lidArticle . PHP_EOL . $fullArticle;
                 $post .= PHP_EOL . '<a href="' . $link . '">Подробнее</a>';
 
+
                 $telegram = new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN);
                 $telegram->setChat('-1001789206618');
                 $res = $telegram->sendPhoto($tmpFile, $post);
+                sendTelegram($post);
                 @unlink($tmpFile);
-                Cache::set($cacheId, trim($link));
-                return $res;
+                $itemId = $DB->addItem('myslo', ['hash' => $hash, 'title' => $title]);
+
+                return print_r($res, true);//'Добавлен новый элемент с ID ' . $itemId;
             } else {
                 return 'Обновление не требуется';
             }
-
-            return $res;
         }
     }

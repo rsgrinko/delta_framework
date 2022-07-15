@@ -34,19 +34,4 @@
     exec('(php -f ' . __DIR__ . '/runtime/threadsWorker.php & ) >> /dev/null 2>&1');
 
 
-    // Каждые 10 минут добавляем в очередь задание на проверку новостей слободы и отправку в телегу
-    $cacheId  = md5('cron_myslo');
-    $runMyslo = false;
-    if (Cache::check($cacheId) && $cronMyslo = Cache::get($cacheId)) {
-        if ((time() - (int)$cronMyslo) > 600) {
-            $runMyslo = true;
-            Cache::set($cacheId, time());
-        }
-    } else {
-        $runMyslo = true;
-        Cache::set($cacheId, time());
-    }
-
-    if ($runMyslo === true) {
-        $result = (new MQ())->setAttempts(3)->setPriority(3)->setCheckDuplicates(true)->createTask('Core\MQTasks', 'getMySLO');
-    }
+    $result = (new MQ())->setAttempts(3)->setPriority(1)->setCheckDuplicates(true)->createTask('Core\MQTasks', 'getMySLO');

@@ -531,7 +531,7 @@
                                'in_progress'    => self::VALUE_N,
                                'attempts'       => '0',
                                'attempts_limit' => $this->runNow ? '1' : $this->attempts, // Если запускаем немедленно, то попытка одна
-                               'class'          => !empty($class) ? addslashes($class) : '',
+                               'class'          => !empty($class) ? $class : '',
                                'method'         => $method,
                                'priority'       => $priority,
                                'params'         => $params,
