@@ -295,10 +295,10 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 $tmpFile = CACHE_DIR . '/' . basename($image);
                 file_put_contents($tmpFile, file_get_contents($image));
 
-                $lidArticle  = SystemFunctions::previewText($lidArticle, 100);
-                $fullArticle = SystemFunctions::previewText($fullArticle, 300);
+                $lidArticlePost  = SystemFunctions::previewText($lidArticle, 100);
+                $fullArticlePost = SystemFunctions::previewText($fullArticle, 300);
 
-                $post = '<b>' . $title . '</b>' . PHP_EOL . $lidArticle . PHP_EOL . $fullArticle;
+                $post = '<b>' . $title . '</b>' . PHP_EOL . $lidArticlePost . PHP_EOL . $fullArticlePost;
                 $post .= PHP_EOL . '<a href="' . $link . '">Подробнее</a>';
 
 
@@ -307,7 +307,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 $res = $telegram->sendPhoto($tmpFile, $post);
                 sendTelegram($post);
                 @unlink($tmpFile);
-                $itemId = $DB->addItem('myslo', ['hash' => $hash, 'title' => $title]);
+                $itemId = $DB->addItem('myslo', ['hash' => $hash, 'title' => $title, 'image' => $image, 'text' => $lidArticle . PHP_EOL . $fullArticle, 'link' => $link]);
 
                 return print_r($res, true);//'Добавлен новый элемент с ID ' . $itemId;
             } else {
