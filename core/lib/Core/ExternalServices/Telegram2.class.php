@@ -137,6 +137,24 @@
         }
 
         /**
+         * Изменяет уже отправленное сообщение на указанное
+         *
+         * @param int    $messageId
+         * @param string $text
+         *
+         * @return array
+         */
+        public function updateMessage(int $messageId, string $text): array
+        {
+            $response = [
+                'chat_id'    => $this->chatId,
+                'message_id' => $messageId,
+                'text'       => $text,
+            ];
+            return $this->setMethod('editMessageText')->sendRequest($response);
+        }
+
+        /**
          * Отправка изображения
          *
          * @param string      $imagePath Путь до изображения

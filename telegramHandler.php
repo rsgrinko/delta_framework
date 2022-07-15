@@ -15,8 +15,7 @@
     $tg = new Telegram2(TELEGRAM_BOT_TOKEN);
     $tg->setRemoteRequest($data);
 
-    $tg->setChat(TELEGRAM_ADMIN_CHAT_ID)->sendMessage(print_r($tg->getChat('bitrix'), true));
-  //$tg->setChat(TELEGRAM_ADMIN_CHAT_ID)->sendLocation( '54.007143', '38.046204');
+    $res = $tg->setChat(TELEGRAM_ADMIN_CHAT_ID)->updateMessage(121, '');
 
 
-   // sendTelegram(print_r($data, true));
+   sendTelegram(print_r($res, true));

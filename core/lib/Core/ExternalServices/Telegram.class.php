@@ -172,8 +172,8 @@
         /**
          * Изменяет уже отправленное сообщение на указанное
          *
-         * @param        $chatId
-         * @param        $messageId
+         * @param int    $chatId
+         * @param int    $messageId
          * @param string $text
          *
          * @return array
