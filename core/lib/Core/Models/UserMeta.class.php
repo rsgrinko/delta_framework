@@ -42,7 +42,6 @@
                     foreach ($res as $meta) {
                         $userMeta[] = [
                             'id'    => $meta['id'],
-                            'type'  => $meta['type'],
                             'name'  => $meta['name'],
                             'value' => $meta['value'],
                         ];
@@ -75,40 +74,6 @@
                     foreach ($res as $meta) {
                         $userMeta[] = [
                             'id'    => $meta['id'],
-                            'type'  => $meta['type'],
-                            'name'  => $meta['name'],
-                            'value' => $meta['value'],
-                        ];
-                    }
-                    Cache::set($cacheId, $userMeta);
-                }
-            }
-            return $userMeta;
-        }
-
-        /**
-         * Получает указанные мета данные пользователя
-         *
-         * @param string|null $type Тип мета
-         *
-         * @return array|null
-         * @throws \Core\CoreException
-         */
-        public function getMetaByType(string $type): ?array
-        {
-            $cacheId = md5('Meta_' . $this->user->getId() . '_getMetaByType');
-            if (Cache::check($cacheId)) {
-                $userMeta = Cache::get($cacheId);
-            } else {
-                /** @var  $DB DB */
-                $DB  = DB::getInstance();
-                $res = $DB->query('SELECT * FROM `' . self::TABLE . '` WHERE user_id=' . $this->user->getId() . ' AND type="' . $type . '"');
-                if (!empty($res)) {
-                    $userMeta = [];
-                    foreach ($res as $meta) {
-                        $userMeta[] = [
-                            'id'    => $meta['id'],
-                            'type'  => $meta['type'],
                             'name'  => $meta['name'],
                             'value' => $meta['value'],
                         ];
@@ -129,32 +94,32 @@
          * @return int|null
          * @throws \Core\CoreException
          */
-        public function addMeta(string $name, ?string $value = null, string $type = 'default'): ?int
+        public function addMeta(string $name, ?string $value = null): ?int
         {
             $cacheId = md5('Meta_' . $this->user->getId() . '_getAllMeta');
             Cache::delete($cacheId);
 
             /** @var  $DB DB */
             $DB = DB::getInstance();
-            return $DB->addItem(self::TABLE, ['user_id' => $this->user->getId(), 'name' => $name, 'value' => $value, 'type' => $type]);
+            return $DB->addItem(self::TABLE, ['user_id' => $this->user->getId(), 'name' => $name, 'value' => $value]);
         }
 
 
         /**
          * Убирает пользователю указанные мета данные
          *
-         * @param string $name Имя мета
+         * @param int $id ID Мета
          *
-         * @return int|null
+         * @return void
          * @throws \Core\CoreException
          */
-        public function deleteMeta(string $name): void
+        public function deleteMeta(int $id): void
         {
             $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
             Cache::delete($cacheId);
 
             /** @var  $DB DB */
             $DB = DB::getInstance();
-            $DB->query('DELETE FROM ' . self::TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND name="' . $name . '"');
+            $DB->query('DELETE FROM ' . self::TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND id="' . $id . '"');
         }
     }
