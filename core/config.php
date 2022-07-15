@@ -60,12 +60,18 @@
     /**
      * Токен телеграм бота
      */
-    const TELEGRAM_BOT_TOKEN = '5232660453:AAGfMWu6EcRfBGSSURJsEEvGPmAqhCyzYHU';
+    //const TELEGRAM_BOT_TOKEN = '5357759725:AAEPGfLRaye1ZOPMBGOrBVCMhz4kE_aecME'; //its
+    const TELEGRAM_BOT_TOKEN = '5357759725:AAEPGfLRaye1ZOPMBGOrBVCMhz4kE_aecME'; //delta
 
     /**
      * ID чата канала уведомлений в телеграм
      */
     const TELEGRAM_NOTIFICATION_CHANNEL = '-1001714289174';
+
+    /**
+     * ID чата админа в телеграм
+     */
+    const TELEGRAM_ADMIN_CHAT_ID = '412790359';
 
     /**
      * Время, в течении которого считаем пользователя онлайн, сек.
