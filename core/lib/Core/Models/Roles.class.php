@@ -106,7 +106,7 @@
          *
          * @return int|null
          */
-        public function removeRole(int $roleId): ?int
+        public function deleteRole(int $roleId): ?int
         {
             $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
             Cache::delete($cacheId);
@@ -133,6 +133,7 @@
          * Получение всех существующих ролей
          *
          * @return array|null
+         * @throws \Core\CoreException
          */
         public static function getAllRoles(): ?array
         {

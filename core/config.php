@@ -25,6 +25,11 @@
     const CORE_VERSION = '1.0.0_dev';
 
     /**
+     * Флаг отладки
+     */
+    const DEBUG = true;
+
+    /**
      * Путь до корня проекта
      */
     define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
@@ -81,7 +86,7 @@
     /**
      * Использование кэша
      */
-    const USE_CACHE = true;
+    const USE_CACHE = false;
 
     /**
      * Папка кэша

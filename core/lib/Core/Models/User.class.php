@@ -26,7 +26,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\Models\{DB, Roles};
+    use Core\Models\{DB, Roles, UserMeta};
     use Core\Helpers\{Cache, Log, SystemFunctions};
 
     class User
@@ -45,6 +45,13 @@
          * @var Roles
          */
         public $rolesObject = null;
+
+        /**
+         * Объект мета данных
+         *
+         * @var Roles
+         */
+        public $metaObject = null;
 
         /**
          * Таблица с пользователями
@@ -572,6 +579,19 @@
                 $this->rolesObject = (new Roles($this));
             }
             return $this->rolesObject;
+        }
+
+        /**
+         * Получить объект для работы с ролями
+         *
+         * @return UserMeta
+         */
+        public function getMetaObject(): UserMeta
+        {
+            if (empty($this->metaObject)) {
+                $this->metaObject = (new UserMeta($this));
+            }
+            return $this->metaObject;
         }
 
         /**

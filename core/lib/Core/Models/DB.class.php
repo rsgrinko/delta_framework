@@ -191,7 +191,7 @@
                 if ($param == 'key') {
                     $result = $result . $k . ', ';
                 } elseif ($param == 'value') {
-                    $result = $result . '\'' . $v . '\', ';
+                    $result = $result . '\'' . addslashes($v) . '\', ';
                 }
             }
             return substr($result, 0, -2);
@@ -214,7 +214,12 @@
                 $stmt = $this->db->query($sql);
             } catch (\Throwable $t) {
                 sendTelegram('SQL ERROR: ' . $sql);
-                throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
+                if(DEBUG) {
+                    throw new CoreException('В SQL запросе произошла ошибка. Запрос: ' . $sql, CoreException::ERROR_SQL_QUERY);
+                } else {
+                    throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
+                }
+
             }
             $this->lastInsertId = $this->db->lastInsertId() ?? null;
 
