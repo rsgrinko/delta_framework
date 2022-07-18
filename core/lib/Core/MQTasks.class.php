@@ -296,7 +296,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 file_put_contents($tmpFile, file_get_contents($image));
 
                 $lidArticlePost  = SystemFunctions::previewText($lidArticle, 100);
-                $fullArticlePost = SystemFunctions::previewText($fullArticle, 300);
+                $fullArticlePost = SystemFunctions::previewText($fullArticle, 250);
 
                 $post = '<b>' . $title . '</b>' . PHP_EOL . $lidArticlePost . PHP_EOL . $fullArticlePost;
                 $post .= PHP_EOL . '<a href="' . $link . '">Подробнее</a>';
