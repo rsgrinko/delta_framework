@@ -310,7 +310,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 @unlink($tmpFile);
                 $itemId = $DB->addItem('myslo', ['hash' => $hash, 'title' => $title, 'image' => $image, 'text' => $lidArticle . PHP_EOL . $fullArticle, 'link' => $link]);
 
-                return print_r($res, true);//'Добавлен новый элемент с ID ' . $itemId;
+                return $res;//'Добавлен новый элемент с ID ' . $itemId;
             } else {
                 return 'Обновление не требуется';
             }

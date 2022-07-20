@@ -34,4 +34,4 @@
     exec('(php -f ' . __DIR__ . '/runtime/threadsWorker.php & ) >> /dev/null 2>&1');
 
 
-    $result = (new MQ())->setAttempts(3)->setPriority(1)->setCheckDuplicates(true)->createTask('Core\MQTasks', 'getMySLO');
+    //$result = (new MQ())->setAttempts(3)->setPriority(1)->setCheckDuplicates(true)->createTask('Core\MQTasks', 'getMySLO');
