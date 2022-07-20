@@ -199,7 +199,24 @@
             /** @var DB $DB */
             $DB = DB::getInstance();
 
-            $file = file_get_contents('http://rzhunemogu.ru/RandJSON.aspx?CType=11');
+            /**
+             * CType = ?
+             * 1 - Анекдот;
+             * 2 - Рассказы;
+             * 3 - Стишки;
+             * 4 - Афоризмы;
+             * 5 - Цитаты;
+             * 6 - Тосты;
+             * 8 - Статусы;
+             * 11 - Анекдот (+18);
+             * 12 - Рассказы (+18);
+             * 13 - Стишки (+18);
+             * 14 - Афоризмы (+18);
+             * 15 - Цитаты (+18);
+             * 16 - Тосты (+18);
+             * 18 - Статусы (+18);
+             */
+            $file = file_get_contents('http://rzhunemogu.ru/RandJSON.aspx?CType=1');
             $file = \iconv('windows-1251//IGNORE', 'UTF-8//IGNORE', $file);
             $file = str_replace('{"content":"', '', $file);
             $file = str_replace('"}', '', $file);
