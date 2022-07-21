@@ -339,9 +339,9 @@
          * @return void
          * @throws CoreException
          */
-        public function run(): void
+        public function run(bool $childProcess = false): void
         {
-            if (USE_LOG) {
+            if (USE_LOG && !$childProcess) {
                 Log::logToFile(
                     'Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                     self::LOG_FILE,
@@ -380,7 +380,20 @@
                 foreach ($arTasks as $task) {
                     $this->execute($task['id']);
                 }
+            } else {
+                if (USE_LOG) {
+                    Log::logToFile(
+                        'Нечего выполнять - завершаем работу',
+                        self::LOG_FILE,
+                        [],
+                        LOG_DEBUG
+                    );
+                }
+                return;
             }
+            // Если воркер отработал - пробуем добрать заданий и продолжить работу
+            $this->setTasksActiveStatus();
+            $this->run(true);
         }
 
         /**
