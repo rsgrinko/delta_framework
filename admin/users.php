@@ -57,6 +57,7 @@
                             <th>Был активен</th>
                             <th>Создан</th>
                             <th>Обновлен</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -88,6 +89,7 @@
                                     <td><?= date('d.m.Y H:i:s', $elUser['last_active']); ?></td>
                                     <td><?= $elUser['date_created'] ? date('d.m.Y H:i:s', strtotime($elUser['date_created'])) : '-'; ?></td>
                                     <td><?= $elUser['date_updated'] ? date('d.m.Y H:i:s', strtotime($elUser['date_updated'])) : '-'; ?></td>
+                                    <td><a class="btn btn-primary" href="login.php?loginAs=<?= $elUser['id']; ?>">Войти</a></td>
                                 </tr>
                                 <?php
                             }

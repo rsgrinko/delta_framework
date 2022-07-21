@@ -5,5 +5,12 @@
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-    тут текст главной страницы
+    тут текст главной страницы<br>
+    {% if user %}
+        Hello, {{ user.name }}!<br>
+        Your ID: {{ user.id }}<br>
+        <pre>{{ dump(user) }}}}</pre>
+        <pre>{{ dump(userData) }}</pre>
+        <pre>{{ dump(userRoles) }}</pre>
+    {% endif %}
 {% endblock %}

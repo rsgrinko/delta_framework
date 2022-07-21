@@ -25,14 +25,16 @@
     {
         public static function index()
         {
-            global $twig;
+            global $twig, $USER;
             $navbarItems = [
                 ['name' => 'Главная', 'url' => '/', 'active' => true],
                 ['name' => 'Админка', 'url' => '/admin', 'active' => false],
                 ['name' => 'Командная PHP строка', 'url' => '/phpcmd.php', 'active' => false],
                 ['name' => 'Тест', 'url' => '/test', 'active' => false],
             ];
-            echo $twig->render('index.twig', ['navbarItems' => $navbarItems, 'name' => 'Roman Grinko']);
+            $userData = $USER ? $USER->getAllUserData() : '';
+            $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
+            echo $twig->render('index.twig', ['navbarItems' => $navbarItems, 'name' => 'Roman Grinko', 'user' => $USER, 'userData' => $userData, 'userRoles' => $userRoles]);
         }
 
         public static function test(int $id = 1)

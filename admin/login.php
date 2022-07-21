@@ -20,6 +20,7 @@
      */
 
     use Core\Models\User;
+    use Core\CoreException;
 
     require_once __DIR__ . '/inc/bootstrap.php';
 
@@ -44,6 +45,15 @@
     }
 
     if ($auth === true) {
+        global $USER;
+        if (isset($_REQUEST['loginAs']) && !empty($_REQUEST['loginAs']) && $USER->isAdmin()) {
+            try {
+                User::logout();
+                User::authorize($_REQUEST['loginAs']);
+            } catch (CoreException $e) {
+                die('Авторизация не удалась');
+            }
+        }
         header('Location: index.php');
     } else {
         ?>

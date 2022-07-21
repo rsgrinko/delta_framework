@@ -93,8 +93,11 @@
      * Инициализация шаблонизатора
      */
     $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
-    $twig   = new \Twig\Environment($loader, [//'cache' => CACHE_DIR,
+    $twig   = new \Twig\Environment($loader, [
+        'debug' => true,
+        //'cache' => CACHE_DIR,
     ]);
+    $twig->addExtension(new \Twig\Extension\DebugExtension());
 
     Cache::init(CACHE_DIR, USE_CACHE);
 
