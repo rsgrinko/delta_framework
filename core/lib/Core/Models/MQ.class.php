@@ -75,7 +75,7 @@
         /**
          * Количество задач для обработки
          */
-        const EXECUTION_TASKS_LIMIT = 250;
+        const EXECUTION_TASKS_LIMIT = 100;
 
         /**
          * Лимит количества запущенных воркеров
