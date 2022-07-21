@@ -80,7 +80,7 @@
         /**
          * Лимит количества запущенных воркеров
          */
-        const WORKERS_LIMIT = 10;
+        const WORKERS_LIMIT = 5;
 
         /**
          * @var DB|null $DB Объект базы
