@@ -391,8 +391,6 @@
                 }
                 return;
             }
-            // Если воркер отработал - пробуем добрать заданий и продолжить работу
-            $this->setTasksActiveStatus();
             $this->run(true);
         }
 
