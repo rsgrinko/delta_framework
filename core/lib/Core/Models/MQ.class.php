@@ -477,7 +477,7 @@
 
             if (USE_LOG) {
                 Log::logToFile(
-                    'Запущено массовое создание заданий',
+                    'Массовое создание заданий',
                     self::LOG_FILE,
                     func_get_args(),
                     LOG_DEBUG,
@@ -509,17 +509,6 @@
             $response->setTaskId(0)->setStatus(self::STATUS_OK)->setParams(self::convertFromJson($params))->setParamsJson($params)->setResponse(
                 $count . ' tasks were created'
             );
-
-            if (USE_LOG) {
-                Log::logToFile(
-                    'Массовое создание заданий завершено',
-                    self::LOG_FILE,
-                    func_get_args(),
-                    LOG_DEBUG,
-                    null,
-                    false
-                );
-            }
 
             return $response;
         }
