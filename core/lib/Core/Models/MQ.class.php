@@ -751,7 +751,7 @@
                         'Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
                         ['response' => json_encode($result, JSON_UNESCAPED_UNICODE)],
-                        LOG_WARNING
+                        LOG_ERR
                     );
                 }
             }
