@@ -325,7 +325,9 @@
                             'Взято в работу заданий ' . count($arTaskIds),
                             self::LOG_FILE,
                             ['added' => count($arTaskIds), 'before' => $countTasks],
-                            LOG_DEBUG
+                            LOG_DEBUG,
+                            null,
+                            false
                         );
                     }
                     $this->DB->query('UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_Y . '" WHERE id IN (' . implode(',', $arTaskIds) . ')');
@@ -346,7 +348,9 @@
                     'Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                     self::LOG_FILE,
                     [],
-                    LOG_DEBUG
+                    LOG_DEBUG,
+                    null,
+                    false
                 );
             }
             // Поиск и исправление зависших заданий
@@ -361,7 +365,9 @@
                         'Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                         self::LOG_FILE,
                         [],
-                        LOG_DEBUG
+                        LOG_DEBUG,
+                        null,
+                        false
                     );
                 }
                 return;
@@ -374,7 +380,9 @@
                         'Запущено выполнение заданий из очереди',
                         self::LOG_FILE,
                         ['count' => count($arTasks)],
-                        LOG_DEBUG
+                        LOG_DEBUG,
+                        null,
+                        false
                     );
                 }
                 foreach ($arTasks as $task) {
@@ -386,7 +394,9 @@
                         'Нечего выполнять - завершаем работу',
                         self::LOG_FILE,
                         [],
-                        LOG_DEBUG
+                        LOG_DEBUG,
+                        null,
+                        false
                     );
                 }
                 return;
@@ -470,7 +480,9 @@
                     'Запущено массовое создание заданий',
                     self::LOG_FILE,
                     func_get_args(),
-                    LOG_DEBUG
+                    LOG_DEBUG,
+                    null,
+                    false
                 );
             }
 
@@ -503,7 +515,9 @@
                     'Массовое создание заданий завершено',
                     self::LOG_FILE,
                     func_get_args(),
-                    LOG_DEBUG
+                    LOG_DEBUG,
+                    null,
+                    false
                 );
             }
 
@@ -537,7 +551,9 @@
                     'Добавлено новое задание в очередь',
                     self::LOG_FILE,
                     func_get_args(),
-                    LOG_DEBUG
+                    LOG_DEBUG,
+                    null,
+                    false
                 );
             }
             if (!empty($this->priority)) {
@@ -625,7 +641,9 @@
                     'Задание ' . $taskId . ' взято в работу',
                     self::LOG_FILE,
                     ['taskId' => $taskId],
-                    LOG_DEBUG
+                    LOG_DEBUG,
+                    null,
+                    false
                 );
             }
 
@@ -641,7 +659,9 @@
                         'Задания ' . $taskId . ' не найдено',
                         self::LOG_FILE,
                         ['taskId' => $taskId],
-                        LOG_ERR
+                        LOG_ERR,
+                        null,
+                        false
                     );
                 }
 
@@ -661,7 +681,9 @@
                         'Задание ' . $taskId . ' уже выполняется другим воркером',
                         self::LOG_FILE,
                         ['taskId' => $taskId],
-                        LOG_DEBUG
+                        LOG_DEBUG,
+                        null,
+                        false
                     );
                 }
 
@@ -721,7 +743,9 @@
                         'Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
                         ['response' => $this->convertToJson($result)],
-                        LOG_DEBUG
+                        LOG_DEBUG,
+                        null,
+                        false
                     );
                 }
             } catch (\Throwable|CoreException $t) {
@@ -750,8 +774,10 @@
                     Log::logToFile(
                         'Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
-                        ['response' => json_encode($result, JSON_UNESCAPED_UNICODE)],
-                        LOG_ERR
+                        ['response' => $t->getMessage()],
+                        LOG_ERR,
+                        null,
+                        false
                     );
                 }
             }
@@ -908,7 +934,9 @@
                                 'Задание ' . $task['id'] . ' зависло',
                                 self::LOG_FILE,
                                 ['task' => json_encode($task, JSON_UNESCAPED_UNICODE)],
-                                LOG_WARNING
+                                LOG_WARNING,
+                                null,
+                                false
                             );
                         }
                     }
@@ -929,7 +957,9 @@
                             'Задания были возвращены в работу (' . count($arStuckTasks) . ')',
                             self::LOG_FILE,
                             ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
-                            LOG_DEBUG
+                            LOG_DEBUG,
+                            null,
+                            false
                         );
                     }
                 }
