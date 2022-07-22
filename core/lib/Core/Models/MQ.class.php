@@ -123,11 +123,27 @@
         private $attempts = self::DEFAULT_ATTEMPTS;
 
         /**
+         * @var null $workerId Идентификатор воркера
+         */
+        private $workerId = null;
+
+        /**
          * Конструктор
          */
         public function __construct()
         {
             $this->DB = DB::getInstance();
+            $this->workerId = 'MQ_' . uniqid();
+        }
+
+        /**
+         * Получение идентификатора текущего воркера
+         *
+         * @return string|null ID воркера
+         */
+        public function getWorkerId(): string
+        {
+            return $this->workerId;
         }
 
         /**
@@ -167,74 +183,6 @@
         {
             $this->attempts = $attempts;
             return $this;
-        }
-
-        /**
-         * Тестовая функция 50/50
-         *
-         * @param mixed ...$params
-         *
-         * @return string
-         * @throws CoreException
-         */
-        public static function test2(...$params): string
-        {
-            sleep(rand(1, 5));
-            $result = rand(0, 100);
-            if (($result % 2) == 0) {
-                throw new CoreException('Сервер обмена временно недоступен');
-            }
-            return 'Пользователь с ID ' . $params['0'] . ' обновлен';
-        }
-
-        /**
-         * Тестовая функция с управлением
-         *
-         * @param mixed ...$params
-         *
-         * @return string
-         * @throws CoreException
-         */
-        public static function testManaged(...$params): string
-        {
-            sleep(rand(1, 3));
-            $status = true;
-            if (file_exists(ROOT_PATH . '/allfail.txt')) {
-                $data   = file_get_contents(ROOT_PATH . '/allfail.txt');
-                $status = (int)$data === 1;
-            }
-            if (!$status) {
-                throw new CoreException('Сервер обмена временно недоступен');
-            }
-            return 'Клиент с ID ' . $params['0'] . ' создан';
-        }
-
-        /**
-         * Тестовая функция ok
-         *
-         * @param mixed ...$params
-         *
-         * @return string
-         * @throws CoreException
-         */
-        public static function testOk(...$params): string
-        {
-            sleep(rand(1, 3));
-            return 'Задание успешно выполнено';
-        }
-
-        /**
-         * Тестовая функция fail
-         *
-         * @param mixed ...$params
-         *
-         * @return string
-         * @throws CoreException
-         */
-        public static function testFail(...$params): string
-        {
-            sleep(rand(1, 3));
-            throw new CoreException('Сервер обменов недоступен');
         }
 
         /**
@@ -322,7 +270,7 @@
                     }
                     if (USE_LOG) {
                         Log::logToFile(
-                            'Взято в работу заданий ' . count($arTaskIds),
+                            $this->getWorkerId() . ': Взято в работу заданий ' . count($arTaskIds),
                             self::LOG_FILE,
                             ['added' => count($arTaskIds), 'before' => $countTasks],
                             LOG_DEBUG,
@@ -345,7 +293,7 @@
         {
             if (USE_LOG && !$childProcess) {
                 Log::logToFile(
-                    'Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
+                    $this->getWorkerId() . ': Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                     self::LOG_FILE,
                     [],
                     LOG_DEBUG,
@@ -362,7 +310,7 @@
             if ($this->hasMaxWorkers() && !$childProcess) {
                 if (USE_LOG) {
                     Log::logToFile(
-                        'Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
+                        $this->getWorkerId() . ': Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                         self::LOG_FILE,
                         [],
                         LOG_DEBUG,
@@ -377,7 +325,7 @@
             if (!empty($arTasks)) {
                 if (USE_LOG) {
                     Log::logToFile(
-                        'Запущено выполнение заданий из очереди',
+                        $this->getWorkerId() . ': Запущено выполнение заданий из очереди',
                         self::LOG_FILE,
                         ['count' => count($arTasks)],
                         LOG_DEBUG,
@@ -391,7 +339,7 @@
             } else {
                 if (USE_LOG) {
                     Log::logToFile(
-                        'Нечего выполнять - завершаем работу',
+                        $this->getWorkerId() . ': Нечего выполнять - завершаем работу',
                         self::LOG_FILE,
                         [],
                         LOG_DEBUG,
@@ -477,7 +425,7 @@
 
             if (USE_LOG) {
                 Log::logToFile(
-                    'Массовое создание заданий',
+                    $this->getWorkerId() . ': Массовое создание заданий',
                     self::LOG_FILE,
                     func_get_args(),
                     LOG_DEBUG,
@@ -537,7 +485,7 @@
 
             if (USE_LOG) {
                 Log::logToFile(
-                    'Добавлено новое задание в очередь',
+                    $this->getWorkerId() . ': Добавлено новое задание в очередь',
                     self::LOG_FILE,
                     func_get_args(),
                     LOG_DEBUG,
@@ -627,7 +575,7 @@
 
             if (USE_LOG) {
                 Log::logToFile(
-                    'Задание ' . $taskId . ' взято в работу',
+                    $this->getWorkerId() . ': Задание ' . $taskId . ' взято в работу',
                     self::LOG_FILE,
                     ['taskId' => $taskId],
                     LOG_DEBUG,
@@ -645,7 +593,7 @@
 
                 if (USE_LOG) {
                     Log::logToFile(
-                        'Задания ' . $taskId . ' не найдено',
+                        $this->getWorkerId() . ': Задания ' . $taskId . ' не найдено',
                         self::LOG_FILE,
                         ['taskId' => $taskId],
                         LOG_ERR,
@@ -667,7 +615,7 @@
 
                 if (USE_LOG) {
                     Log::logToFile(
-                        'Задание ' . $taskId . ' уже выполняется другим воркером',
+                        $this->getWorkerId() . ': Задание ' . $taskId . ' уже выполняется другим воркером',
                         self::LOG_FILE,
                         ['taskId' => $taskId],
                         LOG_DEBUG,
@@ -729,7 +677,7 @@
 
                 if (USE_LOG) {
                     Log::logToFile(
-                        'Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
+                        $this->getWorkerId() . ': Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
                         ['response' => $this->convertToJson($result)],
                         LOG_DEBUG,
@@ -761,7 +709,7 @@
 
                 if (USE_LOG) {
                     Log::logToFile(
-                        'Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
+                        $this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
                         ['response' => $t->getMessage()],
                         LOG_ERR,
@@ -920,7 +868,7 @@
                         $arStuckTasks[] = (int)$task['id'];
                         if (USE_LOG) {
                             Log::logToFile(
-                                'Задание ' . $task['id'] . ' зависло',
+                                $this->getWorkerId() . ': Задание ' . $task['id'] . ' зависло',
                                 self::LOG_FILE,
                                 ['task' => json_encode($task, JSON_UNESCAPED_UNICODE)],
                                 LOG_WARNING,
@@ -943,7 +891,7 @@
 
                     if (USE_LOG) {
                         Log::logToFile(
-                            'Задания были возвращены в работу (' . count($arStuckTasks) . ')',
+                            $this->getWorkerId() . ': Задания были возвращены в работу (' . count($arStuckTasks) . ')',
                             self::LOG_FILE,
                             ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
                             LOG_DEBUG,
