@@ -355,7 +355,7 @@
             // Добор заданий
             $this->setTasksActiveStatus();
 
-            if ($this->hasMaxWorkers()) {
+            if ($this->hasMaxWorkers() && !$childProcess) {
                 if (USE_LOG) {
                     Log::logToFile(
                         'Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
@@ -438,7 +438,8 @@
         public function flush(): void
         {
             $this->stopAllWorkers();
-            $this->DB->query('TRUNCATE ' . self::TABLE . '; TRUNCATE ' . self::TABLE_HISTORY . ';');
+            $this->DB->query('TRUNCATE ' . self::TABLE . ';');
+            $this->DB->query('TRUNCATE ' . self::TABLE_HISTORY . ';');
         }
         /**
          * Массовое создание заданий

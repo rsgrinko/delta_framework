@@ -190,6 +190,9 @@
                     $itemId = $DB->addItem('jokes', ['hash' => $hash, 'text' => $joke]);
                 }
             }
+            if($i < 1 ) {
+                throw new CoreException('Новых шуток не найдено');
+            }
             return 'Добавлено ' . $i . ' шуток из ' . count($arJokes);
         }
 

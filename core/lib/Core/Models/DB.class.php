@@ -213,9 +213,12 @@
             try {
                 $stmt = $this->db->query($sql);
             } catch (\Throwable $t) {
-                sendTelegram('SQL ERROR: ' . $sql);
+                sendTelegram(
+                    '<b><u>' . date('d.m.Y H:i:s') . '</u></b>' . PHP_EOL . '</b><b>SQL ERROR:</b> ' . PHP_EOL . $this->db->errorInfo()[2] . PHP_EOL
+                    . '<b>QUERY:</b> ' . PHP_EOL . $sql
+                );
                 if(DEBUG) {
-                    throw new CoreException('В SQL запросе произошла ошибка. Запрос: ' . $sql, CoreException::ERROR_SQL_QUERY);
+                    throw new CoreException('В SQL запросе произошла ошибка. '.$this->db->errorInfo()[2].' Запрос: ' . $sql, CoreException::ERROR_SQL_QUERY);
                 } else {
                     throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
                 }
