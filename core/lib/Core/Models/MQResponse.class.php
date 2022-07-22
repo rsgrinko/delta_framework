@@ -41,6 +41,11 @@
         private $taskId = 0;
 
         /**
+         * @var ?string $dateCreated Дата создания
+         */
+        private $dateCreated = null;
+
+        /**
          * @var string $status Статус задания
          */
         private $status = '';
@@ -70,6 +75,7 @@
          */
         public function __construct()
         {
+            $this->dateCreated = date(MQ::DATETIME_FORMAT);
         }
 
         /**
@@ -126,6 +132,16 @@
         public function getStatus(): ?string
         {
             return $this->status;
+        }
+
+        /**
+         * Получение даты создания задания
+         *
+         * @return string|null
+         */
+        public function getDateCreated(): ?string
+        {
+            return $this->dateCreated;
         }
 
         /**

@@ -430,6 +430,17 @@
         }
 
         /**
+         * Полная очистка диспетчера очереди с остановкой воркеров
+         *
+         * @return void
+         * @throws CoreException
+         */
+        public function flush(): void
+        {
+            $this->stopAllWorkers();
+            $this->DB->query('TRUNCATE ' . self::TABLE . '; TRUNCATE ' . self::TABLE_HISTORY . ';');
+        }
+        /**
          * Массовое создание заданий
          *
          * @param int         $count  Количество заданий
