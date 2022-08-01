@@ -111,5 +111,5 @@
     /**
      * Флаг использования логирования
      */
-    const USE_LOG = true;
+    const USE_LOG = false;
 

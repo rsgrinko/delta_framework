@@ -53,7 +53,7 @@
                     <li><a href=""><i class="glyphicon glyphicon-home"></i></a></li>
                     <li>Командная PHP строка</li>
                 </ul>
-                <h4>Командная PHP строка</h4>
+                <h4>Командная строка</h4>
             </div>
         </div><!-- media -->
     </div><!-- pageheader -->
@@ -75,11 +75,14 @@
                                 foreach ($userCodes as $code) {
                                     $element = unserialize($code['value']);
                                     ?>
-                                    <button class="btn btn-primary button-get" type="button"
-                                            onClick="addUseSection(this, <?= $code['id'] ?>, '<?= base64_encode(
-                                                $element['code']
-                                            ); ?>');"><?= $element['name']; ?></button>
-                                    <button class="btn btn-danger button-delete" type="button" onclick="deleteUserCode(<?= $code['id'] ?>)">X</button>
+                                    <div class="phpcmdButton">
+                                        <button class="btn btn-primary button-get" type="button"
+                                                onClick="addUseSection(this, <?= $code['id'] ?>, '<?= base64_encode(
+                                                    $element['code']
+                                                ); ?>');"><?= $element['name']; ?></button>
+                                        <button class="btn btn-danger button-delete" type="button" onclick="deleteUserCode(<?= $code['id'] ?>)">X
+                                        </button>
+                                    </div>
                                     <?php
                                 }
                             }
@@ -185,6 +188,11 @@
         button.btn.btn-danger.button-delete {
             margin-left: -5px;
             border-radius: 0px 3px 3px 0px;
+        }
+
+        .phpcmdButton {
+            display: inline-block;
+            margin: 3px;
         }
     </style>
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

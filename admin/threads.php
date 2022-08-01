@@ -69,8 +69,25 @@
                 </div><!-- panel -->
 
             </div>
+        </div>
 
-
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Ручное управление</h4>
+                        <p>Данная вкладка служит для отладки.</p>
+                    </div><!-- panel-heading -->
+                    <div class="panel-body">
+                        <div class="btn-list" id="manualControl">
+                            <button id="restart" class="btn btn-warning">Рестарт воркеров</button>
+                            <button id="clear" class="btn btn-danger">Очистка очереди</button>
+                            <button id="start" class="btn btn-success">Запуск воркера</button>
+                            <button id="restart" class="btn btn-info">Info</button>
+                        </div>
+                    </div>
+                </div><!-- panel -->
+            </div>
         </div>
 
         <div class="row">
@@ -154,6 +171,18 @@
                         update();
                     }
                 }, 500);
+            });
+
+            $(document).ready(function () {
+                $('#manualControl #start').on('click', function () {
+                    $.ajax({
+                        url: '../core/cron.php',
+                        cache: false,
+                        success: function (data) {
+                            console.log('Worker started');
+                        }
+                    });
+                });
             });
         </script>
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

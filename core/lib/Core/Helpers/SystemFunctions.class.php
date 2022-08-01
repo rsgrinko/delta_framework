@@ -65,16 +65,20 @@
                 $size /= 1024;
             }
 
-            $size = str_replace('.', ',', round($size, 1));
+            $size = str_replace('.', ',', round($size, 2));
             switch ($i) {
                 case 0:
-                    return $size .= ' байт';
+                    return $size .= ' Б';
                 case 1:
                     return $size .= ' КБ';
                 case 2:
                     return $size .= ' МБ';
+                case 3:
+                    return $size .= ' ГБ';
+                case 4:
+                    return $size .= 'ТБ';
             }
-            return '';
+            return 'Неизвестно';
         }
 
 

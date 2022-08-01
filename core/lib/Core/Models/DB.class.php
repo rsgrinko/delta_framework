@@ -20,7 +20,8 @@
      */
 
     namespace Core\Models;
-    
+
+    use PDO;
     use Core\CoreException;
 
     /**
@@ -58,22 +59,48 @@
         private ?string $lastInsertId = null;
 
         /**
+         * @var string|null $dbServer Сервер
+         */
+        private ?string $dbServer = null;
+
+        /**
+         * @var string|null $dbUser Пользователь
+         */
+        private ?string $dbUser = null;
+
+        /**
+         * @var string|null $dbPass Пароль
+         */
+        private ?string $dbPass = null;
+
+        /**
+         * @var string|null $dbName Имя базы
+         */
+        private ?string $dbName = null;
+
+
+        /**
          * Подключение к базе данных
          *
-         * @param string      $db_server Сервер
-         * @param string      $db_user   Пользователь
-         * @param string|null $db_pass   Пароль
-         * @param string      $db_name   База
+         * @param string      $dbServer Сервер
+         * @param string      $dbUser   Пользователь
+         * @param string|null $dbPass   Пароль
+         * @param string      $dbName   База
          */
-        public function __construct(string $db_server = DB_HOST, string $db_user = DB_USER, ?string $db_pass = DB_PASSWORD, string $db_name = DB_NAME)
+        public function __construct(string $dbServer = DB_HOST, string $dbUser = DB_USER, ?string $dbPass = DB_PASSWORD, string $dbName = DB_NAME)
         {
-            $dsn      = 'mysql:host=' . $db_server . ';dbname=' . $db_name . ';charset=utf8';
+            $this->dbServer = $dbServer;
+            $this->dbUser   = $dbUser;
+            $this->dbPass   = $dbPass;
+            $this->dbName   = $dbName;
+
+            $dsn      = 'mysql:host=' . $dbServer . ';dbname=' . $dbName . ';charset=utf8';
             $opt      = [
-                \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                \PDO::ATTR_EMULATE_PREPARES   => false,
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
             ];
-            $this->db = new \PDO($dsn, $db_user, $db_pass, $opt);
+            $this->db = new \PDO($dsn, $dbUser, $dbPass, $opt);
         }
 
         /**
@@ -413,6 +440,26 @@
             } else {
                 return false;
             }
+        }
+
+        /**
+         * Получение размера текущей базы данных
+         *
+         * @return int Размер в байтах
+         * @throws CoreException
+         */
+        public function getDatabaseSize(): int
+        {
+
+            $size = 0;
+            $res = $this->query('SHOW TABLE STATUS FROM ' . $this->dbName);
+
+            if ($res) {
+                foreach($res as $item) {
+                    $size += ((int)$item['Index_length'] + (int)$item['Data_length']);
+                }
+            }
+            return $size;
         }
 
     }

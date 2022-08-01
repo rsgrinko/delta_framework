@@ -35,7 +35,7 @@
          *
          * @return string
          */
-        public static function convertBytes($size)
+        public static function convertBytes($size): string
         {
             $i = 0;
             while (floor($size / 1024) > 0) {
@@ -43,10 +43,10 @@
                 $size /= 1024;
             }
 
-            $size = round($size, 1);
+            $size = round($size, 2);
             switch ($i) {
                 case 0:
-                    return $size .= ' байт';
+                    return $size .= ' Б';
                 case 1:
                     return $size .= ' КБ';
                 case 2:
@@ -56,6 +56,7 @@
                 case 4:
                     return $size .= ' ТБ';
             }
+            return 'Неизвестно';
         }
 
         /**
