@@ -23,6 +23,8 @@
       "ext-openssl": "*",
       "ext-simplexml": "*",
       "ext-dom": "*",
-      "ext-pdo": "*"
+      "ext-pdo": "*",
+      "ext-gd": "*",
+      "ext-exif": "*"
     }
 }
