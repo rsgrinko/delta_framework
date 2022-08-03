@@ -22,6 +22,7 @@
     namespace Core\Helpers;
 
     use Core\Models\User;
+    use Core\Helpers\Log;
 
     /**
      * Класс для отправки E-mail
@@ -188,6 +189,7 @@
                 $res[] = mb_send_mail($to, $subject, implode("\r\n", $message), implode("\r\n", $headers));
             }
 
+            Log::logToFile('Отправлено письмо', 'Mail.log', ['to' => $this->toEmail, 'subject' => $subject, 'body' => implode(' ', $message)]);
             return $res;
         }
     }

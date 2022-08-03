@@ -126,9 +126,9 @@
 
             if (!empty($result)) {
                 return $result;
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         /**
@@ -192,6 +192,16 @@
         }
 
         /**
+         * Получение кода верификации
+         *
+         * @return string|null
+         */
+        public function getVerificationCode(): ?string
+        {
+            return $this->getAllUserData() ? $this->getAllUserData()['verification_code'] : null;
+        }
+
+        /**
          * Получение всех пользователей панели
          *
          * @param string $limit Лимит
@@ -222,7 +232,7 @@
         {
             $newToken = self::generateGUID();
             (DB::getInstance())->update(self::TABLE, ['id' => $this->id], ['token' => $newToken]);
-            Log::logToFile('Создан токен ' . $newToken, 'User.log', ['userId' => $this->id]);
+            Log::logToFile('Создан токен', 'User.log', ['userId' => $this->id, 'token' => $newToken]);
             return $newToken;
         }
 
@@ -236,6 +246,7 @@
         {
             $uid  = dechex(microtime(true) * 1000) . bin2hex(random_bytes(8));
             $guid = vsprintf('RG%s-1000-%s-8%.3s-%s%s%s0', str_split($uid, 4));
+            Log::logToFile('Сгенерирован GUID', 'User.log', ['GUID' => $guid]);
             return strtoupper($guid);
         }
 
@@ -379,6 +390,7 @@
                 Log::logToFile('Ошибка отправки кода верификации пользователю', 'User.log', func_get_args());
                 throw new CoreException('Ошибка отправки кода верификации пользователю', CoreException::ERROR_SEND_VERIFICATION_CODE);
             }
+            Log::logToFile('Пользователь успешно создан', 'User.log', ['userId' => $userId]);
 
             return $userId;
         }
@@ -392,9 +404,9 @@
             /** @var  $DB DB */
             $DB = DB::getInstance();
             Log::logToFile(
-                'Изменение данных пользователя c ID ' . $this->id,
+                'Данные пользователя изменены',
                 'User.log',
-                ['before' => $this->getAllUserData(), 'after' => func_get_args()]
+                ['userId' => $this->id, 'before' => $this->getAllUserData(), 'after' => func_get_args()]
             );
             Cache::delete($cacheId);
             return $DB->update(self::TABLE, ['id' => $this->id], $fields);
@@ -421,9 +433,9 @@
 
             if ($result) {
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         /**
@@ -445,9 +457,9 @@
 
             if ($result) {
                 return count($result);
-            } else {
-                return 0;
             }
+
+            return 0;
         }
 
         /**
@@ -677,8 +689,10 @@
             $res = $DB->getItem(self::TABLE, ['verification_code' => $verificationCode]);
             if ($res) {
                 (new self($res['id']))->update(['email_confirmed' => CODE_VALUE_Y]);
+                Log::logToFile('E-Mail успешно верифицирован', 'User.log', ['userId' => $res['id'], 'code' => $verificationCode]);
                 return true;
             }
+            Log::logToFile('Ошибка верификации E-Mail', 'User.log', ['code' => $verificationCode]);
             return false;
         }
 
@@ -689,9 +703,10 @@
          */
         public function sendVerificationCode(): void
         {
+            Log::logToFile('Выслан код верификаци', 'User.log', ['userId' => $this->id, 'code' => $this->getAllUserData()['verification_code']]);
             $this->getMailObject()
                  ->setSubject('Подтверждение E-Mail')
-                 ->setBody('Для подтверждения E-Mail перейдите по ссылке: ' . SITE_URL_CORE . '/verification.php?code=' . $this->getAllUserData()['verification_code'])
+                 ->setBody('Для подтверждения E-Mail перейдите по ссылке: ' . SITE_URL_CORE . '/verification.php?code=' . $this->getVerificationCode())
                  ->send();
         }
     }
