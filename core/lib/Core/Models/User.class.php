@@ -27,7 +27,7 @@
 
     use Core\CoreException;
     use Core\Models\{DB, Roles, UserMeta};
-    use Core\Helpers\{Cache, Log, SystemFunctions};
+    use Core\Helpers\{Cache, Log, Mail, SystemFunctions, Sanitize};
 
     class User
     {
@@ -45,6 +45,13 @@
          * @var Roles
          */
         public $rolesObject = null;
+
+        /**
+         * Объект Mail
+         *
+         * @var Roles
+         */
+        public $mailObject = null;
 
         /**
          * Объект мета данных
@@ -330,32 +337,57 @@
          */
         public static function create(string $login, string $password, string $email, string $name = ''): int
         {
+            $login = Sanitize::sanitizeString($login);
+            $email = Sanitize::sanitizeString($email);
+            $name  = Sanitize::sanitizeString($name);
+
             Log::logToFile('Создание нового пользователя', 'User.log', func_get_args());
+            $verificationCode = md5(self::$cryptoSalt . $email . $login . time());
 
             /** @var  $DB DB */
             $DB     = DB::getInstance();
             $userId = $DB->addItem(self::TABLE, [
-                'login'       => $login,
-                'password'    => self::passwordEncryption($password),
-                'name'        => $name,
-                'image_id'    => null,
-                'token'       => '',
-                'email'       => $email,
-                'last_active' => time(),
+                'login'             => $login,
+                'password'          => self::passwordEncryption($password),
+                'name'              => $name,
+                'image_id'          => 0,
+                'token'             => $verificationCode,
+                'email'             => $email,
+                'email_confirmed'   => CODE_VALUE_N,
+                'verification_code' => md5(self::$cryptoSalt . $email . $login . time()),
+                'last_active'       => time(),
             ]);
+            $objectUser = null;
+
             try {
-                (new self($userId))->getRolesObject()->addRole(Roles::USER_ROLE_ID);
+                $objectUser = (new self($userId));
             } catch (CoreException $e) {
-                Log::logToFile('Ошибка создания объекта пользователя для добавления ролей', 'User.log', func_get_args());
-                throw new CoreException('Ошибка создания объекта пользователя для добавления ролей', CoreException::ERROR_CREATE_USER);
+                Log::logToFile('Ошибка создания объекта пользователя', 'User.log', func_get_args());
+                throw new CoreException('Ошибка создания объекта пользователя', CoreException::ERROR_CREATE_USER);
             }
 
+            try {
+                $objectUser->getRolesObject()->addRole(Roles::USER_ROLE_ID);
+            } catch (CoreException $e) {
+                Log::logToFile('Ошибка добавления ролей пользователю', 'User.log', func_get_args());
+                throw new CoreException('Ошибка добавления ролей пользователю', CoreException::ERROR_ADD_USER_ROLES);
+            }
+
+            try {
+                $objectUser->sendVerificationCode();
+            } catch (CoreException $e) {
+                Log::logToFile('Ошибка отправки кода верификации пользователю', 'User.log', func_get_args());
+                throw new CoreException('Ошибка отправки кода верификации пользователю', CoreException::ERROR_SEND_VERIFICATION_CODE);
+            }
 
             return $userId;
         }
 
         public function update(array $fields): bool
         {
+            foreach($fields as $key => $value) {
+                $fields[$key] = Sanitize::sanitizeString($value);
+            }
             $cacheId = md5('User_getAllUserData_' . $this->id);
             /** @var  $DB DB */
             $DB = DB::getInstance();
@@ -450,9 +482,9 @@
                     setcookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']), time() + 3600 * 24);
                 }
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         /**
@@ -482,9 +514,9 @@
                     setcookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']), time() + 3600 * 24);
                 }
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         /**
@@ -497,9 +529,9 @@
         {
             if (self::isAuthorized()) {
                 return $_SESSION['id'];
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         /**
@@ -533,12 +565,10 @@
                     $DB->update(self::TABLE, ['id' => $result['id']], ['last_active' => time()]);
                     $_SESSION['id'] = $result['id'];
                     return true;
-                } else {
-                    return false;
                 }
-            } else {
                 return false;
             }
+            return false;
         }
 
         /**
@@ -548,7 +578,7 @@
          */
         public function isAdmin(): bool
         {
-            return in_array(Roles::ADMIN_ROLE_ID, $this->getRolesObject()->getRoles());
+            return in_array(Roles::ADMIN_ROLE_ID, $this->getRolesObject()->getRoles(), true);
         }
 
         /**
@@ -595,6 +625,19 @@
         }
 
         /**
+         * Получить объект для работы с почтой
+         *
+         * @return Mail
+         */
+        public function getMailObject(): Mail
+        {
+            if (empty($this->mailObject)) {
+                $this->mailObject = (new Mail($this));
+            }
+            return $this->mailObject;
+        }
+
+        /**
          * Экспорт всех данных из таблицы пользователей
          *
          * @return string XML данные
@@ -609,5 +652,46 @@
                 $res[$key]['roles'] = (new self($element['id']))->getRolesObject()->getRoles();
             }
             return SystemFunctions::arrayToXml($res, self::TABLE);
+        }
+
+        /**
+         * Проверка электронной почты на подтвержденность
+         *
+         * @return bool
+         */
+        public function isEmailConfirmed(): bool
+        {
+            return $this->getAllUserData()['email_confirmed'] === CODE_VALUE_Y;
+        }
+        /**
+         * Верификация E-Mail
+         *
+         * @throws CoreException
+         */
+        public static function verification(string $verificationCode): bool
+        {
+            $verificationCode = Sanitize::sanitizeString($verificationCode);
+
+            /** @var  $DB DB */
+            $DB  = DB::getInstance();
+            $res = $DB->getItem(self::TABLE, ['verification_code' => $verificationCode]);
+            if ($res) {
+                (new self($res['id']))->update(['email_confirmed' => CODE_VALUE_Y]);
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Отправка кода верификации пользователю на почту
+         *
+         * @return void
+         */
+        public function sendVerificationCode(): void
+        {
+            $this->getMailObject()
+                 ->setSubject('Подтверждение E-Mail')
+                 ->setBody('Для подтверждения E-Mail перейдите по ссылке: ' . SITE_URL_CORE . '/verification.php?code=' . $this->getAllUserData()['verification_code'])
+                 ->send();
         }
     }

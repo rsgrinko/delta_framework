@@ -39,6 +39,16 @@
         const ERROR_CREATE_USER = 200;
 
         /**
+         * Ошибка добавления ролей пользователю
+         */
+        const ERROR_ADD_USER_ROLES = 201;
+
+        /**
+         * Ошибка отправки кода верификации пользователю
+         */
+        const ERROR_SEND_VERIFICATION_CODE = 202;
+
+        /**
          * Ошибка проверки класса или метода на существование
          */
         const ERROR_CLASS_OR_METHOD_NOT_FOUND = 300;

@@ -40,6 +40,16 @@
     const CORE_PATH = ROOT_PATH . '/core';
 
     /**
+     * Адрес проекта
+     */
+    define('SITE_URL', 'https://' . $_SERVER['SERVER_NAME']);
+
+    /**
+     * Путь до папки ядра
+     */
+    const SITE_URL_CORE = SITE_URL . '/core';
+
+    /**
      * Путь до папки загрузок
      */
     const UPLOADS_PATH = ROOT_PATH . '/uploads';
@@ -104,6 +114,11 @@
     const CODE_VALUE_Y = 'Y';
 
     /**
+     * Код значения Нет
+     */
+    const CODE_VALUE_N = 'N';
+
+    /**
      * Ключ шифрования
      */
     const CRYPTO_KEY = '642a43f13133ea61cb6315bf46c89cd26346bd7b2cda43cee6d17b4a733854639b22b7688582b3cc';
@@ -112,4 +127,14 @@
      * Флаг использования логирования
      */
     const USE_LOG = false;
+
+    /**
+     * E-Mail сайта
+     */
+    const SERVER_EMAIL = 'noreply@dev.it-stories.ru';
+
+    /**
+     * Имя E-Mail сайта
+     */
+    const SERVER_EMAIL_NAME = 'Delta Framework';
 

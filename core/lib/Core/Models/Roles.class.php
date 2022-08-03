@@ -74,7 +74,7 @@
                 $userRoles = [];
                 if (!empty($res)) {
                     foreach ($res as $row) {
-                        $userRoles[] = $row['role_id'];
+                        $userRoles[] = (int)$row['role_id'];
                     }
                 }
                 Cache::set($cacheId, $userRoles);

@@ -25,6 +25,7 @@
       "ext-dom": "*",
       "ext-pdo": "*",
       "ext-gd": "*",
-      "ext-exif": "*"
+      "ext-exif": "*",
+      "ext-mbstring": "*"
     }
 }

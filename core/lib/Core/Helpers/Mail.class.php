@@ -21,6 +21,8 @@
 
     namespace Core\Helpers;
 
+    use Core\Models\User;
+
     /**
      * Класс для отправки E-mail
      */
@@ -51,22 +53,34 @@
         public $body = '';
 
         /**
-         * Тип
-         */
-        public $type = '';
-
-        /**
          * Массив заголовков файлов
          */
         private $_files = [];
 
         /**
-         * От кого
+         * @var User|null $user Объект пользователя
          */
-        public function setFrom($email, $name = null)
+        private $user = null;
+
+        /**
+         * Конструктор
+         */
+        public function __construct(User $user = null) {
+            if($user !== null) {
+                $this->user = $user;
+                $this->setFrom(SERVER_EMAIL, SERVER_EMAIL_NAME)->setTo($user->getEmail(), $user->getName());
+            }
+        }
+        /**
+         * От кого
+         *
+         * @return $this
+         */
+        public function setFrom($email, $name = null): self
         {
             $this->fromEmail = $email;
             $this->fromName  = $name;
+            return $this;
         }
 
         /**
@@ -80,32 +94,32 @@
 
         /**
          * Тема
+         *
+         * @return $this
          */
-        public function setSubject($subject = null)
+        public function setSubject($subject = null): self
         {
             $this->subject = $subject;
+            return $this;
         }
 
         /**
          * Тело письма
+         *
+         * @return $this
          */
-        public function setBody($body = null)
+        public function setBody($body = null): self
         {
             $this->body = $body;
-        }
-
-        /**
-         * Тело письма
-         */
-        public function setType($type = 'html')
-        {
-            $this->type = $type;
+            return $this;
         }
 
         /**
          * Добавление файла к письму
+         *
+         * @return $this
          */
-        public function addFile($filename)
+        public function addFile($filename): self
         {
             if (is_file($filename)) {
                 $name = basename($filename);
@@ -120,6 +134,7 @@
                     chunk_split(base64_encode($file)),
                 ];
             }
+            return $this;
         }
 
         /**
@@ -143,7 +158,7 @@
 
             $subject  = (empty($this->subject)) ? 'No subject' : $this->subject;
             $body     = $this->body;
-            $boundary = md5(uniqid(time()));
+            $boundary = md5(uniqid(time(), true));
             $headers  = [
                 'Content-Type: multipart/mixed; boundary="' . $boundary . '"',
                 'Content-Transfer-Encoding: 7bit',

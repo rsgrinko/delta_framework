@@ -71,7 +71,7 @@
                                     <td><?= $elUser['login']; ?></td>
                                     <td><?= $elUser['password']; ?></td>
                                     <td><?= $elUser['name']; ?></td>
-                                    <td><?= $elUser['email']; ?></td>
+                                    <td><?= $elUser['email']; ?> <?=$userObject->isEmailConfirmed() ? '(Подтвержден)' : '' ?></td>
                                     <td><?php
                                             $image = $userObject->getImage();
                                             if (!empty($image)) {
