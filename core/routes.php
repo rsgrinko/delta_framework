@@ -29,6 +29,9 @@
         echo '404 - Page Not Found';
     });
 
+    Router::route('/sections', '\Core\App::sections');
+    Router::route('/section/(\d+)', '\Core\App::section');
+
     Router::route('blog/(\w+)/(\d+)', function ($category, $id) {
         echo $category . ':' . $id;
     });

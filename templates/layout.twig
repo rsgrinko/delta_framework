@@ -1,28 +1,195 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html class="no-js" lang="ru">
 <head>
+
+    <!--- basic page needs
+    ================================================== -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
-    <title>{% block title %}Тестовый заголовок{% endblock %}</title>
-    <style>
-        main > .container {
-            margin-top: 20px;
-        }
-    </style>
+    <title>{% block title %}Delta Framework{% endblock %}</title>
+    <meta name="description" content="Delta Framework">
+    <meta name="author" content="Delta Framework">
+
+    <!-- mobile specific metas
+    ================================================== -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- CSS
+    ================================================== -->
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <link rel="stylesheet" href="/assets/css/vendor.css">
+    <link rel="stylesheet" href="/assets/css/main.css">
+
+    <!-- script
+    ================================================== -->
+    <script src="/assets/js/modernizr.js"></script>
+
+    <!-- favicons
+    ================================================== -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
 </head>
-<body>
-<main>
-    {{ include('parts/navbar/navbar.twig', {'navbarItems': navbarItems}) }}
-<div class="container">
-        <div class="row justify-content-md-center">
-            <div class="col-md">
-                {% block content %}{% endblock %}
-            </div>
-        </div>
+
+<body id="top">
+
+<!-- preloader
+================================================== -->
+<div id="preloader">
+    <div id="loader" class="dots-fade">
+        <div></div>
+        <div></div>
+        <div></div>
     </div>
-</main>
-{{ include('parts/footer.twig') }}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</div>
+
+<!-- header
+================================================== -->
+<header class="s-header header">
+
+    <div class="header__logo">
+        <a class="logo" href="index.html">
+            <img src="/assets/images/logo.svg" alt="Homepage">
+        </a>
+    </div> <!-- end header__logo -->
+
+    <a class="header__search-trigger" href="#0"></a>
+    <div class="header__search">
+
+        <form role="search" method="get" class="header__search-form" action="#">
+            <label>
+                <span class="hide-content">Что ищем:</span>
+                <input type="search" class="search-field" placeholder="Введите ключевые слова" value="" name="s" title="Что ищем:" autocomplete="off">
+            </label>
+            <input type="submit" class="search-submit" value="Поиск">
+        </form>
+
+        <a href="#0" title="Close Search" class="header__overlay-close">Close</a>
+
+    </div>  <!-- end header__search -->
+
+    <a class="header__toggle-menu" href="#0" title="Menu"><span>Menu</span></a>
+    <nav class="header__nav-wrap">
+
+        <h2 class="header__nav-heading h6">Меню</h2>
+
+        <ul class="header__nav">
+            <li class="current"><a href="index.html" title="">Главная</a></li>
+            <li class="has-children">
+                <a href="/sections" title="">Статьи</a>
+                <ul class="sub-menu">
+                    {% for section in sections %}
+                        <li><a href="/section/{{ section.id }}">{{ section.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li class="has-children">
+                <a href="#0" title="">Блок</a>
+                <ul class="sub-menu">
+                    <li><a href="single-video.html">Видео</a></li>
+                    <li><a href="single-audio.html">Подкасты</a></li>
+                    <li><a href="single-standard.html">Стандартный пост</a></li>
+                </ul>
+            </li>
+            <li><a href="style-guide.html" title="">Стили</a></li>
+            <li><a href="page-about.html" title="">Обо мне</a></li>
+            <li><a href="page-contact.html" title="">Контакты</a></li>
+        </ul> <!-- end header__nav -->
+
+        <a href="#0" title="Close Menu" class="header__overlay-close close-mobile-menu">Закрыть</a>
+
+    </nav> <!-- end header__nav-wrap -->
+
+</header> <!-- s-header -->
+
+{% block main %}{% endblock %}
+
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+
+    <div class="s-footer__main">
+        <div class="row">
+
+            <div class="col-six tab-full s-footer__about">
+
+                <h4>About Wordsmith</h4>
+
+                <p>Fugiat quas eveniet voluptatem natus. Placeat error temporibus magnam sunt optio aliquam. Ut ut occaecati placeat at.
+                    Fuga fugit ea autem. Dignissimos voluptate repellat occaecati minima dignissimos mollitia consequatur.
+                    Sit vel delectus amet officiis repudiandae est voluptatem. Tempora maxime provident nisi et fuga et enim exercitationem ipsam. Culpa error
+                    temporibus magnam est voluptatem.</p>
+
+            </div> <!-- end s-footer__about -->
+
+            <div class="col-six tab-full s-footer__subscribe">
+
+                <h4>Our Newsletter</h4>
+
+                <p>Sit vel delectus amet officiis repudiandae est voluptatem. Tempora maxime provident nisi et fuga et enim exercitationem ipsam. Culpa consequatur occaecati.</p>
+
+                <div class="subscribe-form">
+                    <form id="mc-form" class="group" novalidate="true">
+
+                        <input type="email" value="" name="EMAIL" class="email" id="mc-email" placeholder="Email Address" required="">
+
+                        <input type="submit" name="subscribe" value="Send">
+
+                        <label for="mc-email" class="subscribe-message"></label>
+
+                    </form>
+                </div>
+
+            </div> <!-- end s-footer__subscribe -->
+
+        </div>
+    </div> <!-- end s-footer__main -->
+
+    <div class="s-footer__bottom">
+        <div class="row">
+
+            <div class="col-six">
+                <ul class="footer-social">
+                    <li>
+                        <a href="#0"><i class="fab fa-facebook"></i></a>
+                    </li>
+                    <li>
+                        <a href="#0"><i class="fab fa-twitter"></i></a>
+                    </li>
+                    <li>
+                        <a href="#0"><i class="fab fa-instagram"></i></a>
+                    </li>
+                    <li>
+                        <a href="#0"><i class="fab fa-youtube"></i></a>
+                    </li>
+                    <li>
+                        <a href="#0"><i class="fab fa-pinterest"></i></a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-six">
+                <div class="s-footer__copyright">
+                        <span><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+</span>
+                </div>
+            </div>
+
+        </div>
+    </div> <!-- end s-footer__bottom -->
+
+    <div class="go-top">
+        <a class="smoothscroll" title="Back to Top" href="#top"></a>
+    </div>
+
+</footer> <!-- end s-footer -->
+
+
+<!-- Java Script
+================================================== -->
+<script src="/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/assets/js/plugins.js"></script>
+<script src="/assets/js/main.js"></script>
 </body>
 </html>

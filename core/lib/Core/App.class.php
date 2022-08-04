@@ -21,28 +21,49 @@
 
     namespace Core;
 
+    use Core\Models\Posts;
+
     class App
     {
         public static function index()
         {
             global $twig, $USER;
-            $navbarItems = [
-                ['name' => 'Главная', 'url' => '/', 'active' => true],
-                ['name' => 'Админка', 'url' => '/admin', 'active' => false],
-                ['name' => 'Командная PHP строка', 'url' => '/phpcmd.php', 'active' => false],
-                ['name' => 'Тест', 'url' => '/test', 'active' => false],
-            ];
             $userData = $USER ? $USER->getAllUserData() : '';
             $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
             echo $twig->render(
                 'index.twig',
                 [
-                    'navbarItems' => $navbarItems,
-                    'name' => $USER ? $USER->getName() : '',
-                    'emailConfirmed' => $USER ? $USER->isEmailConfirmed() : false,
-                    'user' => $USER,
-                    'userData' => $userData,
-                    'userRoles' => $userRoles
+                    'sections' => (new Posts())->getMainSections(),
+                    'user' => $USER ? $USER->getAllUserData() : null,
+                ]
+            );
+        }
+
+        public static function sections()
+        {
+            global $twig, $USER;
+            $userData = $USER ? $USER->getAllUserData() : '';
+            $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
+            echo $twig->render(
+                'sections.twig',
+                [
+                    'sections' => (new Posts())->getMainSections(),
+                    'user' => $USER ? $USER->getAllUserData() : null,
+                ]
+            );
+        }
+
+        public static function section($sectionId)
+        {
+            global $twig, $USER;
+            $userData = $USER ? $USER->getAllUserData() : '';
+            $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
+            echo $twig->render(
+                'section.twig',
+                [
+                    'sections' => (new Posts())->getMainSections(),
+                    'user' => $USER ? $USER->getAllUserData() : null,
+                    'sectionId' => $sectionId,
                 ]
             );
         }

@@ -117,10 +117,19 @@
 
             $sql = 'SELECT count(*) as count FROM ' . self::TABLE;
             if (!empty($this->sectionId)) {
-                $sql .= ' WHERE section_id="' . $this->sectionId . '"';
+                $sql .= ' WHERE section_id = "' . $this->sectionId . '"';
             }
             $res = $DB->query($sql);
             return  $res ? (int)$res[0]['count'] : 0;
+        }
+
+        public function getMainSections(): array
+        {
+            /** @var  $DB DB */
+            $DB = DB::getInstance();
+
+            $res = $DB->query('SELECT id, name, description, image_id FROM ' . self::TABLE_SECTIONS .' WHERE parrent_id = 0');
+            return  $res ?: [];
         }
 
 
