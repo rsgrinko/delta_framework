@@ -63,7 +63,7 @@
         /**
          * Таблица с пользователями
          */
-        const TABLE = 'users';
+        private const TABLE = 'users';
 
         /**
          * @var string $cryptoSalt Соль для шифрования
@@ -310,6 +310,34 @@
             } else {
                 return false;
             }
+        }
+
+        /**
+         * Получить объект пользователя по ID при его существовании
+         *
+         * @throws CoreException
+         */
+        public static function getById(int $id): ?self
+        {
+            if(self::isUserExistsByParams(['id' => $id])) {
+                return new self($id);
+            }
+            return null;
+        }
+
+        /**
+         * Получение строки с данными о пользователе по ID
+         *
+         * @return string [123] (admin) Роман
+         * @throws CoreException
+         */
+        public static function getInfoById(int $id): string
+        {
+            if (self::isUserExistsByParams(['id' => $id])) {
+                $objectUser = new self($id);
+                return '[' . $id . '] (' . $objectUser->getLogin() . ') ' . $objectUser->getName();
+            }
+            return 'Неизвестно';
         }
 
         /**

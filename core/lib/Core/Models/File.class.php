@@ -155,6 +155,7 @@
          * Получение файла по идентификатору
          *
          * @return array|null
+         * @throws CoreException
          */
         public function getAllProps(): ?array
         {
