@@ -5,12 +5,17 @@
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-    тут текст главной страницы<br>
+    <h1>Главная страница Delta Framwrork</h1>
     {% if user %}
-        Hello, {{ user.name }}!<br>
-        Your ID: {{ user.id }}<br>
-        <pre>{{ dump(user) }}}}</pre>
+        Добро пожаловать, {{ user.name }}!<br>
+        Ваш ID: {{ user.id }}<br>
+        {% if emailConfirmed == false %}
+            Email требует подтверждения<br>
+        {% endif %}
+        <!--<pre>{{ dump(user) }}}}</pre>
         <pre>{{ dump(userData) }}</pre>
-        <pre>{{ dump(userRoles) }}</pre>
+        <pre>{{ dump(userRoles) }}</pre>-->
+    {% else %}
+        Вы не авторизованы в системе
     {% endif %}
 {% endblock %}

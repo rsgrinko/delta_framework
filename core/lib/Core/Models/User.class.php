@@ -93,6 +93,7 @@
          * Получение аватара пользователя
          *
          * @return array|null
+         * @throws CoreException
          */
         public function getImage(): ?array
         {
@@ -113,6 +114,7 @@
          * Получение всех полей пользователя
          *
          * @return array|null
+         * @throws CoreException
          */
         public function getAllUserData(): ?array
         {
@@ -121,6 +123,7 @@
                 $result = Cache::get($cacheId);
             } else {
                 $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
+                $result = array_merge($result, ['roles' => $this->getRolesObject()->getRoles()]);
                 Cache::set($cacheId, $result);
             }
 
@@ -135,6 +138,7 @@
          * Получение логина текущего пользователя
          *
          * @return string|null
+         * @throws CoreException
          */
         public function getLogin(): ?string
         {
@@ -145,6 +149,7 @@
          * Получение E-Mail'а текущего пользователя
          *
          * @return string|null
+         * @throws CoreException
          */
         public function getEmail(): ?string
         {
@@ -155,6 +160,7 @@
          * Получение имени текущего пользователя
          *
          * @return string|null
+         * @throws CoreException
          */
         public function getName(): ?string
         {
@@ -165,6 +171,7 @@
          * Получение токена текущего пользователя
          *
          * @return string|null
+         * @throws CoreException
          */
         public function getToken(): ?string
         {
@@ -172,13 +179,14 @@
         }
 
         /**
-         * Получение времени ппоследней активности
+         * Получение времени последней активности
          *
          * @return string|null
+         * @throws CoreException
          */
-        public function getLastActive(): ?string
+        public function getLastActive(): ?int
         {
-            return $this->getAllUserData() ? $this->getAllUserData()['last_active'] : null;
+            return $this->getAllUserData() ? (int)$this->getAllUserData()['last_active'] : null;
         }
 
         /**
@@ -188,13 +196,14 @@
          */
         public function getId(): ?int
         {
-            return $this->getAllUserData() ? $this->getAllUserData()['id'] : null;
+            return $this->id;
         }
 
         /**
          * Получение кода верификации
          *
          * @return string|null
+         * @throws CoreException
          */
         public function getVerificationCode(): ?string
         {
@@ -362,10 +371,10 @@
                 'password'          => self::passwordEncryption($password),
                 'name'              => $name,
                 'image_id'          => 0,
-                'token'             => $verificationCode,
+                'token'             => null,
                 'email'             => $email,
                 'email_confirmed'   => CODE_VALUE_N,
-                'verification_code' => md5(self::$cryptoSalt . $email . $login . time()),
+                'verification_code' => $verificationCode,
                 'last_active'       => time(),
             ]);
             $objectUser = null;
@@ -395,6 +404,14 @@
             return $userId;
         }
 
+        /**
+         * Обновление данных пользователя
+         *
+         * @param array $fields Массив полей для обновления
+         *
+         * @return bool
+         * @throws CoreException
+         */
         public function update(array $fields): bool
         {
             foreach($fields as $key => $value) {
@@ -439,13 +456,13 @@
         }
 
         /**
-         * Считает количество пользователей
+         * Получение количества пользователей
          *
          * @return int
          */
-        public static function countUsers(): int
+        public static function getAllCount(): int
         {
-            $cacheId = md5('countUsers');
+            $cacheId = md5('User::getAllCount');
             if (Cache::check($cacheId) && Cache::getAge($cacheId) < 300) {
                 $result = Cache::get($cacheId);
             } else {
@@ -587,6 +604,7 @@
          * Проверка на админа
          *
          * @return bool
+         * @throws CoreException
          */
         public function isAdmin(): bool
         {
@@ -670,6 +688,7 @@
          * Проверка электронной почты на подтвержденность
          *
          * @return bool
+         * @throws CoreException
          */
         public function isEmailConfirmed(): bool
         {
@@ -700,9 +719,14 @@
          * Отправка кода верификации пользователю на почту
          *
          * @return void
+         * @throws CoreException
          */
         public function sendVerificationCode(): void
         {
+            if (empty($this->getAllUserData()['verification_code'])) {
+                Log::logToFile('Ошибка отправки кода верификации: код отсутствует', 'User.log', ['userId' => $this->id]);
+                throw new CoreException('Ошибка отправки кода верификации: код отсутствует');
+            }
             Log::logToFile('Выслан код верификаци', 'User.log', ['userId' => $this->id, 'code' => $this->getAllUserData()['verification_code']]);
             $this->getMailObject()
                  ->setSubject('Подтверждение E-Mail')

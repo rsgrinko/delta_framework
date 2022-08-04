@@ -19,6 +19,7 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
+    use Core\Helpers\Pagination;
     use Core\Models\User;
 
     require_once __DIR__ . '/inc/header.php';
@@ -62,7 +63,10 @@
                         </thead>
                         <tbody>
                         <?php
-                            $arUsers = User::getUsers();
+                            Pagination::execute($_REQUEST['page'], User::getAllCount(), PAGINATION_LIMIT);
+                            $limit = Pagination::getLimit();
+
+                            $arUsers = User::getUsers($limit);
                             foreach ($arUsers as $elUser) {
                                 $userObject = new User($elUser['id']);
                                 ?>
@@ -97,6 +101,7 @@
                         </tbody>
                     </table>
                 </div><!-- table-responsive -->
+                <?php Pagination::show('page') ?>
             </div>
         </div>
         <!-- end table -->

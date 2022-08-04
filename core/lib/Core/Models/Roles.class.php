@@ -21,6 +21,7 @@
 
     namespace Core\Models;
 
+    use Core\CoreException;
     use Core\Helpers\Cache;
     use Core\Models\User;
 
@@ -60,10 +61,11 @@
          * Получение ролей пользователя
          *
          * @return array
+         * @throws CoreException
          */
         public function getRoles(): array
         {
-            $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
+            $cacheId = md5(__CLASS__ . '::' . __FUNCTION__ . '_' . $this->user->getId());
             if (Cache::check($cacheId)) {
                 $userRoles = Cache::get($cacheId);
             } else {
@@ -88,10 +90,11 @@
          * @param int $roleId ID роли
          *
          * @return int|null
+         * @throws CoreException
          */
         public function addRole(int $roleId): ?int
         {
-            $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
+            $cacheId = md5(__CLASS__ . '::' . __FUNCTION__ . '_' . $this->user->getId());
             Cache::delete($cacheId);
 
             /** @var  $DB DB */
@@ -105,10 +108,11 @@
          * @param int $roleId ID роли
          *
          * @return int|null
+         * @throws CoreException
          */
         public function deleteRole(int $roleId): ?int
         {
-            $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
+            $cacheId = md5(__CLASS__ . '::' . __FUNCTION__);
             Cache::delete($cacheId);
 
             /** @var  $DB DB */
@@ -119,14 +123,33 @@
         /**
          * Получение полной информации о ролях пользователя
          *
+         * @deprecated Реализован новый метод для получения этих данных
          * @return array|null
+         * @throws CoreException
          */
-        public function getFullRoles(): ?array
+        public function getFullRolesOld(): ?array
         {
             return array_map(function ($element) {
                 return static::getAllRoles()[$element];
             },
                 $this->getRoles());
+        }
+
+        /**
+         * Получение полной информации о ролях пользователя V2
+         *
+         * @return array|null
+         * @throws CoreException
+         */
+        public function getFullRoles(): ?array
+        {
+            /** @var  $DB DB */
+            $DB = DB::getInstance();
+            return $DB->query(
+                'SELECT ' . self::ROLES_TABLE . '.id, ' . self::ROLES_TABLE . '.name, ' . self::ROLES_TABLE . '.description FROM '
+                . self::USER_ROLES_TABLE . ' left JOIN ' . self::ROLES_TABLE . ' ON  ' . self::USER_ROLES_TABLE . '.role_id = ' . self::ROLES_TABLE
+                . '.id WHERE ' . self::USER_ROLES_TABLE . '.user_id = "' . $this->user->getId() . '"'
+            ) ?: [];
         }
 
         /**
@@ -137,7 +160,7 @@
          */
         public static function getAllRoles(): ?array
         {
-            $cacheId = md5('Roles::getAllRoles');
+            $cacheId = md5(__CLASS__ . '::' . __FUNCTION__);
             if (Cache::check($cacheId)) {
                 $roles = Cache::get($cacheId);
             } else {

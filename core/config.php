@@ -60,6 +60,11 @@
     define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');
 
     /**
+     * Количество элементов на странице
+     */
+    const PAGINATION_LIMIT = 10;
+
+    /**
      * Параметры SQL базы
      */
     const DB_HOST     = 'localhost';

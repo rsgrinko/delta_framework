@@ -34,7 +34,17 @@
             ];
             $userData = $USER ? $USER->getAllUserData() : '';
             $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
-            echo $twig->render('index.twig', ['navbarItems' => $navbarItems, 'name' => 'Roman Grinko', 'user' => $USER, 'userData' => $userData, 'userRoles' => $userRoles]);
+            echo $twig->render(
+                'index.twig',
+                [
+                    'navbarItems' => $navbarItems,
+                    'name' => $USER ? $USER->getName() : '',
+                    'emailConfirmed' => $USER ? $USER->isEmailConfirmed() : false,
+                    'user' => $USER,
+                    'userData' => $userData,
+                    'userRoles' => $userRoles
+                ]
+            );
         }
 
         public static function test(int $id = 1)
