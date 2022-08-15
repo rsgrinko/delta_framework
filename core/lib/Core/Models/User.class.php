@@ -272,9 +272,9 @@
             $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
             if ($result) {
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         /**
@@ -290,9 +290,9 @@
             $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
             if ($result) {
                 return (new self($result['id']));
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         /**
@@ -307,9 +307,9 @@
             $result = (DB::getInstance())->getItem(self::TABLE, $where);
             if (!empty($result)) {
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         /**
@@ -319,7 +319,7 @@
          */
         public static function getById(int $id): ?self
         {
-            if(self::isUserExistsByParams(['id' => $id])) {
+            if (self::isUserExistsByParams(['id' => $id])) {
                 return new self($id);
             }
             return null;
@@ -354,9 +354,9 @@
             $timeNow     = time();
             if ($last_active > ($timeNow - USER_ONLINE_TIME)) {
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         /**
@@ -386,15 +386,15 @@
         public static function create(string $login, string $password, string $email, string $name = ''): int
         {
             $login = Sanitize::sanitizeString($login);
-            $email = Sanitize::sanitizeString($email);
+            $email = Sanitize::sanitizeEmail($email);
             $name  = Sanitize::sanitizeString($name);
 
             Log::logToFile('Создание нового пользователя', 'User.log', func_get_args());
             $verificationCode = md5(self::$cryptoSalt . $email . $login . time());
 
-            /** @var  $DB DB */
-            $DB     = DB::getInstance();
-            $userId = $DB->addItem(self::TABLE, [
+            /** @var $DB DB Объект базы данных */
+            $DB         = DB::getInstance();
+            $userId     = $DB->addItem(self::TABLE, [
                 'login'             => $login,
                 'password'          => self::passwordEncryption($password),
                 'name'              => $name,
@@ -429,6 +429,10 @@
             }
             Log::logToFile('Пользователь успешно создан', 'User.log', ['userId' => $userId]);
 
+            $objectUser->getMailObject()->setSubject('Регистрация на сайте')->setBody(
+                    '<b>Логин:</b> ' . $objectUser->getLogin() . PHP_EOL . '<b>Пароль:</b> ' . $password
+                )->setTemplateVars(['TITLE' => 'Создана учетная запись'])->send();
+
             return $userId;
         }
 
@@ -442,16 +446,14 @@
          */
         public function update(array $fields): bool
         {
-            foreach($fields as $key => $value) {
+            foreach ($fields as $key => $value) {
                 $fields[$key] = Sanitize::sanitizeString($value);
             }
             $cacheId = md5('User_getAllUserData_' . $this->id);
-            /** @var  $DB DB */
+            /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
             Log::logToFile(
-                'Данные пользователя изменены',
-                'User.log',
-                ['userId' => $this->id, 'before' => $this->getAllUserData(), 'after' => func_get_args()]
+                'Данные пользователя изменены', 'User.log', ['userId' => $this->id, 'before' => $this->getAllUserData(), 'after' => func_get_args()]
             );
             Cache::delete($cacheId);
             return $DB->update(self::TABLE, ['id' => $this->id], $fields);
@@ -470,7 +472,7 @@
             if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
-                /** @var  $DB DB */
+                /** @var $DB DB Объект базы данных */
                 $DB     = DB::getInstance();
                 $result = $DB->getItem(self::TABLE, ['login' => $login]);
                 Cache::set($cacheId, $result);
@@ -494,7 +496,7 @@
             if (Cache::check($cacheId) && Cache::getAge($cacheId) < 300) {
                 $result = Cache::get($cacheId);
             } else {
-                /** @var  $DB DB */
+                /** @var $DB DB Объект базы данных */
                 $DB     = DB::getInstance();
                 $result = $DB->getItems(self::TABLE, ['id' => '>0']);
                 Cache::set($cacheId, $result);
@@ -518,11 +520,11 @@
          */
         public static function authorize(?int $id = null, bool $remember = false): bool
         {
-            if (empty($id)) {
+            if ($id === null) {
                 throw new CoreException('Передан некорректный идентификатор пользователя');
             }
             self::logout();
-            /** @var  $DB DB */
+            /** @var $DB DB Объект базы данных */
             $DB     = DB::getInstance();
             $result = $DB->getItem(self::TABLE, ['id' => $id], true);
 
@@ -555,7 +557,7 @@
          */
         public static function securityAuthorize(string $login, string $password, bool $remember = false): bool
         {
-            /** @var  $DB DB */
+            /** @var $DB DB Объект базы данных */
             $DB     = DB::getInstance();
             $result = $DB->getItem(self::TABLE, ['login' => $login, 'password' => self::passwordEncryption($password)], true);
             if ($result) {
@@ -599,7 +601,7 @@
          */
         public static function isAuthorized(): bool
         {
-            /** @var  $DB DB */
+            /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
 
             if (!empty($_COOKIE['userId'])
@@ -703,7 +705,7 @@
          */
         public static function exportUsers(): string
         {
-            /** @var  $DB DB */
+            /** @var $DB DB Объект базы данных */
             $DB  = DB::getInstance();
             $res = $DB->query('SELECT * FROM ' . self::TABLE);
             foreach ($res as $key => $element) {
@@ -722,6 +724,7 @@
         {
             return $this->getAllUserData()['email_confirmed'] === CODE_VALUE_Y;
         }
+
         /**
          * Верификация E-Mail
          *
@@ -731,10 +734,14 @@
         {
             $verificationCode = Sanitize::sanitizeString($verificationCode);
 
-            /** @var  $DB DB */
+            /** @var $DB DB Объект базы данных */
             $DB  = DB::getInstance();
             $res = $DB->getItem(self::TABLE, ['verification_code' => $verificationCode]);
             if ($res) {
+                if ($res['email_confirmed'] === CODE_VALUE_Y) {
+                    Log::logToFile('E-Mail уже верифицирован', 'User.log', ['userId' => $res['id'], 'code' => $verificationCode]);
+                    return false;
+                }
                 (new self($res['id']))->update(['email_confirmed' => CODE_VALUE_Y]);
                 Log::logToFile('E-Mail успешно верифицирован', 'User.log', ['userId' => $res['id'], 'code' => $verificationCode]);
                 return true;
@@ -756,10 +763,27 @@
                 throw new CoreException('Ошибка отправки кода верификации: код отсутствует');
             }
             Log::logToFile('Выслан код верификаци', 'User.log', ['userId' => $this->id, 'code' => $this->getAllUserData()['verification_code']]);
-            return (bool)$this->getMailObject()
-                 ->setSubject('Подтверждение E-Mail')
-                 ->setBody('Код верификации: <b>' . $this->getVerificationCode() . '</b>' . PHP_EOL . 'Для подтверждения E-Mail перейдите по <a href="' . SITE_URL_CORE . '/verification.php?code=' . $this->getVerificationCode() . '">ссылке</a>')
-                 ->setTemplateVars(['TITLE' => 'Подтверждение E-Mail'])
-                 ->send()[0];
+            return (bool)$this->getMailObject()->setSubject('Подтверждение E-Mail')->setBody(
+                    'Код верификации: <b>' . $this->getVerificationCode() . '</b>' . PHP_EOL . 'Для подтверждения E-Mail перейдите по <a href="'
+                    . SITE_URL_CORE . '/verification.php?code=' . $this->getVerificationCode() . '">ссылке</a>'
+                )->setTemplateVars(['TITLE' => 'Подтверждение E-Mail'])->send()[0];
+        }
+
+        public function resetPassword(): bool
+        {
+            $newPassword = SystemFunctions::generatePassword();
+
+            try {
+                $this->update(['password' => self::passwordEncryption($newPassword)]);
+            } catch (CoreException $e) {
+                return false;
+            }
+
+            Log::logToFile('Произведен сброс пароля', 'User.log', ['userId' => $this->id, 'password' => $newPassword]);
+
+            $this->getMailObject()->setSubject('Произведен сброс пароля')->setBody(
+                    '<b>Логин:</b> ' . $this->getLogin() . PHP_EOL . '<b>Пароль:</b> ' . $newPassword
+                )->setTemplateVars(['TITLE' => 'Ваши учетные данные'])->send();
+            return true;
         }
     }

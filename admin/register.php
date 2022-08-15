@@ -20,6 +20,7 @@
      */
 
     use Core\Models\User;
+    use Core\CoreException;
 
     require_once __DIR__ . '/inc/bootstrap.php';
     if (User::isAuthorized()) {
@@ -44,10 +45,14 @@
             }
 
             if (empty($arErrors)) {
-                $userId = User::create($_REQUEST['login'], $_REQUEST['pass'], $_REQUEST['email'], $_REQUEST['name']);
+                try {
+                    $userId = User::create($_REQUEST['login'], $_REQUEST['pass'], $_REQUEST['email'], $_REQUEST['name']);
 
-                User::authorize($userId);
-                header('Location: index.php');
+                    User::authorize($userId);
+                    header('Location: index.php');
+                } catch (CoreException $e){
+                    $arErrors[] = $e->getMessage();
+                }
             }
         }
 
