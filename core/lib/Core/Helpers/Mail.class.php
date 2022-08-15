@@ -86,11 +86,14 @@
 
         /**
          * Кому
+         *
+         * @return $this
          */
-        public function setTo($email, $name = null)
+        public function setTo($email, $name = null): self
         {
             $this->toEmail = $email;
             $this->toName  = $name;
+            return $this;
         }
 
         /**
