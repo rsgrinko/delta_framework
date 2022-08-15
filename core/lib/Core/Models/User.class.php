@@ -746,19 +746,20 @@
         /**
          * Отправка кода верификации пользователю на почту
          *
-         * @return void
+         * @return bool Результат отправки
          * @throws CoreException
          */
-        public function sendVerificationCode(): void
+        public function sendVerificationCode(): bool
         {
             if (empty($this->getAllUserData()['verification_code'])) {
                 Log::logToFile('Ошибка отправки кода верификации: код отсутствует', 'User.log', ['userId' => $this->id]);
                 throw new CoreException('Ошибка отправки кода верификации: код отсутствует');
             }
             Log::logToFile('Выслан код верификаци', 'User.log', ['userId' => $this->id, 'code' => $this->getAllUserData()['verification_code']]);
-            $this->getMailObject()
+            return (bool)$this->getMailObject()
                  ->setSubject('Подтверждение E-Mail')
-                 ->setBody('Для подтверждения E-Mail перейдите по ссылке: ' . SITE_URL_CORE . '/verification.php?code=' . $this->getVerificationCode())
-                 ->send();
+                 ->setBody('Код верификации: <b>' . $this->getVerificationCode() . '</b>' . PHP_EOL . 'Для подтверждения E-Mail перейдите по <a href="' . SITE_URL_CORE . '/verification.php?code=' . $this->getVerificationCode() . '">ссылке</a>')
+                 ->setTemplateVars(['TITLE' => 'Подтверждение E-Mail'])
+                 ->send()[0];
         }
     }

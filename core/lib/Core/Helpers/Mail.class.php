@@ -21,6 +21,7 @@
 
     namespace Core\Helpers;
 
+    use Core\CoreException;
     use Core\Models\User;
     use Core\Helpers\Log;
 
@@ -59,6 +60,16 @@
         private $_files = [];
 
         /**
+         * Почтовый шаблон
+         */
+        private $templateName = null;
+
+        /**
+         * Массив переменных шаблона
+         */
+        private $templateVars = [];
+
+        /**
          * @var User|null $user Объект пользователя
          */
         private $user = null;
@@ -69,9 +80,55 @@
         public function __construct(User $user = null) {
             if($user !== null) {
                 $this->user = $user;
-                $this->setFrom(SERVER_EMAIL, SERVER_EMAIL_NAME)->setTo($user->getEmail(), $user->getName());
+                $this->setFrom(SERVER_EMAIL, SERVER_EMAIL_NAME)
+                     ->setTo($user->getEmail(), $user->getName())
+                     ->setTemplate(MAIL_TEMPLATE_DEFAULT);
             }
         }
+
+        /**
+         * Использовать шаблон
+         *
+         * @param string $templateName Имя шаблона
+         *
+         * @return $this
+         */
+        public function setTemplate(string $templateName): self
+        {
+            if(!file_exists(MAIL_TEMPLATES_PATH . '/' . $templateName . '.html')) {
+                throw new CoreException('Шаблон "' . $templateName . '" не найден');
+            }
+            $this->templateName = $templateName;
+            return $this;
+        }
+
+        /**
+         * Определение переменных шаблона
+         *
+         * @param array $templateVars Массив переменных шаблона
+         *
+         * @return $this
+         */
+        public function setTemplateVars(array $templateVars): self
+        {
+            foreach($templateVars as $key => $value){
+                $this->templateVars['{' . $key . '}'] =  $value;
+            }
+
+            return $this;
+        }
+
+        private function messageConversionForTemplate(): self
+        {
+            $mailTemplate = file_get_contents(MAIL_TEMPLATES_PATH . '/' . $this->templateName . '.html');
+            $this->body = str_replace("\r\n", PHP_EOL, $this->body);
+            $this->body = str_replace("\n\n", PHP_EOL, $this->body);
+            $this->body = str_replace(PHP_EOL, '<br>', $this->body);
+            $this->templateVars['{BODY}'] = $this->body;
+            $this->body = str_replace(array_keys($this->templateVars), array_values($this->templateVars), $mailTemplate);
+            return $this;
+        }
+
         /**
          * От кого
          *
@@ -161,6 +218,9 @@
             }
 
             $subject  = (empty($this->subject)) ? 'No subject' : $this->subject;
+            if($this->templateName !== null) {
+                $this->messageConversionForTemplate();
+            }
             $body     = $this->body;
             $boundary = md5(uniqid(time(), true));
             $headers  = [

@@ -55,6 +55,16 @@
     const UPLOADS_PATH = ROOT_PATH . '/uploads';
 
     /**
+     * Путь до папки почтовых шаблонов
+     */
+    const MAIL_TEMPLATES_PATH = CORE_PATH . '/mail_templates';
+
+    /**
+     * Почтовый шаблон по умолчанию
+     */
+    const MAIL_TEMPLATE_DEFAULT = 'default';
+
+    /**
      * Путь до директории с логами
      */
     define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');
