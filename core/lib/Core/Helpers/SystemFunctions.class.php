@@ -376,7 +376,7 @@
         {
             $num = $value % 100;
             if ($num > 19) {
-                $num = $num % 10;
+                $num %= 10;
             }
 
             switch ($num) {
@@ -409,19 +409,19 @@
             $res = '';
 
             $days = floor($secs / 86400);
-            $secs = $secs % 86400;
+            $secs %= 86400;
             if ($days > 0) {
                 $res .= $days . ' ' . self::numWord($days, ['день', 'дня', 'дней']) . ', ';
             }
 
             $hours = floor($secs / 3600);
-            $secs  = $secs % 3600;
+            $secs  %= 3600;
             if ($hours > 0) {
                 $res .= $hours . ' ' . self::numWord($hours, ['час', 'часа', 'часов']) . ', ';
             }
 
             $minutes = floor($secs / 60);
-            $secs    = $secs % 60;
+            $secs    %= 60;
             if ($minutes > 0) {
                 $res .= $minutes . ' ' . self::numWord($minutes, ['минута', 'минуты', 'минут']) . ', ';
             }
@@ -491,7 +491,6 @@
                 'э' => 'e',
                 'ю' => 'yu',
                 'я' => 'ya',
-
                 'А' => 'A',
                 'Б' => 'B',
                 'В' => 'V',

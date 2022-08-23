@@ -15,7 +15,7 @@
     $tg = new Telegram2(TELEGRAM_BOT_TOKEN);
     $tg->setRemoteRequest($data);
 
-    $res = $tg->setChat(TELEGRAM_ADMIN_CHAT_ID)->updateMessage(121, '');
+    //$res = $tg->setChat(TELEGRAM_ADMIN_CHAT_ID)->updateMessage(121, '');
 
 
-   sendTelegram(print_r($res, true));
+   sendTelegram(print_r($data, true));

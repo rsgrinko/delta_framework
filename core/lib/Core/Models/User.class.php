@@ -181,7 +181,7 @@
         /**
          * Получение времени последней активности
          *
-         * @return string|null
+         * @return int|null
          * @throws CoreException
          */
         public function getLastActive(): ?int
