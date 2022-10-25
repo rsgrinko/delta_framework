@@ -80,7 +80,7 @@
         /**
          * Лимит количества запущенных воркеров
          */
-        const WORKERS_LIMIT = 5;
+        const WORKERS_LIMIT = 2;
 
         /**
          * @var DB|null $DB Объект базы
@@ -349,7 +349,7 @@
                 }
                 return;
             }
-            $this->run(true);
+            //$this->run(true);
         }
 
         /**

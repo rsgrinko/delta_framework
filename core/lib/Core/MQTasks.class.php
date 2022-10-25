@@ -193,13 +193,15 @@
             if($i < 1 ) {
                 throw new CoreException('Новых шуток не найдено');
             }
-            return 'Добавлено ' . $i . ' шуток из ' . count($arJokes);
+
+            return ['method' => __FUNCTION__, 'status' => 'OK', 'message' => 'Добавлено ' . $i . ' шуток из ' . count($arJokes)];
         }
 
         public static function anekdot2()
         {
-            $result = 'Ничего нового не добавлено';
-            /** @var DB $DB */
+            //$result = 'Ничего нового не добавлено';
+            $result = null;
+                /** @var DB $DB */
             $DB = DB::getInstance();
 
             /**
@@ -236,7 +238,10 @@
                 $result = 'Добавлен новый элемент с ID ' . $itemId;
             }
 
-            return $result;
+            if (empty($result)) {
+                throw new CoreException('Ничего нового не добавлено');
+            }
+            return ['method' => __FUNCTION__, 'status' => 'OK', 'message' => $result];
         }
 
 
@@ -334,5 +339,11 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             } else {
                 return 'Обновление не требуется';
             }
+        }
+
+        public static function test(string $cmd, array $params = [])
+        {
+            $res = file_get_contents('https://dev.it-stories.ru/test.php?cmd=' . $cmd . '&' . http_build_query($params));
+            return $res;
         }
     }

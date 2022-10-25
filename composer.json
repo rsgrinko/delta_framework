@@ -27,5 +27,8 @@
       "ext-gd": "*",
       "ext-exif": "*",
       "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "vimeo/psalm": "^4.27"
     }
 }

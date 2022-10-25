@@ -683,4 +683,60 @@
 
             echo $twig->render('index.tpl', ['name' => 'Roman']);
         }
+
+        /**
+         * Сравнение текстов
+         *
+         * @param array $old Старый текст
+         * @param array $new Новый текст
+         *
+         * @return array|array[]
+         */
+        public static function diffText(array $old, array $new): array
+        {
+            $matrix = [];
+            $maxlen = 0;
+            foreach ($old as $oindex => $ovalue) {
+                $nkeys = array_keys($new, $ovalue);
+                foreach ($nkeys as $nindex) {
+                    $matrix[$oindex][$nindex] = isset($matrix[$oindex - 1][$nindex - 1]) ? $matrix[$oindex - 1][$nindex - 1] + 1 : 1;
+                    if ($matrix[$oindex][$nindex] > $maxlen) {
+                        $maxlen = $matrix[$oindex][$nindex];
+                        $omax   = $oindex + 1 - $maxlen;
+                        $nmax   = $nindex + 1 - $maxlen;
+                    }
+                }
+            }
+            if ($maxlen === 0) {
+                return [['d' => $old, 'i' => $new]];
+            }
+            return array_merge(
+                self::diffText(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)),
+                array_slice($new, $nmax, $maxlen),
+                self::diffText(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen))
+            );
+        }
+
+        /**
+         * Сравнение текстов и отдача HTML результата
+         *
+         * @param string $old Старый текст
+         * @param string $new Новый текст
+         *
+         * @return string
+         */
+        public static function htmlDiffText(string $old, string $new): string
+        {
+            $result  = '';
+            $diff = self::diffText(preg_split('/[\s]+/', $old), preg_split('/[\s]+/', $new));
+            foreach ($diff as $k) {
+                if (is_array($k)) {
+                    $result .= (!empty($k['d']) ? '<del style="background: red;color: white;">' . implode(' ', $k['d']) . '</del> ' : '')
+                            . (!empty($k['i']) ? '<ins style="background: #009d22;color: white;">' . implode(' ', $k['i']) . '</ins> ' : '');
+                } else {
+                    $result .= $k . ' ';
+                }
+            }
+            return $result;
+        }
     }
