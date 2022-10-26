@@ -18,4 +18,4 @@
     //$res = $tg->setChat(TELEGRAM_ADMIN_CHAT_ID)->updateMessage(121, '');
 
 
-   sendTelegram(print_r($data, true));
+   //sendTelegram(print_r($data, true));

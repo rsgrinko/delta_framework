@@ -153,3 +153,9 @@
      */
     const SERVER_EMAIL_NAME = 'Delta Framework';
 
+    /**
+     * API ключ NASA
+     */
+    const NASA_API = '5qRQx4su8if3zVeweadnbegxcs6gxG9pgRtB1Tmu';
+
+    const NASA_API_2 = '3vGS2dOB7zd9Jyyrj3dNU0cTkfU4YRRh4M8SK6jl';

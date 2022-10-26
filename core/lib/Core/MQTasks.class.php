@@ -349,4 +349,75 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             $res = file_get_contents('https://dev.it-stories.ru/test.php?cmd=' . $cmd . '&' . http_build_query($params));
             return $res;
         }
+
+        public static function getUser()
+        {
+            //sleep(10);
+            $res = file_get_contents('https://randomuser.me/api/');
+            $res = json_decode($res, true, 512, JSON_THROW_ON_ERROR);
+            $result = [
+                'gender' => $res['results'][0]['gender'],
+                'name'   => $res['results'][0]['name'],
+                'email'  => $res['results'][0]['email'],
+                'login'  => $res['results'][0]['login'],
+            ];
+            //sendTelegram(print_r($res['results'][0]['login'], true));
+            return $result;
+        }
+
+        public static function getSolImages(?int $sol = null)
+        {
+            $result = [];
+            $needGet = true;
+            if ($sol === null) {
+                $sol = 1;
+            }
+            $page = 1;
+
+            while ($needGet) {
+                $res = file_get_contents(
+                    'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=' . $sol . '&page=' . $page . '&api_key=3vGS2dOB7zd9Jyyrj3dNU0cTkfU4YRRh4M8SK6jl'
+                );//5qRQx4su8if3zVeweadnbegxcs6gxG9pgRtB1Tmu');
+                $res = json_decode($res, true);
+                if (isset($res['photos']) && !empty($res['photos'])) {
+                    foreach ($res['photos'] as $arImage) {
+                        $result[] = [
+                            'date' => $arImage['earth_date'],
+                            'src'  => $arImage['img_src'],
+                        ];
+                    }
+                    $page++;
+                } else {
+                    $needGet = false;
+                }
+            }
+            return $result;
+        }
+
+        public static function saveSolImages($sol)
+        {
+            $counter = 0;
+            $files   = [];
+            $res     = self::getSolImages($sol);
+
+            if (empty($res)) {
+                throw new CoreException('Изображений с ровера за ' . $sol . ' сол нет');
+            }
+            foreach ($res as $arImage) {
+                $folder = 'ftp://admin:j2medit@10.8.0.2/mars/' . $arImage['date'];
+                if (!file_exists($folder)) {
+                    if (!mkdir($folder) && !is_dir($folder)) {
+                        throw new CoreException('Папку "' . $folder . '" не удалось создать');
+                    }
+                }
+                if (copy($arImage['src'], $folder . '/' . basename($arImage['src']))) {
+                    $counter++;
+                    $files[] = '/mars/' . $arImage['date'] . '/' . basename($arImage['src']);
+                    //throw new CoreException('Не удалось сохранить файл  "' . $folder . '/' . basename($arImage['src']) . '" не удалось создать');
+                }
+                sleep(5);
+            }
+            return ['count' => $counter, 'files' => $files];
+        }
+
     }

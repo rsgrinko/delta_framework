@@ -1,51 +1,42 @@
 <?php
 
-    $timer1 = $timer2 = 0;
-
-    $varTrue  = true;
-    $varFalse = false;
-
-    $count = 100000000;
-
-
-    /**********************/
-    $start = microtime(true);
-    // Проверка эталона
-    for ($i = 0; $i < $count; $i++) {
-        if ($varTrue) {
-            // пустота
+    function getSolImages(?int $sol = null)
+    {
+        $result = [];
+        $needGet = true;
+        if ($sol === null) {
+            $sol = 1;
         }
-    }
-    $end      = microtime(true);
-    $deltaOne = $end - $start;
+        $page = 1;
 
-    /**********************/
-    $start = microtime(true);
-    // Проверка инверсии
-    for ($i = 0; $i < $count; $i++) {
-        if (!$varFalse) {
-            // пустота
+        while($needGet) {
+            $res = file_get_contents('https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=' . $sol . '&page=' . $page . '&api_key=5qRQx4su8if3zVeweadnbegxcs6gxG9pgRtB1Tmu');
+            $res = json_decode($res, true);
+            if (isset($res['photos']) && !empty($res['photos'])) {
+                foreach($res['photos'] as $arImage) {
+                    $result[] = [
+                            'date' => $arImage['earth_date'],
+                            'src' => $arImage['img_src'],
+                    ];
+                }
+                $page++;
+            } else {
+                $needGet = false;
+            }
         }
+        return $result;
     }
-    $end      = microtime(true);
-    $deltaTwo = $end - $start;
-    /**********************/
 
-    $start = microtime(true);
-    // Проверка сравнением в булевым
-    for ($i = 0; $i < $count; $i++) {
-        if ($varFalse === false) {
-            // пустота
-        }
-    }
-    $end        = microtime(true);
-    $deltaThree = $end - $start;
-    /**********************/
+
+
 ?>
-<b>Тестирование условий с количеством выполнения <?= $count ?></b><br>
-<table border="1px">
-    <tr style="font-weight: bold"><td>Тестирование</td><td>Время</td></tr>
-    <tr><td>Эталон</td><td><?= $deltaOne ?></td></tr>
-    <tr><td>Инверсия</td><td><?= $deltaTwo ?></td></tr>
-    <tr><td>Сравнение с bool</td><td><?= $deltaThree ?></td></tr>
-</table>
+<div style="display:flex; flex-wrap: wrap">
+    <?php
+        $sol = $_REQUEST['sol'] ?: 1;
+        $res = getSolImages($sol);
+
+        foreach ($res as $item) {
+            echo '<div><img src="' . $item['src'] . '" width="300px"> </div>';
+        }
+    ?>
+</div>
