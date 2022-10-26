@@ -191,7 +191,7 @@
                 }
             }
             if($i < 1 ) {
-                throw new CoreException('Новых шуток не найдено');
+                throw new CoreException('Новых данных не найдено');
             }
 
             return ['method' => __FUNCTION__, 'status' => 'OK', 'message' => 'Добавлено ' . $i . ' шуток из ' . count($arJokes)];

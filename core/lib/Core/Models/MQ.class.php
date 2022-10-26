@@ -30,77 +30,77 @@
         /**
          * Таблица заданий
          */
-        const TABLE = 'threads';
+        public const TABLE = 'threads';
 
         /**
          * Таблица истории заданий
          */
-        const TABLE_HISTORY = 'threads_history';
+        public const TABLE_HISTORY = 'threads_history';
 
         /**
          * Формат даты и времени
          */
-        const DATETIME_FORMAT = 'Y-m-d H:i:s';
+        public const DATETIME_FORMAT = 'Y-m-d H:i:s';
 
         /**
          * Имя файла логов
          */
-        const LOG_FILE = 'MQ.log';
+        public const LOG_FILE = 'MQ.log';
 
         /**
          * Статус успешно выполненного задания
          */
-        const STATUS_OK = 'OK';
+        public const STATUS_OK = 'OK';
 
         /**
          * Статус неудачно выполненного задания
          */
-        const STATUS_ERROR = 'ERROR';
+        public const STATUS_ERROR = 'ERROR';
 
         /**
          * Статус занято
          */
-        const STATUS_BUSY = 'BUSY';
+        public const STATUS_BUSY = 'BUSY';
 
         /**
          * Значение ДА
          */
-        const VALUE_Y = 'Y';
+        public const VALUE_Y = 'Y';
 
         /**
          * Значение НЕТ
          */
-        const VALUE_N = 'N';
+        public const VALUE_N = 'N';
 
         /**
          * Количество задач для обработки
          */
-        const EXECUTION_TASKS_LIMIT = 100;
+        public const EXECUTION_TASKS_LIMIT = 100;
 
         /**
          * Лимит количества запущенных воркеров
          */
-        const WORKERS_LIMIT = 2;
+        public const WORKERS_LIMIT = 2;
 
         /**
-         * @var DB|null $DB Объект базы
+         * @var object|DB|null $DB Объект базы
          */
         private $DB = null;
 
         /**
          * Приоритет по умолчанию
          */
-        const DEFAULT_PRIORITY = 5;
+        public const DEFAULT_PRIORITY = 5;
 
         /**
          * Попыток выполнения по умолчанию
          */
-        const DEFAULT_ATTEMPTS = 1;
+        public const DEFAULT_ATTEMPTS = 1;
 
         /**
          * Время, после которого задача считается повисшей (5 минут)
          */
-        const STUCK_TIME = 60 * 10;
+        public const STUCK_TIME = 60 * 10;
 
         /**
          * @var null $priority Приоритет задания
@@ -115,12 +115,12 @@
         /**
          * @var bool $useCheckDuplicates Флаг проверки задания на дубликат
          */
-        private $useCheckDuplicates = true;
+        public $useCheckDuplicates = true;
 
         /**
          * @var null $attempts Количество попыток выполнения задания
          */
-        private $attempts = self::DEFAULT_ATTEMPTS;
+        protected $attempts = self::DEFAULT_ATTEMPTS;
 
         /**
          * @var null $workerId Идентификатор воркера
@@ -130,10 +130,10 @@
         /**
          * Конструктор
          */
-        public function __construct()
+        public function __construct(?string $workerId = null)
         {
-            $this->DB = DB::getInstance();
-            $this->workerId = 'MQ_' . uniqid();
+            $this->DB       = DB::getInstance();
+            $this->workerId = $workerId ?: explode('.', uniqid('MQ_', true))[0];
         }
 
         /**
@@ -203,9 +203,9 @@
         /**
          * Преобразование из JSON строки в данные
          *
-         * @param string $json Данные
+         * @param string|null $json Данные
          *
-         * @return string
+         * @return array
          */
         private function convertFromJson(?string $json): array
         {
@@ -216,9 +216,10 @@
         }
 
         /**
-         * Выборка активных невыполненных заданий из очереди
+         * Выборка количества активных невыполненных заданий из очереди
          *
-         * @return int
+         * @return int Количество заданий
+         * @throws CoreException
          */
         private function getActiveTasksCount(): int
         {
@@ -273,7 +274,7 @@
                             $this->getWorkerId() . ': Взято в работу заданий ' . count($arTaskIds),
                             self::LOG_FILE,
                             ['added' => count($arTaskIds), 'before' => $countTasks],
-                            LOG_DEBUG,
+                            LOG_INFO,
                             null,
                             false
                         );
@@ -286,7 +287,8 @@
         /**
          * Запуск диспетчера очереди
          *
-         * @return void
+         * @param bool $childProcess Флаг дочернего процесса
+         *
          * @throws CoreException
          */
         public function run(bool $childProcess = false): void
@@ -296,7 +298,7 @@
                     $this->getWorkerId() . ': Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                     self::LOG_FILE,
                     [],
-                    LOG_DEBUG,
+                    LOG_INFO,
                     null,
                     false
                 );
@@ -313,7 +315,7 @@
                         $this->getWorkerId() . ': Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                         self::LOG_FILE,
                         [],
-                        LOG_DEBUG,
+                        LOG_NOTICE,
                         null,
                         false
                     );
@@ -328,7 +330,7 @@
                         $this->getWorkerId() . ': Запущено выполнение заданий из очереди',
                         self::LOG_FILE,
                         ['count' => count($arTasks)],
-                        LOG_DEBUG,
+                        LOG_INFO,
                         null,
                         false
                     );
@@ -342,14 +344,15 @@
                         $this->getWorkerId() . ': Нечего выполнять - завершаем работу',
                         self::LOG_FILE,
                         [],
-                        LOG_DEBUG,
+                        LOG_INFO,
                         null,
                         false
                     );
                 }
                 return;
             }
-            //$this->run(true);
+            $this->runNewWorker($this->getWorkerId()); // Запускаем дочерний воркер с тем же идентификатором
+            //$this->run(true);    // Продолжаем выполнение заданий текущим воркером
         }
 
         /**
@@ -454,9 +457,14 @@
             $this->priority = null;
 
             $response = new MQResponse();
-            $response->setTaskId(0)->setStatus(self::STATUS_OK)->setParams(self::convertFromJson($params))->setParamsJson($params)->setResponse(
-                $count . ' tasks were created'
-            );
+            $response->setTaskId(0)
+                     ->setStatus(self::STATUS_OK)
+                     ->setParams($this->convertFromJson($params))
+                     ->setParamsJson($params)
+                     ->setExecutionTime(0)
+                     ->setAttempts(0)
+                     ->setAttemptsLimit($this->attempts)
+                     ->setResponse($count . ' tasks were created');
 
             return $response;
         }
@@ -519,9 +527,16 @@
             }
 
             $response = new MQResponse();
-            $response->setTaskId($taskId)->setStatus(self::STATUS_OK)->setParams(self::convertFromJson($params))->setParamsJson($params)->setResponse(
-                'Task ' . $taskId . ' created'
-            );
+            $response->setTaskId($taskId)
+                     ->setStatus(self::STATUS_OK)
+                     ->setClass($class)
+                     ->setMethod($method)
+                     ->setParams($this->convertFromJson($params))
+                     ->setParamsJson($params)
+                     ->setExecutionTime(0)
+                     ->setAttempts(0)
+                     ->setAttemptsLimit($this->runNow ? 1 : $this->attempts)
+                     ->setResponse('Task ' . $taskId . ' created');
 
 
             return $response;
@@ -578,7 +593,7 @@
                     $this->getWorkerId() . ': Задание ' . $taskId . ' взято в работу',
                     self::LOG_FILE,
                     ['taskId' => $taskId],
-                    LOG_DEBUG,
+                    LOG_INFO,
                     null,
                     false
                 );
@@ -605,7 +620,7 @@
                 return $response;
             }
 
-            $response->setParamsJson($arTask['params']);
+            $response->setParamsJson($arTask['params'])->setClass($arTask['class'])->setMethod($arTask['method']);
             $arTask['params'] = $this->convertFromJson($arTask['params']);
             $response->setParams($arTask['params']);
 
@@ -618,7 +633,7 @@
                         $this->getWorkerId() . ': Задание ' . $taskId . ' уже выполняется другим воркером',
                         self::LOG_FILE,
                         ['taskId' => $taskId],
-                        LOG_DEBUG,
+                        LOG_INFO,
                         null,
                         false
                     );
@@ -672,7 +687,11 @@
                                    'response'       => addslashes($this->convertToJson($result)),
                                ]
                 );
-                $response->setStatus(self::STATUS_OK)->setExecutionTime($endTime)->setResponse($this->convertToJson($result));
+                $response->setStatus(self::STATUS_OK)
+                         ->setExecutionTime($endTime)
+                         ->setResponse($this->convertToJson($result))
+                         ->setAttempts($arTask['attempts'])
+                         ->setAttemptsLimit($arTask['attempts_limit']);
                 $this->saveTaskToHistory($taskId);
 
                 if (USE_LOG) {
@@ -680,7 +699,7 @@
                         $this->getWorkerId() . ': Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
                         self::LOG_FILE,
                         ['response' => $this->convertToJson($result)],
-                        LOG_DEBUG,
+                        LOG_INFO,
                         null,
                         false
                     );
@@ -739,6 +758,7 @@
                                            'task_id'        => $arTask['id'],
                                            'execution_time' => $arTask['execution_time'],
                                            'attempts'       => $arTask['attempts'],
+                                           'attempts_limit' => $arTask['attempts_limit'],
                                            'date_created'   => $arTask['date_created'],
                                            'date_updated'   => $arTask['date_updated'],
                                            'class'          => addslashes($arTask['class']),
@@ -827,6 +847,16 @@
         }
 
         /**
+         * Запуск нового воркера
+         *
+         * @return void
+         */
+        public function runNewWorker(?string $workerId = null)
+        {
+            exec('(php -f ' . $_SERVER['DOCUMENT_ROOT'] . '/core/runtime/threadsWorker.php "children" "' . $workerId . '" & ) >> /dev/null 2>&1');
+        }
+
+        /**
          * Принудительная остановка всех запущенных воркеров
          *
          * @return void
@@ -901,5 +931,36 @@
                     }
                 }
             }
+        }
+
+        /**
+         * Получение объекта задания
+         *
+         * @param int $taskId Идентификатор задания
+         *
+         * @return MQResponse
+         */
+        public function getTaskResponse(int $taskId): MQResponse
+        {
+            $res = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id="' . $taskId . '"')[0];
+            if (empty($res)) {
+                $res = $this->DB->query('SELECT * FROM ' . self::TABLE_HISTORY . ' WHERE task_id="' . $taskId . '"')[0];
+            }
+            if (empty($res)) {
+                throw new CoreException('Задание с ID ' . $taskId . ' не найдено');
+            }
+            //print_r($res);die();
+            $response = new MQResponse();
+            $response->setTaskId($taskId)
+                     ->setStatus($res['status'])
+                     ->setClass($res['class'])
+                     ->setMethod($res['method'])
+                     ->setParams($this->convertFromJson($res['params']))
+                     ->setParamsJson($res['params'])
+                     ->setExecutionTime($res['execution_time'])
+                     ->setAttempts($res['attempts'])
+                     ->setAttemptsLimit($res['attempts_limit'])
+                     ->setResponse($res['response']);
+            return $response;
         }
     }

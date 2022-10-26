@@ -1,40 +1,51 @@
 <?php
 
-    function sendRequest(string $method, array $request = []): array
-    {
-        $ch = curl_init('https://api.telegram.org/bot1667667369:AAGv5Y1mLTndb1JEzwjzQ1yeelox2NRamR0/' . $method);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        $res      = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        $res = json_decode($res, true);
-        if (empty($res) || $res['ok'] !== true) {
-            die($res['description'] . ' | ' . $res['error_code']);
-        }
-        return $res;
-    }
+    $timer1 = $timer2 = 0;
 
-    //sendRequest('deleteWebhook');
-    $arUpdates = sendRequest('getUpdates?offset=');
-    $result    = $arUpdates['result'];
-    if(isset($result['update_id'])) {
-        $result[] = $result;
-    }
-    $update_id = '';
+    $varTrue  = true;
+    $varFalse = false;
+
+    $count = 100000000;
 
 
-
-    $res = [];
-    foreach ($result as $element) {
-        if(isset($element['message']['from']['id']) && !empty($element['message']['from']['id'])) {
-            $res[] = sendRequest(
-                'sendMessage',
-                ['chat_id' => $element['message']['from']['id'], 'parse_mode' => 'html', 'text' => 'Ответ бота']
-            );
+    /**********************/
+    $start = microtime(true);
+    // Проверка эталона
+    for ($i = 0; $i < $count; $i++) {
+        if ($varTrue) {
+            // пустота
         }
     }
+    $end      = microtime(true);
+    $deltaOne = $end - $start;
 
-    print_r($result);
+    /**********************/
+    $start = microtime(true);
+    // Проверка инверсии
+    for ($i = 0; $i < $count; $i++) {
+        if (!$varFalse) {
+            // пустота
+        }
+    }
+    $end      = microtime(true);
+    $deltaTwo = $end - $start;
+    /**********************/
+
+    $start = microtime(true);
+    // Проверка сравнением в булевым
+    for ($i = 0; $i < $count; $i++) {
+        if ($varFalse === false) {
+            // пустота
+        }
+    }
+    $end        = microtime(true);
+    $deltaThree = $end - $start;
+    /**********************/
+?>
+<b>Тестирование условий с количеством выполнения <?= $count ?></b><br>
+<table border="1px">
+    <tr style="font-weight: bold"><td>Тестирование</td><td>Время</td></tr>
+    <tr><td>Эталон</td><td><?= $deltaOne ?></td></tr>
+    <tr><td>Инверсия</td><td><?= $deltaTwo ?></td></tr>
+    <tr><td>Сравнение с bool</td><td><?= $deltaThree ?></td></tr>
+</table>

@@ -66,6 +66,26 @@
         private $executionTime = null;
 
         /**
+         * @var string|null $class Класс
+         */
+        private $class = null;
+
+        /**
+         * @var string|null $method Метод
+         */
+        private $method = null;
+
+        /**
+         * @var int|null $attempts Количество попыток
+         */
+        private $attempts = null;
+
+        /**
+         * @var int|null $attempts Лимит количество попыток
+         */
+        private $attemptsLimit = null;
+
+        /**
          * @var string|null $response Результат выполнения задания
          */
         private $response = null;
@@ -125,6 +145,98 @@
         }
 
         /**
+         * Получение класса задания
+         *
+         * @return ?string
+         */
+        public function getClass(): ?string
+        {
+            return $this->class;
+        }
+
+        /**
+         * Установка класса задания
+         *
+         * @param string|null $class Время выполнения
+         *
+         * @return $this
+         */
+        public function setClass(?string $class = null): self
+        {
+            $this->class = $class;
+            return $this;
+        }
+
+        /**
+         * Получение метода задания
+         *
+         * @return ?string
+         */
+        public function getMethod(): ?string
+        {
+            return $this->method;
+        }
+
+        /**
+         * Установка метода задания
+         *
+         * @param string|null $method Время выполнения
+         *
+         * @return $this
+         */
+        public function setMethod(?string $method = null): self
+        {
+            $this->method = $method;
+            return $this;
+        }
+
+        /**
+         * Получение количества попыток
+         *
+         * @return int|null Количество попыток
+         */
+        public function getAttempts(): ?int
+        {
+            return $this->attempts;
+        }
+
+        /**
+         * Установка количества попыток
+         *
+         * @param int|null $attempts Количество попыток
+         *
+         * @return $this
+         */
+        public function setAttempts(?int $attempts = null): self
+        {
+            $this->attempts = $attempts;
+            return $this;
+        }
+
+        /**
+         * Получение лимита количества попыток
+         *
+         * @return int|null Количество попыток
+         */
+        public function getAttemptsLimit(): ?int
+        {
+            return $this->attemptsLimit;
+        }
+
+        /**
+         * Установка лимита количества попыток
+         *
+         * @param int|null $attempts Количество попыток
+         *
+         * @return $this
+         */
+        public function setAttemptsLimit(?int $attempts = null): self
+        {
+            $this->attemptsLimit = $attempts;
+            return $this;
+        }
+
+        /**
          * Получение статуса задания
          *
          * @return string|null
@@ -167,11 +279,11 @@
         /**
          * Установка текстового кода ответа внешней службы
          *
-         * @param string $status Текстовый код ответа
+         * @param string|null $status Текстовый код ответа
          *
          * @return $this
          */
-        public function setStatus(string $status): self
+        public function setStatus(?string $status): self
         {
             $status       = strtoupper($status);
             $this->status = $status;

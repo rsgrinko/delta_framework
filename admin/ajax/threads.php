@@ -96,6 +96,7 @@
             <th>ID задания</th>
             <th>Время выполнения</th>
             <th>Попыток</th>
+            <th>Лимит попыток</th>
             <th>Класс</th>
             <th>Метод</th>
             <th>Параметры</th>
@@ -121,6 +122,7 @@
                     <td><?= $task['task_id']; ?></td>
                     <td><?= $task['execution_time']; ?></td>
                     <td><?= $task['attempts']; ?></td>
+                    <td><?= $task['attempts_limit']; ?></td>
                     <td><?= $task['class']; ?></td>
                     <td><?= $task['method']; ?></td>
                     <td><?= $task['params']; ?></td>

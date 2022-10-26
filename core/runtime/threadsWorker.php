@@ -29,9 +29,10 @@
 
     use Core\Helpers\SystemFunctions;
     use Core\Models\MQ;
-
+    $isChildrenThread = isset($argv[1]) && $argv[1] === 'children';
+    $workerId = isset($argv[2]) && !empty($argv[2]) ? $argv[2] : null;
     try {
-        (new MQ())->run();
+        (new MQ($workerId))->run($isChildrenThread);
     } catch (Throwable $t) {
         SystemFunctions::sendTelegram(
             'ThreadsWorker: Произошла ошибка' . PHP_EOL . $t->getMessage() . PHP_EOL . 'File: ' . $t->getFile() . PHP_EOL . 'Line: ' . $t->getLine()
