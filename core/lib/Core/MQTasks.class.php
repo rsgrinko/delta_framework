@@ -107,6 +107,9 @@
                 }
             }
             sleep(2);
+            if ($i < 1) {
+                throw new CoreException('Не найдено новых данных для добавления');
+            }
             return 'bashPage: Добавлено ' . $i . ' записей из ' . count($frazes);
         }
 
