@@ -266,6 +266,42 @@
         }
 
         /**
+         * Старт транзацкии
+         *
+         * @return $this
+         * @throws CoreException
+         */
+        public function startTransaction(): self
+        {
+            $this->query('START TRANSACTION;');
+            return $this;
+        }
+
+        /**
+         * Коммит транзакции
+         *
+         * @return $this
+         * @throws CoreException
+         */
+        public function commitTransaction(): self
+        {
+            $this->query('COMMIT;');
+            return $this;
+        }
+
+        /**
+         * Откат транзакции
+         *
+         * @return $this
+         * @throws CoreException
+         */
+        public function rollbackTransaction(): self
+        {
+            $this->query('ROLLBACK;');
+            return $this;
+        }
+
+        /**
          * Метод для обновления записи в таблице
          * Принимает 3 аргумента: имя таблицы, массив для WHERE и массив значений для обновления (ключ-значение)
          *
@@ -274,6 +310,7 @@
          * @param        $set
          *
          * @return array|false
+         * @throws CoreException
          */
         public function update(string $table, $where, $set)
         {

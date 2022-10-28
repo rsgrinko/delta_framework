@@ -31,7 +31,6 @@
     require_once __DIR__ . '/bootstrap.php';
 
     // Запускаем воркер диспетчера очереди
-    exec('(php -f ' . __DIR__ . '/runtime/threadsWorker.php & ) >> /dev/null 2>&1');
-
+    exec('(php -f ' . $_SERVER['DOCUMENT_ROOT'] . '/core/runtime/threadsWorker.php & ) >> /dev/null 2>&1');
 
     //$result = (new MQ())->setAttempts(3)->setPriority(1)->setCheckDuplicates(true)->createTask('Core\MQTasks', 'getMySLO');

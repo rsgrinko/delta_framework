@@ -27,104 +27,64 @@
 
     class MQ
     {
-        /**
-         * Таблица заданий
-         */
+        /** Таблица заданий */
         public const TABLE = 'threads';
 
-        /**
-         * Таблица истории заданий
-         */
+        /** Таблица истории заданий */
         public const TABLE_HISTORY = 'threads_history';
 
-        /**
-         * Формат даты и времени
-         */
+        /** Формат даты и времени */
         public const DATETIME_FORMAT = 'Y-m-d H:i:s';
 
-        /**
-         * Имя файла логов
-         */
+        /** Имя файла логов */
         public const LOG_FILE = 'MQ.log';
 
-        /**
-         * Статус успешно выполненного задания
-         */
+        /** Статус успешно выполненного задания */
         public const STATUS_OK = 'OK';
 
-        /**
-         * Статус неудачно выполненного задания
-         */
+        /** Статус неудачно выполненного задания */
         public const STATUS_ERROR = 'ERROR';
 
-        /**
-         * Статус занято
-         */
+        /** Статус занято */
         public const STATUS_BUSY = 'BUSY';
 
-        /**
-         * Значение ДА
-         */
+        /** Значение ДА */
         public const VALUE_Y = 'Y';
 
-        /**
-         * Значение НЕТ
-         */
+        /** Значение НЕТ */
         public const VALUE_N = 'N';
 
-        /**
-         * Количество задач для обработки
-         */
+        /** Количество задач для обработки */
         public const EXECUTION_TASKS_LIMIT = 100;
 
-        /**
-         * Лимит количества запущенных воркеров
-         */
+        /** Лимит количества запущенных воркеров */
         public const WORKERS_LIMIT = 2;
 
-        /**
-         * @var object|DB|null $DB Объект базы
-         */
+        /** @var object|DB|null $DB Объект базы */
         private $DB = null;
 
-        /**
-         * Приоритет по умолчанию
-         */
+        /** Приоритет по умолчанию */
         public const DEFAULT_PRIORITY = 5;
 
-        /**
-         * Попыток выполнения по умолчанию
-         */
+        /** Попыток выполнения по умолчанию */
         public const DEFAULT_ATTEMPTS = 1;
 
-        /**
-         * Время, после которого задача считается повисшей (5 минут)
-         */
-        public const STUCK_TIME = 60 * 10;
+        /** Время, после которого задача считается повисшей (5 минут) */
+        public const STUCK_TIME = 60 * 15;
 
-        /**
-         * @var null $priority Приоритет задания
-         */
+        /** @var null $priority Приоритет задания */
         private $priority = null;
 
-        /**
-         * @var null $runNow Флаг немедленного запуска
-         */
+        /** @var null $runNow Флаг немедленного запуска */
         private $runNow = false;
 
-        /**
-         * @var bool $useCheckDuplicates Флаг проверки задания на дубликат
-         */
+        /** @var bool $useCheckDuplicates Флаг проверки задания на дубликат */
         public $useCheckDuplicates = true;
 
-        /**
-         * @var null $attempts Количество попыток выполнения задания
-         */
+        /** @var null $attempts Количество попыток выполнения задания */
         protected $attempts = self::DEFAULT_ATTEMPTS;
 
-        /**
-         * @var null $workerId Идентификатор воркера
-         */
+        /** @var null $workerId Идентификатор воркера */
         private $workerId = null;
 
         /**
@@ -162,7 +122,7 @@
         /**
          * Установка режима проверки задания на дубликат при создании
          *
-         * @param bool useCheckDuplicates Флаг проверки задания на дубликат
+         * @param bool $useCheckDuplicates Флаг проверки задания на дубликат
          *
          * @return $this
          */
@@ -232,7 +192,6 @@
          * Выборка активных заданий из очереди
          *
          * @return array|null
-         * @throws CoreException
          */
         private function getActiveTasks(): ?array
         {
@@ -360,7 +319,7 @@
          *
          * @param int $priority Приоритет
          *
-         * @return MQ
+         * @return $this
          */
         public function setPriority(int $priority): self
         {
@@ -551,7 +510,7 @@
          */
         public function removeTask(?int $taskId = null): bool
         {
-            if (empty($taskId)) {
+            if ($taskId === null) {
                 throw new CoreException('Не передан идентификатор задания');
             }
             return $this->DB->remove(self::TABLE, ['id' => $taskId]);
@@ -761,7 +720,7 @@
                                            'attempts_limit' => $arTask['attempts_limit'],
                                            'date_created'   => $arTask['date_created'],
                                            'date_updated'   => $arTask['date_updated'],
-                                           'class'          => addslashes($arTask['class']),
+                                           'class'          => $arTask['class'],
                                            'method'         => $arTask['method'],
                                            'params'         => $arTask['params'],
                                            'status'         => $arTask['status'],
@@ -771,7 +730,6 @@
                 $this->removeTask($taskId);
                 return $taskHistoryId;
             }
-
 
             return null;
         }
@@ -826,6 +784,7 @@
          * @param array|null $filter Фильтр
          *
          * @return int
+         * @throws CoreException
          */
         public function getCountTasksHistory(?array $filter = null): int
         {
@@ -849,9 +808,11 @@
         /**
          * Запуск нового воркера
          *
+         * @param string|null $workerId Идентификатор воркера
+         *
          * @return void
          */
-        public function runNewWorker(?string $workerId = null)
+        public function runNewWorker(?string $workerId = null): void
         {
             exec('(php -f ' . $_SERVER['DOCUMENT_ROOT'] . '/core/runtime/threadsWorker.php "children" "' . $workerId . '" & ) >> /dev/null 2>&1');
         }
@@ -860,6 +821,7 @@
          * Принудительная остановка всех запущенных воркеров
          *
          * @return void
+         * @throws CoreException
          */
         public function stopAllWorkers(): void
         {
