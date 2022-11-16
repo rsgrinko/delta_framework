@@ -69,7 +69,7 @@
         /** Попыток выполнения по умолчанию */
         public const DEFAULT_ATTEMPTS = 1;
 
-        /** Время, после которого задача считается повисшей (5 минут) */
+        /** Время, после которого задача считается повисшей (15 минут) */
         public const STUCK_TIME = 60 * 15;
 
         /** @var null $priority Приоритет задания */
@@ -574,6 +574,7 @@
                         null,
                         false
                     );
+                    Log::logToSentry($this->getWorkerId() . ': Задания ' . $taskId . ' не найдено', 'DEBUG', ['taskId' => $taskId]);
                 }
 
                 return $response;
@@ -694,6 +695,7 @@
                         null,
                         false
                     );
+                    Log::logToSentry($this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'], 'DEBUG', ['response' => $t->getMessage()]);
                 }
             }
 
@@ -854,8 +856,8 @@
             );
             if (!empty($runTasks)) {
                 foreach ($runTasks as $task) {
-                    if ((!empty($task['date_updated']) && (time() - strtotime($task['date_updated'])) > self::STUCK_TIME) // Повисшие надолго
-                        || empty($task['date_updated']) // Криво запущенные
+                    if (empty($task['date_updated']) // Криво запущенные
+                        || (time() - strtotime($task['date_updated'])) > self::STUCK_TIME // Повисшие надолго
                     ) {
                         $arStuckTasks[] = (int)$task['id'];
                         if (USE_LOG) {

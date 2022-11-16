@@ -216,9 +216,13 @@
             $result = '';
             foreach ($data as $k => $v) {
                 if ($param == 'key') {
-                    $result = $result . $k . ', ';
+                    $result .= $k . ', ';
                 } elseif ($param == 'value') {
-                    $result = $result . '\'' . addslashes($v) . '\', ';
+                    if (is_numeric($v)) {
+                        $result .= $v . ', ';
+                    } else {
+                        $result .= '\'' . addslashes($v) . '\', ';
+                    }
                 }
             }
             return substr($result, 0, -2);

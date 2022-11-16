@@ -739,4 +739,18 @@
             }
             return $result;
         }
+
+        /**
+         * Получение количества ядер процессора площадки
+         *
+         * @return int Количество ядер
+         */
+        public static function getCPUCount(): int
+        {
+            $count = (int)shell_exec('cat /proc/cpuinfo | grep processor | wc -l');
+            if ($count === 0) {
+                $count = 1;
+            }
+            return $count;
+        }
     }

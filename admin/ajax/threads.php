@@ -48,7 +48,7 @@
         </thead>
         <tbody>
         <?php
-            $arTasks = $MQ->getTasks(10, 'priority', 'asc');
+            $arTasks = $MQ->getTasks(10, 'in_progress', 'desc');
             foreach ($arTasks as $task) {
                 ?>
                 <tr class="<?php

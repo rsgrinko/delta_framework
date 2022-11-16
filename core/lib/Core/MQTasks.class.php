@@ -421,4 +421,24 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             return ['count' => $counter, 'files' => $files];
         }
 
+
+        public static function saveVisaviThreads(int $page = 1)
+        {
+            //181
+            $link = 'https://visavi.net/api/forums/3?token=27e11369d8c770b3cb6d5e211a5aab99&page=' . $page;
+            $res = file_get_contents($link);
+            $res = json_decode($res, true, 512, JSON_THROW_ON_ERROR);
+            if (empty($res['data'])) {
+                throw new CoreException('Данных для обработки не найдено');
+            }
+            $result= [];
+            /** @var DB $DB */
+            $DB = DB::getInstance();
+            foreach($res['data'] as $thread) {
+                $result[] = $DB->addItem('visavi_themes', ['thread_id' => (int)$thread['id'], 'title' => addslashes($thread['title'])]);
+            }
+            return $result;
+        }
+
+
     }

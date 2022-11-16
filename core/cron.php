@@ -22,7 +22,7 @@
     @ignore_user_abort(true);
     set_time_limit(0);
 
-    use Core\Helpers\Cache;
+    use Core\Helpers\Log;
     use Core\Models\MQ;
 
     if (empty($_SERVER['DOCUMENT_ROOT'])) {
@@ -34,3 +34,34 @@
     exec('(php -f ' . $_SERVER['DOCUMENT_ROOT'] . '/core/runtime/threadsWorker.php & ) >> /dev/null 2>&1');
 
     //$result = (new MQ())->setAttempts(3)->setPriority(1)->setCheckDuplicates(true)->createTask('Core\MQTasks', 'getMySLO');
+
+    // Попытка получения валюты сайта за ежедневные авторизации
+    $cookieFile = $_SERVER['DOCUMENT_ROOT'] . '/uploads/visaviCookie.txt';
+    $logFileName = 'visavi.log';
+
+    if (!file_exists($cookieFile) || time() - @filectime($cookieFile) > 60 * 60 * 23) {
+        Log::logToFile('Время пришло - начинаем попытку авторизации', $logFileName);
+        @unlink($cookieFile);
+        Log::logToFile('Файл куков удален', $logFileName);
+
+        $array = [
+            'login'    => 'Nominal',
+            'password' => 'j2medit',
+        ];
+        $ch = curl_init('https://visavi.net/login');
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($array, '', '&'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
+        curl_setopt($ch, CURLOPT_COOKIEJAR, $cookieFile);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        $html = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        unset($html);
+
+        Log::logToFile('Запрос на авторизацию произведен. Код ответа: ' . $httpCode, $logFileName);
+    }
