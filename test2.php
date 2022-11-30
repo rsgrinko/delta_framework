@@ -23,6 +23,7 @@
 
     echo 'Backup was created<br>';
 
+
     //echo '<pre>'.print_r($CBackup->getResult(), true).'</pre>';
 
     $arResult = $CBackup->getResult();
