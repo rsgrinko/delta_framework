@@ -250,6 +250,7 @@
                 <li><a href="/admin/hosts.php"><i class="fa fa-home"></i> <span>Управление хостами</span></a></li>
                 <li><a href="/admin/threads.php"><i class="fa fa-home"></i> <span>Диспетчер очереди</span></a></li>
                 <li><a href="/admin/phpcmd.php"><i class="fa fa-home"></i> <span>Командная PHP строка</span></a></li>
+                <li><a href="/admin/nginx.php"><i class="fa fa-home"></i> <span>Логи nginx</span></a></li>
                 <li><a href="index.html"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
 
 

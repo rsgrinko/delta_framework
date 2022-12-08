@@ -22,6 +22,8 @@
     namespace Core\Helpers;
 
 
+    use Core\CoreException;
+
     /**
      * Класс вспомогательных методов
      */
@@ -752,5 +754,109 @@
                 $count = 1;
             }
             return $count;
+        }
+
+        /**
+         * Получение данных об оперативной памяти площадки
+         *
+         * @param bool $humanView Флаг человеческого представления данных
+         *
+         * @return int[] Данные о памяти
+         */
+        public static function getHostMemoryInfo(bool $humanView = false): array
+        {
+            $fh     = fopen('/proc/meminfo', 'rb');
+            $result = [
+                'total'     => 0,
+                'free'      => 0,
+                'swapTotal' => 0,
+                'swapFree'  => 0,
+            ];
+            while ($line = fgets($fh)) {
+                if (preg_match('/^MemTotal:\s+(\d+)\skB$/', $line, $matches)) {
+                    $result['total'] = (int)$matches[1] * 1024;
+                }
+                unset($matches);
+
+                if (preg_match('/^MemFree:\s+(\d+)\skB$/', $line, $matches)) {
+                    $result['free'] = (int)$matches[1] * 1024;
+                }
+                unset($matches);
+
+                if (preg_match('/^SwapFree:\s+(\d+)\skB$/', $line, $matches)) {
+                    $result['swapTotal'] = (int)$matches[1] * 1024;
+                }
+                unset($matches);
+
+                if (preg_match('/^SwapFree:\s+(\d+)\skB$/', $line, $matches)) {
+                    $result['swapFree'] = (int)$matches[1] * 1024;
+                }
+                unset($matches);
+            }
+            fclose($fh);
+
+            if ($humanView) {
+                $result = array_map(static function ($el) {
+                    return self::convertBytes($el);
+                }, $result);
+            }
+            return $result;
+        }
+
+        /**
+         * Парсинг логов nginx
+         *
+         * @param string   $logPath     Путь до файла логов
+         * @param bool     $isOnlyCount Только получение количества
+         * @param string|null $limit    Ограничение выборки "0, 10"
+         * @param bool     $isReverse   Реверсировать выборку
+         *
+         * @return array|int
+         * @throws CoreException
+         */
+        public static function getNginxLogData(string $logPath, bool $isOnlyCount = false, ?string $limit = null, bool $isReverse = false)
+        {
+            if (!file_exists($logPath)) {
+                throw new CoreException('Файл логов не найден', CoreException::ERROR_FILE_NOT_FOUND);
+            }
+            $arLogs = file($logPath);
+            $logCount = count($arLogs);
+            if ($isOnlyCount) {
+                return $logCount;
+            }
+            if ($isReverse) {
+                $arLogs = array_reverse($arLogs);
+            }
+            $arLimit = [0, $logCount];
+            if ($limit !== null) {
+                $arLimit['start'] = (int)explode(',', $limit)[0];
+                $arLimit['stop']  = $arLimit['start'] + (int)explode(',', $limit)[1];
+            }
+            $regExp   = '/(?<ip>[0-9.]+)\s+\-\s+\-\s\[(?<date>[^\]]+)\]\s"(?<request>[^"]+)"\s(?<code>\d+)\s+(?<size>\d+)\s"(?<url>[^"]+)"\s"(?<useragent>[^"]+)"/m';
+            $arResult = [];
+            $result   = null;
+            $counter = 0;
+            foreach ($arLogs as $logEvent) {
+                $counter++;
+                if ($limit !== null && ($counter - 1) < $arLimit['start']) {
+                    continue;
+                }
+                preg_match_all($regExp, $logEvent, $result, PREG_SET_ORDER, 0);
+                $result     = array_shift($result);
+                $arResult[] = [
+                    'ip'        => $result['ip'],
+                    'date'      => $result['date'],
+                    'request'   => $result['request'],
+                    'httpCode'  => $result['code'],
+                    'size'      => $result['size'],
+                    'url'       => $result['url'],
+                    'userAgent' => $result['useragent'],
+                ];
+                $result     = null;
+                if ($limit !== null && ($counter + 1) > $arLimit['stop']) {
+                    break;
+                }
+            }
+            return $arResult;
         }
     }

@@ -20,6 +20,7 @@
      */
 
     use Core\Models\MQ;
+    use Core\Helpers\SystemFunctions;
 
     require_once __DIR__ . '/../inc/bootstrap.php';
     $result = null;
@@ -194,4 +195,15 @@
     </div>
 <?php
     $result['progress'] = ob_get_clean();
+    ob_start();
+    $memory = SystemFunctions::getHostMemoryInfo();
+    ?>
+    <div class="progress">
+        <div style="width: <?= round(($memory['free'] + $memory['swapFree']) / ($memory['total'] + $memory['swapTotal']) * 100, 2); ?>%" aria-valuemax="100" aria-valuemin="0"
+             aria-valuenow="40" role="progressbar" class="progress-bar progress-bar-warning">
+            <span class="sr-only">40% Complete (success)</span>
+        </div>
+    </div>
+    <?php
+    $result['memory'] = ob_get_clean();
     echo json_encode($result, JSON_UNESCAPED_UNICODE);

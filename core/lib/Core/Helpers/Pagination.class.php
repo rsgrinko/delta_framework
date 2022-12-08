@@ -52,17 +52,15 @@
          */
         public static function getLimit(): string
         {
-            self::$total_pages = intval((self::$total - 1) / self::$limit) + 1;
-            if (empty(self::$page) or self::$page < 0) {
+            self::$total_pages = (int)((self::$total - 1) / self::$limit) + 1;
+            if (empty(self::$page) || self::$page < 0) {
                 self::$page = 1;
             }
             if (self::$page > self::$total_pages) {
                 self::$page = self::$total_pages;
             }
             $start = self::$page * self::$limit - self::$limit;
-            $limit = $start . ', ' . self::$limit;
-
-            return $limit;
+            return $start . ', ' . self::$limit;
         }
 
         /**

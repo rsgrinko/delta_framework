@@ -440,5 +440,13 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             return $result;
         }
 
+        public function saveSiteScreen(string $url = 'it-stories.ru')
+        {
+            $image = file_get_contents('https://screen.2ip.ru/?url=' . $url);
+            if (empty($image)) {
+                throw new CoreException('Не удалось получить содержимое');
+            }
+            return file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/uploads/screens/' . $url . ' .png', $image);
+        }
 
     }
