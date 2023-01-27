@@ -143,10 +143,10 @@
         /**
          * Вспомогательный метод, формирует WHERE из массива
          *
-         * @param        $where
-         * @param string $logic
+         * @param mixed  $where Массив условия выборки ['id' => 1] или прямая строка вида owner="admin"
+         * @param string $logic Логика выборки AND или OR
          *
-         * @return string
+         * @return string Результат обработки
          */
         public function createWhere($where, string $logic = 'AND'): string
         {
@@ -182,9 +182,9 @@
         /**
          * Вспомогательный метод, формирует SET из массива
          *
-         * @param $set
+         * @param mixed $set Массив установки вида ['email' => "rsgrinko@yandex.ru"] или прямая строка вида email="rsgrinko@yandex.ru"
          *
-         * @return string
+         * @return string Результат обработки
          */
         private function createSet($set): string
         {
@@ -193,7 +193,7 @@
             }
             $set_string = '';
             foreach ($set as $set_key => $set_item) {
-                $set_string = $set_string . ' ' . $set_key . '=\'' . $set_item . '\',';
+                $set_string .= ' ' . $set_key . '=\'' . $set_item . '\',';
             }
             return substr($set_string, 0, -1);
         }
@@ -201,9 +201,9 @@
         /**
          * Вспомогательный метод для создания строки сортировки
          *
-         * @param $sort
+         * @param mixed $sort Условия сортировки вида ['ID'=> 'DESC']
          *
-         * @return string
+         * @return string Результат обработки
          */
         private function createSort($sort): string
         {
@@ -221,12 +221,12 @@
         /**
          * Вспомогательный метод для построения запросов
          *
-         * @param        $data
-         * @param string $param
+         * @param array $data Массив данных для вставки вида [['data' => 'test'], ['data2' => 'test2']]
+         * @param string $param Ключ key или value
          *
-         * @return string
+         * @return string Результат обработки
          */
-        private function createInsertString($data, string $param = 'key'): string
+        private function createInsertString(array $data, string $param = 'key'): string
         {
             $result = '';
             foreach ($data as $k => $v) {
@@ -250,7 +250,8 @@
          * @param string $sql          SQL запрос
          * @param bool   $returnObject Вернуть объект после выполнения
          *
-         * @return mixed
+         * @return mixed Результат выполнения запроса
+         * @throws CoreException Возможные типы исключений
          */
         public function query(string $sql, bool $returnObject = false)
         {
@@ -270,7 +271,6 @@
             }
             $this->lastInsertId = $this->db->lastInsertId() ?? null;
 
-
             $endTime           = microtime(true);
             self::$workingTime += ($endTime - $startTime);
 
@@ -283,7 +283,7 @@
         }
 
         /**
-         * Старт транзацкии
+         * Старт транзакции
          *
          * @return $this
          * @throws CoreException
@@ -319,14 +319,14 @@
         }
 
         /**
-         * Метод для обновления записи в таблице
+         * Метод для обновления записи в таблице.
          * Принимает 3 аргумента: имя таблицы, массив для WHERE и массив значений для обновления (ключ-значение)
          *
-         * @param string $table
-         * @param array  $where
-         * @param        $set
+         * @param string       $table Имя таблицы
+         * @param array|string $where Массив where
+         * @param array|string $set   Данные set
          *
-         * @return array|false
+         * @return bool
          * @throws CoreException
          */
         public function update(string $table, $where, $set)
@@ -343,6 +343,7 @@
          * @param $where
          *
          * @return array|null
+         * @throws CoreException
          */
         public function getItem($table, $where): ?array
         {
@@ -350,9 +351,9 @@
             $result = $this->query('SELECT * FROM `' . $table . '` WHERE ' . $this->createWhere($where) . ' LIMIT 1');
             if ($result) {
                 return $result[0];
-            } else {
-                return null;
             }
+
+            return null;
         }
 
 
@@ -370,7 +371,7 @@
          * @return int|null
          * @throws CoreException
          */
-        public function addItem($table, $data): ?int
+        public function addItem(string $table, array $data): ?int
         {
             self::$quantity++;
             $this->query(
@@ -394,7 +395,7 @@
          * @return int|null
          * @throws CoreException
          */
-        public function addItems($table, $data)
+        public function addItems(string $table, array $data)
         {
             self::$quantity++;
 
@@ -420,12 +421,13 @@
         /**
          * Удалить элемент из базы
          *
-         * @param $table
-         * @param $where
+         * @param string $table
+         * @param        $where
          *
          * @return bool
+         * @throws CoreException
          */
-        public function remove($table, $where): bool
+        public function remove(string $table, $where): bool
         {
             self::$quantity++;
             $result = $this->query('DELETE FROM `' . $table . '` WHERE ' . $this->createWhere($where));
@@ -435,65 +437,66 @@
         /**
          * Получить элементЫ из базы
          *
-         * @param        $table
+         * @param string $table
          * @param        $where
-         * @param string $sort
+         * @param array  $sort
          *
          * @return array|null
+         * @throws CoreException
          */
-        public function getItems($table, $where, $sort = []): ?array
+        public function getItems(string $table, $where, $sort = []): ?array
         {
             self::$quantity++;
             $result = $this->query('SELECT * FROM `' . $table . '` WHERE ' . $this->createWhere($where) . $this->createSort($sort));
 
             if ($result) {
                 return $result;
-            } else {
-                return null;
             }
+
+            return null;
         }
 
 
         /**
          * Получить все данные из таблицы
          *
-         * @param        $table
+         * @param string $table
          * @param string $sort
          *
          * @return array|null
+         * @throws CoreException
          */
-        public function getAll($table, $sort = ''): ?array
+        public function getAll(string $table, $sort = ''): ?array
         {
             self::$quantity++;
             $result = $this->query('SELECT * FROM `' . $table . '`' . $this->createSort($sort));
 
             if ($result) {
                 return $result;
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         /**
          * Получение строки из таблицы
          *
-         * @param        $table
+         * @param string $table
          * @param string $sql
-         * @param array  $params
-         * @param false  $force
          *
-         * @return false|mixed
+         * @return array|null
+         * @throws CoreException
          */
-        public function getRow($table, $sql = '', $params = [])
+        public function getRow(string $table, string $sql = ''): ?array
         {
             self::$quantity++;
-            $result = $this->query('SELECT * FROM `' . $table . '` ' . $sql . ' LIMIT 1', $params);
+            $result = $this->query('SELECT * FROM `' . $table . '` ' . $sql . ' LIMIT 1');
 
             if ($result) {
                 return $result[0];
-            } else {
-                return false;
             }
+
+            return null;
         }
 
         /**
