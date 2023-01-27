@@ -47,9 +47,9 @@
         public static int $quantity = 0;
 
         /**
-         * @var int $workingTime Время выполнения запросов
+         * @var float $workingTime Время выполнения запросов
          */
-        public static int $workingTime = 0;
+        public static float $workingTime = 0;
 
         /**
          * ID последней добавленной записи
@@ -61,22 +61,22 @@
         /**
          * @var string|null $dbServer Сервер
          */
-        private ?string $dbServer = null;
+        private ?string $dbServer;
 
         /**
          * @var string|null $dbUser Пользователь
          */
-        private ?string $dbUser = null;
+        private ?string $dbUser;
 
         /**
          * @var string|null $dbPass Пароль
          */
-        private ?string $dbPass = null;
+        private ?string $dbPass;
 
         /**
          * @var string|null $dbName Имя базы
          */
-        private ?string $dbName = null;
+        private ?string $dbName;
 
 
         /**
@@ -108,10 +108,24 @@
          */
         public function __destruct()
         {
-            unset($this->instance);
-            unset($this->db);
+            // TODO: на случай чего то стоящего...
         }
 
+        /**
+         * Отправка уведомления о критическом событии
+         * // TODO: метод-заглушка для возможности оповещения о критических событиях
+         *
+         * @param string $text Текст
+         *
+         * @return void
+         * @deprecated Вероятно, будет выпилено в дальнейшем
+         */
+        public static function sendAlarm(string $text): void
+        {
+            if (function_exists('sendTelegram')) {
+                sendTelegram($text);
+            }
+        }
 
         /**
          * Получить объект класса
@@ -138,7 +152,8 @@
         {
             if (!is_array($where)) {
                 return $where;
-            } elseif (empty($where)) {
+            }
+            if (empty($where)) {
                 return '1';
             }
             $where_string = '';
@@ -211,13 +226,13 @@
          *
          * @return string
          */
-        private function createInsertString($data, $param = 'key'): string
+        private function createInsertString($data, string $param = 'key'): string
         {
             $result = '';
             foreach ($data as $k => $v) {
-                if ($param == 'key') {
+                if ($param === 'key') {
                     $result .= $k . ', ';
-                } elseif ($param == 'value') {
+                } elseif ($param === 'value') {
                     if (is_numeric($v)) {
                         $result .= $v . ', ';
                     } else {
@@ -244,16 +259,14 @@
             try {
                 $stmt = $this->db->query($sql);
             } catch (\Throwable $t) {
-                sendTelegram(
+                self::sendAlarm(
                     '<b><u>' . date('d.m.Y H:i:s') . '</u></b>' . PHP_EOL . '</b><b>SQL ERROR:</b> ' . PHP_EOL . $this->db->errorInfo()[2] . PHP_EOL
                     . '<b>QUERY:</b> ' . PHP_EOL . $sql
                 );
                 if(DEBUG) {
                     throw new CoreException('В SQL запросе произошла ошибка. '.$this->db->errorInfo()[2].' Запрос: ' . $sql, CoreException::ERROR_SQL_QUERY);
-                } else {
-                    throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
                 }
-
+                throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
             }
             $this->lastInsertId = $this->db->lastInsertId() ?? null;
 
@@ -263,10 +276,10 @@
 
             if ($returnObject) {
                 return $stmt;
-            } else {
-                $result = $stmt->fetchAll();
-                return $result ?: null;
             }
+            $result = $stmt->fetchAll();
+            return $result ?: null;
+
         }
 
         /**
