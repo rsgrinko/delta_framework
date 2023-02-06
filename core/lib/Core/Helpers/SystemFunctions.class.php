@@ -859,4 +859,88 @@
             }
             return $arResult;
         }
+
+        /**
+         * Возвращает подсвеченную PHP строку
+         *
+         * @param string $string Строка кода
+         *
+         * @return string Подсвеченная строка
+         */
+        public static function highlightLine(string $string): string
+        {
+            $string = str_replace(['<?php', '<?'], '', $string);
+            $string = htmlspecialchars_decode($string);
+            ob_start();
+            highlight_string('<?php ' . $string);
+            $result = ob_get_clean();
+            return str_replace('&lt;?php', '', $result);
+        }
+
+        /**
+         * Возвращает кусок текстового содерживого с подсвеченной строкой
+         * @param string $fileText Текст
+         * @param int    $lineNum Номер строки
+         *
+         * @return string|null
+         */
+        public static function getFilePreviewByLine(string $fileText, int $lineNum): ?string
+        {
+            $fileText = explode(PHP_EOL, $fileText);
+            $fileText = array_map('htmlspecialchars', $fileText);
+            $line = $lineNum - 1;
+
+            if (!isset($fileText[$line])) {
+                return null;
+            }
+            $lineStyle = 'border-bottom: 1px solid black; padding: 5px;';
+
+            $result   = [];
+
+            if ($lineNum - 2 > 0) {
+                $result[] = '<div style="' . $lineStyle . '"><i>' . ($lineNum - 2) . '.</i> ' . self::highlightLine($fileText[$line - 2]) . '</div>';
+            }
+
+            if ($lineNum - 1 > 0) {
+                $result[] = '<div style="' . $lineStyle . '"><i>' . ($lineNum - 1) . '.</i> ' . self::highlightLine($fileText[$line - 1]) . '</div>';
+            }
+
+            if ($lineNum > 0 && $lineNum <= count($fileText)) {
+                $result[] = '<div style="' . $lineStyle . ' background: #b9ff9c;"><i>' . $lineNum . '.</i> <b>' . self::highlightLine($fileText[$line]) . '</b></div>';
+            }
+
+            if ($lineNum + 1 <= count($fileText)) {
+                $result[] = '<div style="' . $lineStyle . '"><i>' . ($lineNum + 1) . '.</i> ' . self::highlightLine($fileText[$line + 1]) . '</div>';
+            }
+
+            if ($lineNum + 2 <= count($fileText)) {
+                $result[] = '<div style="' . $lineStyle . '"><i>' . ($lineNum + 2) . '.</i> ' . self::highlightLine($fileText[$line + 2]) . '</div>';
+            }
+
+            $textBefore = '<div style="border:1px solid black">';
+            $textAfter = '</div>';
+            return $textBefore . implode(PHP_EOL . PHP_EOL, $result) . $textAfter;
+        }
+
+        /**
+         * Выполняет поиск строки текста в файле и отдает аннотацию
+         *
+         * @param string $text Текст
+         * @param string $file Путь к файлу
+         *
+         * @return string|null Результат поиска
+         */
+        public static function findText(string $text, string $file): ?string
+        {
+            $fileText = file_get_contents($file);
+            $file     = explode(PHP_EOL, $fileText);
+            foreach ($file as $line => $string) {
+                $pos = strripos($string, $text);
+                if ($pos !== false) {
+                    return self::getFilePreviewByLine($fileText, $line + 1);
+                }
+            }
+
+            return null;
+        }
     }
