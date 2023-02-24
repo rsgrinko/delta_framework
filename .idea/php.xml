@@ -1,63 +1,213 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="MessDetectorOptionsConfiguration">
+    <option name="transferred" value="true" />
+  </component>
+  <component name="PHPCSFixerOptionsConfiguration">
+    <option name="transferred" value="true" />
+  </component>
+  <component name="PHPCodeSnifferOptionsConfiguration">
+    <option name="highlightLevel" value="WARNING" />
+    <option name="transferred" value="true" />
+  </component>
   <component name="PhpIncludePathManager">
     <include_path>
-      <path value="$PROJECT_DIR$/vendor/twig/twig" />
-      <path value="$PROJECT_DIR$/vendor/composer" />
+      <path value="$PROJECT_DIR$/vendor/dnoegel/php-xdg-base-dir" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-grapheme" />
+      <path value="$PROJECT_DIR$/vendor/sebastian/diff" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-normalizer" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-ctype" />
       <path value="$PROJECT_DIR$/vendor/sentry/sentry" />
-      <path value="$PROJECT_DIR$/vendor/psr/container" />
       <path value="$PROJECT_DIR$/vendor/http-interop/http-factory-guzzle" />
-      <path value="$PROJECT_DIR$/vendor/psr/http-message" />
-      <path value="$PROJECT_DIR$/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/vendor/psr/container" />
       <path value="$PROJECT_DIR$/vendor/psr/http-client" />
       <path value="$PROJECT_DIR$/vendor/psr/http-factory" />
-      <path value="$PROJECT_DIR$/vendor/clue/stream-filter" />
+      <path value="$PROJECT_DIR$/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/vendor/twig/twig" />
       <path value="$PROJECT_DIR$/vendor/php-http/httplug" />
-      <path value="$PROJECT_DIR$/vendor/php-http/message" />
-      <path value="$PROJECT_DIR$/vendor/php-http/client-common" />
+      <path value="$PROJECT_DIR$/vendor/clue/stream-filter" />
       <path value="$PROJECT_DIR$/vendor/php-http/discovery" />
       <path value="$PROJECT_DIR$/vendor/php-http/message-factory" />
-      <path value="$PROJECT_DIR$/vendor/php-http/promise" />
+      <path value="$PROJECT_DIR$/vendor/php-http/message" />
+      <path value="$PROJECT_DIR$/vendor/php-http/client-common" />
       <path value="$PROJECT_DIR$/vendor/symfony/http-client" />
-      <path value="$PROJECT_DIR$/vendor/jean85/pretty-package-versions" />
-      <path value="$PROJECT_DIR$/vendor/symfony/options-resolver" />
+      <path value="$PROJECT_DIR$/vendor/php-http/promise" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php73" />
       <path value="$PROJECT_DIR$/vendor/symfony/deprecation-contracts" />
-      <path value="$PROJECT_DIR$/vendor/guzzlehttp/promises" />
+      <path value="$PROJECT_DIR$/vendor/jean85/pretty-package-versions" />
+      <path value="$PROJECT_DIR$/vendor/symfony/options-resolver" />
       <path value="$PROJECT_DIR$/vendor/symfony/service-contracts" />
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/vendor/guzzlehttp/promises" />
+      <path value="$PROJECT_DIR$/vendor/ralouphie/getallheaders" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php80" />
       <path value="$PROJECT_DIR$/vendor/symfony/http-client-contracts" />
-      <path value="$PROJECT_DIR$/vendor/ralouphie/getallheaders" />
-      <path value="$PROJECT_DIR$/vendor/vimeo/psalm" />
       <path value="$PROJECT_DIR$/vendor/felixfbecker/language-server-protocol" />
-      <path value="$PROJECT_DIR$/vendor/felixfbecker/advanced-json-rpc" />
+      <path value="$PROJECT_DIR$/vendor/vimeo/psalm" />
       <path value="$PROJECT_DIR$/vendor/phpdocumentor/type-resolver" />
       <path value="$PROJECT_DIR$/vendor/symfony/string" />
-      <path value="$PROJECT_DIR$/vendor/symfony/console" />
+      <path value="$PROJECT_DIR$/vendor/felixfbecker/advanced-json-rpc" />
       <path value="$PROJECT_DIR$/vendor/openlss/lib-array2xml" />
-      <path value="$PROJECT_DIR$/vendor/nikic/php-parser" />
+      <path value="$PROJECT_DIR$/vendor/symfony/console" />
       <path value="$PROJECT_DIR$/vendor/amphp/byte-stream" />
       <path value="$PROJECT_DIR$/vendor/amphp/amp" />
-      <path value="$PROJECT_DIR$/vendor/webmozart/path-util" />
+      <path value="$PROJECT_DIR$/vendor/nikic/php-parser" />
       <path value="$PROJECT_DIR$/vendor/webmozart/assert" />
       <path value="$PROJECT_DIR$/vendor/phpdocumentor/reflection-docblock" />
-      <path value="$PROJECT_DIR$/vendor/phpdocumentor/reflection-common" />
+      <path value="$PROJECT_DIR$/vendor/webmozart/path-util" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
       <path value="$PROJECT_DIR$/vendor/netresearch/jsonmapper" />
-      <path value="$PROJECT_DIR$/vendor/sebastian/diff" />
-      <path value="$PROJECT_DIR$/vendor/dnoegel/php-xdg-base-dir" />
-      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-grapheme" />
-      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-normalizer" />
+      <path value="$PROJECT_DIR$/vendor/phpdocumentor/reflection-common" />
     </include_path>
+  </component>
+  <component name="PhpInterpreters">
+    <interpreters>
+      <interpreter id="9b5f2f5e-509e-45e2-a30a-b4d1544b217e" name="rsgrinko@dev.it-stories.ru:22 password" home="sshConfig://DATA" debugger_id="php.debugger.XDebug">
+        <remote_data INTERPRETER_PATH="/usr/bin/php" HELPERS_PATH="/home/rsgrinko/.phpstorm_helpers" INITIALIZED="false" VALID="true" RUN_AS_ROOT_VIA_SUDO="false" SSH_CONFIG_ID="b4bdc3dc-f3e4-4fbe-9d94-3cb514b49751" SSH_CONFIG_NAME="rsgrinko@dev.it-stories.ru:22 password" SSH_CREDENTIALS_ID="sshConfig://rsgrinko@dev.it-stories.ru:22 password" />
+      </interpreter>
+    </interpreters>
+  </component>
+  <component name="PhpInterpretersPhpInfoCache">
+    <phpInfoCache>
+      <interpreter name="rsgrinko@dev.it-stories.ru:22 password">
+        <phpinfo binary_type="PHP" php_cgi="/usr/bin/php74/bin/php-cgi" php_cli="/usr/bin/php74/bin/php" path_separator=":" remote_host="91.195.204.109" version="7.4.19">
+          <additional_php_ini>/etc/php74w/php.d/1-ioncubeloader.ini, /etc/php74w/php.d/10-opcache.ini, /etc/php74w/php.d/15-xdebug.ini, /etc/php74w/php.d/20-bcmath.ini, /etc/php74w/php.d/20-bz2.ini, /etc/php74w/php.d/20-calendar.ini, /etc/php74w/php.d/20-ctype.ini, /etc/php74w/php.d/20-curl.ini, /etc/php74w/php.d/20-dba.ini, /etc/php74w/php.d/20-dom.ini, /etc/php74w/php.d/20-enchant.ini, /etc/php74w/php.d/20-exif.ini, /etc/php74w/php.d/20-ffi.ini, /etc/php74w/php.d/20-fileinfo.ini, /etc/php74w/php.d/20-ftp.ini, /etc/php74w/php.d/20-gd.ini, /etc/php74w/php.d/20-gettext.ini, /etc/php74w/php.d/20-gmp.ini, /etc/php74w/php.d/20-iconv.ini, /etc/php74w/php.d/20-imap.ini, /etc/php74w/php.d/20-intl.ini, /etc/php74w/php.d/20-json.ini, /etc/php74w/php.d/20-ldap.ini, /etc/php74w/php.d/20-mbstring.ini, /etc/php74w/php.d/20-mysqlnd.ini, /etc/php74w/php.d/20-odbc.ini, /etc/php74w/php.d/20-pdo.ini, /etc/php74w/php.d/20-pgsql.ini, /etc/php74w/php.d/20-phar.ini, /etc/php74w/php.d/20-posix.ini, /etc/php74w/php.d/20-pspell.ini, /etc/php74w/php.d/20-shmop.ini, /etc/php74w/php.d/20-simplexml.ini, /etc/php74w/php.d/20-snmp.ini, /etc/php74w/php.d/20-soap.ini, /etc/php74w/php.d/20-sockets.ini, /etc/php74w/php.d/20-sodium.ini, /etc/php74w/php.d/20-sqlite3.ini, /etc/php74w/php.d/20-sysvmsg.ini, /etc/php74w/php.d/20-sysvsem.ini, /etc/php74w/php.d/20-sysvshm.ini, /etc/php74w/php.d/20-tidy.ini, /etc/php74w/php.d/20-tokenizer.ini, /etc/php74w/php.d/20-xml.ini, /etc/php74w/php.d/20-xmlwriter.ini, /etc/php74w/php.d/20-xsl.ini, /etc/php74w/php.d/30-mysqli.ini, /etc/php74w/php.d/30-pdo_dblib.ini, /etc/php74w/php.d/30-pdo_firebird.ini, /etc/php74w/php.d/30-pdo_mysql.ini, /etc/php74w/php.d/30-pdo_odbc.ini, /etc/php74w/php.d/30-pdo_pgsql.ini, /etc/php74w/php.d/30-pdo_sqlite.ini, /etc/php74w/php.d/30-xmlreader.ini, /etc/php74w/php.d/30-xmlrpc.ini, /etc/php74w/php.d/40-apcu.ini, /etc/php74w/php.d/40-brotli.ini, /etc/php74w/php.d/40-env.ini, /etc/php74w/php.d/40-ffmpeg.ini, /etc/php74w/php.d/40-gearman.ini, /etc/php74w/php.d/40-geoip.ini, /etc/php74w/php.d/40-igbinary.ini, /etc/php74w/php.d/40-imagick.ini, /etc/php74w/php.d/40-mailparse.ini, /etc/php74w/php.d/40-mcrypt.ini, /etc/php74w/php.d/40-memcache.ini, /etc/php74w/php.d/40-msgpack.ini, /etc/php74w/php.d/40-ncurses.ini, /etc/php74w/php.d/40-psr.ini, /etc/php74w/php.d/40-smbclient.ini, /etc/php74w/php.d/40-sqlsrv.ini, /etc/php74w/php.d/40-ssh2.ini, /etc/php74w/php.d/40-swoole.ini, /etc/php74w/php.d/40-uploadprogress.ini, /etc/php74w/php.d/40-v8js.ini, /etc/php74w/php.d/40-yaml.ini, /etc/php74w/php.d/40-zephir_parser.ini, /etc/php74w/php.d/40-zip.ini, /etc/php74w/php.d/50-apc.ini, /etc/php74w/php.d/50-memcached.ini, /etc/php74w/php.d/50-phalcon.ini, /etc/php74w/php.d/50-redis.ini</additional_php_ini>
+          <configuration_file>/etc/php74w/php.ini</configuration_file>
+          <configuration_options>
+            <configuration_option name="include_path" value=".:/usr/share/pear:/usr/share/php" />
+          </configuration_options>
+          <debuggers>
+            <debugger_info debugger="xdebug" debugger_version="2.9.0">
+              <debug_extensions />
+            </debugger_info>
+          </debuggers>
+          <loaded_extensions>
+            <extension name="Core" />
+            <extension name="FFI" />
+            <extension name="PDO" />
+            <extension name="PDO_Firebird" />
+            <extension name="PDO_ODBC" />
+            <extension name="Phar" />
+            <extension name="Reflection" />
+            <extension name="SPL" />
+            <extension name="SimpleXML" />
+            <extension name="Zend OPcache" />
+            <extension name="Zephir Parser" />
+            <extension name="apc" />
+            <extension name="apcu" />
+            <extension name="bcmath" />
+            <extension name="brotli" />
+            <extension name="bz2" />
+            <extension name="calendar" />
+            <extension name="ctype" />
+            <extension name="curl" />
+            <extension name="date" />
+            <extension name="dba" />
+            <extension name="dom" />
+            <extension name="enchant" />
+            <extension name="env" />
+            <extension name="exif" />
+            <extension name="ffmpeg" />
+            <extension name="fileinfo" />
+            <extension name="filter" />
+            <extension name="ftp" />
+            <extension name="gd" />
+            <extension name="gearman" />
+            <extension name="geoip" />
+            <extension name="gettext" />
+            <extension name="gmp" />
+            <extension name="hash" />
+            <extension name="iconv" />
+            <extension name="igbinary" />
+            <extension name="imagick" />
+            <extension name="imap" />
+            <extension name="intl" />
+            <extension name="ionCube Loader" />
+            <extension name="json" />
+            <extension name="ldap" />
+            <extension name="libsmbclient" />
+            <extension name="libxml" />
+            <extension name="mailparse" />
+            <extension name="mbstring" />
+            <extension name="mcrypt" />
+            <extension name="memcache" />
+            <extension name="memcached" />
+            <extension name="msgpack" />
+            <extension name="mysqli" />
+            <extension name="mysqlnd" />
+            <extension name="ncurses" />
+            <extension name="odbc" />
+            <extension name="openssl" />
+            <extension name="pcntl" />
+            <extension name="pcre" />
+            <extension name="pdo_dblib" />
+            <extension name="pdo_mysql" />
+            <extension name="pdo_pgsql" />
+            <extension name="pdo_sqlite" />
+            <extension name="pdo_sqlsrv" />
+            <extension name="pgsql" />
+            <extension name="phalcon" />
+            <extension name="posix" />
+            <extension name="pspell" />
+            <extension name="psr" />
+            <extension name="readline" />
+            <extension name="redis" />
+            <extension name="session" />
+            <extension name="shmop" />
+            <extension name="smbclient" />
+            <extension name="snmp" />
+            <extension name="soap" />
+            <extension name="sockets" />
+            <extension name="sodium" />
+            <extension name="sqlite3" />
+            <extension name="sqlsrv" />
+            <extension name="ssh2" />
+            <extension name="standard" />
+            <extension name="swoole" />
+            <extension name="sysvmsg" />
+            <extension name="sysvsem" />
+            <extension name="sysvshm" />
+            <extension name="tidy" />
+            <extension name="tokenizer" />
+            <extension name="uploadprogress" />
+            <extension name="v8js" />
+            <extension name="xdebug" />
+            <extension name="xml" />
+            <extension name="xmlreader" />
+            <extension name="xmlrpc" />
+            <extension name="xmlwriter" />
+            <extension name="xsl" />
+            <extension name="yaml" />
+            <extension name="zip" />
+            <extension name="zlib" />
+          </loaded_extensions>
+        </phpinfo>
+      </interpreter>
+    </phpInfoCache>
+  </component>
+  <component name="PhpProjectServersManager">
+    <servers>
+      <server host="dev.it-stories.ru" id="5ebf0e22-ce82-415b-8c4d-32dc73d0d427" name="dev.it-stories.ru" use_path_mappings="true">
+        <path_mappings>
+          <mapping local-root="$PROJECT_DIR$" remote-root="/home/rsgrinko/sites/dev.it-stories.ru" />
+        </path_mappings>
+      </server>
+    </servers>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.4">
     <option name="suggestChangeDefaultLanguageLevel" value="false" />
+  </component>
+  <component name="PhpStanOptionsConfiguration">
+    <option name="transferred" value="true" />
   </component>
   <component name="Psalm">
     <Psalm_settings>
       <PsalmConfiguration tool_path="$PROJECT_DIR$/vendor/bin/psalm" />
     </Psalm_settings>
+  </component>
+  <component name="PsalmOptionsConfiguration">
+    <option name="transferred" value="true" />
   </component>
 </project>

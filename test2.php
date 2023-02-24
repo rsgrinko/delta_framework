@@ -1,20 +1,21 @@
 <?php
-    $array = [
-        'login'    => 'Nominal',
-        'password' => 'j2medit'
-    ];
-    $cookieFile = $_SERVER['DOCUMENT_ROOT'] . '/uploads/cookie.txt';
+    //use Core\CoreException;
+    //use Core\ExternalServices\Telegram;
+    //use Core\Models\{User, DB, Roles};
+    //use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination, Files};
 
-    $ch = curl_init('https://visavi.net/login');
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($array, '', '&'));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookieFile);
-    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookieFile);
-    curl_setopt($ch, CURLOPT_HEADER, false);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-    $html = curl_exec($ch);
-    curl_close($ch);
+    //const USE_ROUTER = false;
+    //require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
 
-    unset($html);
+
+
+    //echo getFilePreviewByLine(file_get_contents('./index.php'), 12);
+
+    //echo SystemFunctions::findText('DB::getInstance()', './index.php');
+
+    $arr = array(1, 2, 3, 4, 5, 6);
+    foreach ($arr as &$value) {
+        $value = $value * 3;
+        echo $value.'
+';
+    }

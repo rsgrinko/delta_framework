@@ -26,6 +26,7 @@
     use Core\Helpers\Thumbs;
     use Core\ExternalServices\TelegramSender;
     use Core\Models\DB;
+    use Core\Models\MQ;
 
     class MQTasks
     {
@@ -447,6 +448,64 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 throw new CoreException('Не удалось получить содержимое');
             }
             return file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/uploads/screens/' . $url . ' .png', $image);
+        }
+
+
+        public static function getStory($from = null)
+        {
+            $tableName = 'podslyshano';
+            $link = 'https://podslyshano.com/api/v3.5/posts';
+            if (!empty($from) && $from !== '') {
+                $link .= '?from=' . $from;
+            }
+            $response = file_get_contents($link);
+            if (empty($response)) {
+                throw new CoreException('Не удалось получить содержимое');
+            }
+
+            try {
+                $response = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+            } catch(\Throwable $e) {
+                throw new CoreException($e->getMessage());
+            }
+
+            if (empty($response['posts'])) {
+                throw new CoreException('Постов по данной выборке не найдено');
+            }
+
+            $result = [];
+            $lastId = null;
+            /** @var DB $DB */
+            $DB = DB::getInstance();
+            foreach ($response['posts'] as $post) {
+                if ($post['type'] !== 'post') {
+                    continue;
+                }
+                if ($DB->getItem($tableName, ['post_id' => (int)$post['id']])) {
+                    continue;
+                }
+                $DB->query('SET NAMES \'utf8mb4\'');
+                $result[] = $DB->addItem(
+                    $tableName, [
+                                     'type'          => $post['type'],
+                                     'post_id'       => (int)$post['id'],
+                                     'category_id'   => (int)$post['category_id'],
+                                     'category_name' => $post['category_name'],
+                                     'category_slug' => $post['category_slug'],
+                                     'likes_count'   => (int)$post['likes_count'],
+                                     'created_at'    => $post['created_at'],
+                                     'image_uri'     => $post['image_uri'],
+                                     'note'          => addslashes($post['note']),
+                                 ]
+                );
+                $lastId = (int)$post['id'];
+            }
+
+            if ($lastId !== null) {
+                exec('(php -f ' . $_SERVER['DOCUMENT_ROOT'] . '/core/runtime/podslyshano.php "' . $lastId . '" & ) >> /dev/null 2>&1');
+            }
+
+            return 'Добавлено постов: ' . count($result);
         }
 
     }

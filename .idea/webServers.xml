@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="afaead60-4e07-45ee-a3a6-955b92f318f9" name="dev.it-stories.ru" url="http://dev.it-stories.ru">
-        <fileTransfer rootFolder="/dev.it-stories.ru" host="dev.it-stories.ru" port="21">
+        <fileTransfer rootFolder="/home/rsgrinko" accessType="SFTP" host="dev.it-stories.ru" port="22" sshConfigId="b4bdc3dc-f3e4-4fbe-9d94-3cb514b49751" sshConfig="rsgrinko@dev.it-stories.ru:22 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
