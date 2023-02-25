@@ -508,4 +508,15 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             return 'Добавлено постов: ' . count($result);
         }
 
+
+        public static function addIntoVisits($pageId, $date, $count) {
+            $DB = DB::getInstance();
+            /** @var DB $DB */
+            $arData = ['page_id' => $pageId, 'counter' => $count, 'date' => date('Y-m-d', strtotime($date))];
+            //INSERT INTO `visits` (`id`, `page_id`, `counter`, `date`) VALUES (NULL, '123', '12', '2023-02-22');
+            $res = $DB->addItem('visits', $arData);
+
+            return $arData;
+        }
+
     }
