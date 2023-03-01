@@ -24,10 +24,12 @@
     require_once __DIR__ . '/bootstrap.php';
     global $USER, $arUser;
 
-    if (!User::isAuthorized() && $_SERVER['REQUEST_URI'] !== '/login.php') {
+    if (User::isAuthorized() === false && $_SERVER['REQUEST_URI'] !== '/login.php') {
         header('Location: login.php');
         die();
-    } elseif (!$USER->isAdmin()) {
+    }
+
+    if ($USER->isAdmin() === false && $USER->haveAccessToAdminPanel() === false) {
         header('Location: ../');
         die();
     }

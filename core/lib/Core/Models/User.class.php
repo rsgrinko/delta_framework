@@ -642,6 +642,17 @@
         }
 
         /**
+         * Проверка на админа
+         *
+         * @return bool
+         * @throws CoreException
+         */
+        public function haveAccessToAdminPanel(): bool
+        {
+            return in_array(Roles::ADMIN_PANEL_ROLE_ID, $this->getRolesObject()->getRoles(), true);
+        }
+
+        /**
          * Метод выхода из системы
          */
         public static function logout(): void

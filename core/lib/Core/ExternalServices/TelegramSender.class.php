@@ -105,7 +105,7 @@
          *
          * @return $this
          */
-        public function setChat(int $chatId): self
+        public function setChat(string $chatId): self
         {
             $this->chatId = $chatId;
             return $this;

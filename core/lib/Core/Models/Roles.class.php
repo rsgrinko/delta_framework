@@ -43,9 +43,19 @@
         const ADMIN_ROLE_ID = 1;
 
         /**
+         * Роль "система"
+         */
+        const SYSTEM_ROLE_ID = 2;
+
+        /**
+         * Роль "доступ в панель администратора"
+         */
+        const ADMIN_PANEL_ROLE_ID = 3;
+
+        /**
          * Роль "пользователь"
          */
-        const USER_ROLE_ID = 2;
+        const USER_ROLE_ID = 5;
 
         /**
          * @var User $user
