@@ -23,6 +23,7 @@
     use Core\Models\User;
 
     require_once __DIR__ . '/inc/header.php';
+    global $USER;
 ?>
     <div class="pageheader">
         <div class="media">
@@ -93,7 +94,7 @@
                                     <td><?= date('d.m.Y H:i:s', $elUser['last_active']); ?></td>
                                     <td><?= $elUser['date_created'] ? date('d.m.Y H:i:s', strtotime($elUser['date_created'])) : '-'; ?></td>
                                     <td><?= $elUser['date_updated'] ? date('d.m.Y H:i:s', strtotime($elUser['date_updated'])) : '-'; ?></td>
-                                    <td><a class="btn btn-primary" href="login.php?loginAs=<?= $elUser['id']; ?>">Войти</a></td>
+                                    <td><?php if ($USER->isAdmin()) { ?><a class="btn btn-primary" href="login.php?loginAs=<?= $elUser['id']; ?>">Войти</a> <?php } ?></td>
                                 </tr>
                                 <?php
                             }

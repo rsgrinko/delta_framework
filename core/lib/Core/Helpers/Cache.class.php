@@ -123,9 +123,9 @@
                 || self::getAge($name) > CACHE_TTL
                 || !file_exists(self::$cacheDir . md5($name) . '.tmp')) {
                 return false;
-            } else {
-                return true;
             }
+
+            return true;
         }
 
         /**
@@ -169,9 +169,9 @@
             self::$quantityWrite++;
             if (file_put_contents(self::$cacheDir . md5($name) . '.tmp', base64_encode(serialize($arValue)))) {
                 return true;
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         /**
@@ -181,7 +181,6 @@
          */
         public static function flush(): bool
         {
-            sendTelegram('Произведена очистка кэша' . PHP_EOL . 'IP: ' . SystemFunctions::getOS());
             $di = new \RecursiveDirectoryIterator(self::$cacheDir, \FilesystemIterator::SKIP_DOTS);
             $ri = new \RecursiveIteratorIterator($di, \RecursiveIteratorIterator::CHILD_FIRST);
             foreach ($ri as $file) {
@@ -233,7 +232,7 @@
         {
             $return_size = 0;
             foreach (scandir(self::$cacheDir) as $file) {
-                if ($file == '.' or $file == '..') {
+                if ($file === '.' || $file === '..') {
                     continue;
                 }
                 $return_size = $return_size + filesize(self::$cacheDir . $file);
