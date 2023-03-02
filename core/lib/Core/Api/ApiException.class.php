@@ -35,4 +35,7 @@
 
         /** @var int ERROR_METHOD_NOT_FOUND Метод не существует */
         const ERROR_METHOD_NOT_FOUND = 10003;
+
+        /** @var int ERROR_AUTHORIZE Не авторизован */
+        const ERROR_AUTHORIZE = 10004;
     }

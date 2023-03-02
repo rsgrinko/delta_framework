@@ -21,6 +21,7 @@
 
     namespace Core\Api;
 
+    use Composer\Util\RemoteFilesystem;
     use Core\CoreException;
     use Core\Models\File;
     use Core\Models\User;
@@ -37,6 +38,11 @@
         /** @var Request $request Объект запроса */
         private $request;
 
+        /**
+         * Конструктор
+         *
+         * @param User $userObject Объект пользователя
+         */
         public function __construct(User $userObject)
         {
             $this->userObject = $userObject;
@@ -57,6 +63,57 @@
             $result['email_confirmed'] = $result['email_confirmed'] === CODE_VALUE_Y;
             unset($result['password'], $result['token'], $result['image_id']);
             ApiView::output($result);
+        }
+
+        public static function createUser(): void
+        {
+            $request         = new Request();
+            $login           = $request->getProperty('login');
+            $password        = $request->getProperty('password');
+            $confirmPassword = $request->getProperty('confirmPassword');
+            $email           = $request->getProperty('email');
+            $name            = $request->getProperty('name') ?: '';
+
+            if (empty($login)) {
+                throw new ApiException('Не задан логин', ApiException::ERROR_INPUT_DATA);
+            }
+            if (empty($password)) {
+                throw new ApiException('Не задан пароль', ApiException::ERROR_INPUT_DATA);
+            }
+            if (empty($email)) {
+                throw new ApiException('Не задан E-Mail', ApiException::ERROR_INPUT_DATA);
+            }
+            if ($password !== $confirmPassword) {
+                throw new ApiException('Пароль и подтверждение пароля не совпадают', ApiException::ERROR_INPUT_DATA);
+            }
+            $userId = User::create($login, $password, $email, $name);
+            ApiView::output(['userId' => $userId]);
+        }
+
+        public static function getToken(): void
+        {
+            $request         = new Request();
+            $login           = $request->getProperty('login');
+            $password        = $request->getProperty('password');
+            if (empty($login)) {
+                throw new ApiException('Не задан логин', ApiException::ERROR_INPUT_DATA);
+            }
+            if (empty($password)) {
+                throw new ApiException('Не задан пароль', ApiException::ERROR_INPUT_DATA);
+            }
+
+            $userObject = User::getByParams(['login' => $login, 'password' => User::passwordEncryption($password)]);
+            if ($userObject === null) {
+                throw new ApiException('Авторизация не удалась', ApiException::ERROR_AUTHORIZE);
+            }
+            $token = $userObject->getToken();
+
+            // Если токен отсутствует - сгенерируем его
+            if (empty($token)) {
+                $token = $userObject->createToken();
+            }
+
+            ApiView::output(['id' => $userObject->getId(), 'login' => $login, 'token' => $token]);
         }
 
         /**
@@ -95,8 +152,8 @@
          */
         public function changeName(): void
         {
-            $name = $this->request->getProperty('name');
-            if (empty(trim($name))) {
+            $name = trim($this->request->getProperty('name'));
+            if (empty($name)) {
                 throw new ApiException('Новое имя не может быть пустым', ApiException::ERROR_INPUT_DATA);
             }
             $this->userObject->update(['name' => $name]);

@@ -313,6 +313,24 @@
         }
 
         /**
+         * Получение объекта пользователя по параметрам
+         *
+         * @param array $where Массив параметров фильтра
+         *
+         * @return self
+         * @throws CoreException
+         */
+        public static function getByParams(array $where): ?self
+        {
+            $result = (DB::getInstance())->getItem(self::TABLE, $where);
+            if (!empty($result)) {
+                return (new self((int)$result['id']));
+            }
+
+            return null;
+        }
+
+        /**
          * Получить объект пользователя по ID при его существовании
          *
          * @throws CoreException
@@ -388,6 +406,14 @@
             $login = Sanitize::sanitizeString($login);
             $email = Sanitize::sanitizeEmail($email);
             $name  = Sanitize::sanitizeString($name);
+
+            if (self::isUserExists($login)) {
+                throw new CoreException('Пользователь с данным логином уже существует', CoreException::ERROR_CREATE_USER);
+            }
+
+            if (self::isUserExistsByParams(['email' => $email])) {
+                throw new CoreException('Пользователь с данным E-Mail уже существует', CoreException::ERROR_CREATE_USER);
+            }
 
             Log::logToFile('Создание нового пользователя', 'User.log', func_get_args());
             $verificationCode = md5(self::$cryptoSalt . $email . $login . time());

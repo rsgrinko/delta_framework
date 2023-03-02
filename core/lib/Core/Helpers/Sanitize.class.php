@@ -49,7 +49,7 @@
          *
          * @param mixed $email E-Mail
          *
-         * @return float
+         * @return string
          */
         public static function sanitizeEmail($email) {
             $isValidEmail = filter_var($email, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE);

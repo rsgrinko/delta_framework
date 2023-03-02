@@ -34,6 +34,8 @@
         'testNoAuth',
         'test',
         'testNotFound',
+        'createUser', // Создание УЗ
+        'getToken',   // Авторизация и получение токена
     ];
 
     $method = $_REQUEST['method'] ?: null;
