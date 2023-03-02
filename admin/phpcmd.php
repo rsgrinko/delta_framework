@@ -24,6 +24,10 @@
     require_once __DIR__ . '/inc/header.php';
 
     global $USER;
+    if ($USER->isAdmin() === false) {
+        header('Location: ./');
+        die();
+    }
 
     if (isset($_REQUEST['execute']) && $_REQUEST['execute'] == 'Y') {
         $_SESSION['phpcmd_query'] = $_REQUEST['query'];

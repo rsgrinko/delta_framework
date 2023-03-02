@@ -53,6 +53,11 @@
         const ADMIN_PANEL_ROLE_ID = 3;
 
         /**
+         * Роль "менеджер"
+         */
+        const MANAGER_ROLE_ID = 4;
+
+        /**
          * Роль "пользователь"
          */
         const USER_ROLE_ID = 5;

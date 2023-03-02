@@ -22,6 +22,12 @@
     use Core\Helpers\{Cache, SystemFunctions};
 
     require_once __DIR__ . '/inc/header.php';
+
+    global $USER;
+    if ($USER->isAdmin() === false) {
+        header('Location: ./');
+        die();
+    }
 ?>
     <div class="pageheader">
         <div class="media">

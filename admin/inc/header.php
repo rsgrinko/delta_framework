@@ -68,7 +68,8 @@
     <div class="headerwrapper">
         <div class="header-left">
             <a href="index.php" class="logo">
-                <img src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/images/logo.png" alt=""/>
+                <span class="" style="color: white;font-size: 1.5em;">Панель админа</span>
+                <!--<img src="//<?= $_SERVER['SERVER_NAME'] ?>/admin/styles/images/logo.png" alt=""/>-->
             </a>
             <div class="pull-right">
                 <a href="" class="menu-collapse">
@@ -246,15 +247,17 @@
             <h5 class="leftpanel-title">Навигация</h5>
             <ul class="nav nav-pills nav-stacked">
                 <li><a href="/admin/"><i class="fa fa-home"></i> <span>Дашбоард</span></a></li>
-                <li><a href="/admin/users.php"><i class="fa fa-home"></i> <span>Список пользователей</span></a></li>
-                <li><a href="/admin/groups.php"><i class="fa fa-home"></i> <span>Список ролей</span></a></li>
-                <li><a href="/admin/cacheInfo.php"><i class="fa fa-home"></i> <span>Кэширование</span></a></li>
-                <li><a href="/admin/hosts.php"><i class="fa fa-home"></i> <span>Управление хостами</span></a></li>
-                <li><a href="/admin/threads.php"><i class="fa fa-home"></i> <span>Диспетчер очереди</span></a></li>
-                <li><a href="/admin/phpcmd.php"><i class="fa fa-home"></i> <span>Командная PHP строка</span></a></li>
-                <li><a href="/admin/nginx.php"><i class="fa fa-home"></i> <span>Логи nginx</span></a></li>
-                <li><a href="index.html"><i class="fa fa-home"></i> <span>Dashboard</span></a></li>
+                <?php if ($USER->isAdmin()) { ?>
+                    <li><a href="/admin/users.php"><i class="fa fa-home"></i> <span>Список пользователей</span></a></li>
+                    <li><a href="/admin/groups.php"><i class="fa fa-home"></i> <span>Список ролей</span></a></li>
+                    <li><a href="/admin/cacheInfo.php"><i class="fa fa-home"></i> <span>Кэширование</span></a></li>
+                    <li><a href="/admin/hosts.php"><i class="fa fa-home"></i> <span>Управление хостами</span></a></li>
+                    <li><a href="/admin/threads.php"><i class="fa fa-home"></i> <span>Диспетчер очереди</span></a></li>
+                    <li><a href="/admin/phpcmd.php"><i class="fa fa-home"></i> <span>Командная PHP строка</span></a></li>
+                    <li><a href="/admin/nginx.php"><i class="fa fa-home"></i> <span>Логи nginx</span></a></li>
+                <?php } ?>
 
+                <li><a href="#"><i class="fa fa-home"></i> <span>В никуда</span></a></li>
 
             </ul>
 

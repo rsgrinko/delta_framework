@@ -285,11 +285,11 @@
          * @return User|null
          * @throws CoreException
          */
-        public static function getUserByToken(string $token): ?self
+        public static function getByToken(string $token): ?self
         {
             $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
             if ($result) {
-                return (new self($result['id']));
+                return (new self((int)$result['id']));
             }
 
             return null;
@@ -639,6 +639,17 @@
         public function isAdmin(): bool
         {
             return in_array(Roles::ADMIN_ROLE_ID, $this->getRolesObject()->getRoles(), true);
+        }
+
+        /**
+         * Проверка на менеджера
+         *
+         * @return bool
+         * @throws CoreException
+         */
+        public function isManager(): bool
+        {
+            return in_array(Roles::MANAGER_ROLE_ID, $this->getRolesObject()->getRoles(), true);
         }
 
         /**
