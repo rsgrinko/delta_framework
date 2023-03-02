@@ -28,10 +28,10 @@
     class MQ
     {
         /** Таблица заданий */
-        public const TABLE = 'threads';
+        public const TABLE = DB_TABLE_PREFIX . 'threads';
 
         /** Таблица истории заданий */
-        public const TABLE_HISTORY = 'threads_history';
+        public const TABLE_HISTORY = DB_TABLE_PREFIX . 'threads_history';
 
         /** Формат даты и времени */
         public const DATETIME_FORMAT = 'Y-m-d H:i:s';

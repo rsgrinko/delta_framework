@@ -63,7 +63,7 @@
         /**
          * Таблица с пользователями
          */
-        private const TABLE = 'users';
+        private const TABLE = DB_TABLE_PREFIX . 'users';
 
         /**
          * @var string $cryptoSalt Соль для шифрования

@@ -423,34 +423,6 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
         }
 
 
-        public static function saveVisaviThreads(int $page = 1)
-        {
-            //181
-            $link = 'https://visavi.net/api/forums/3?token=27e11369d8c770b3cb6d5e211a5aab99&page=' . $page;
-            $res = file_get_contents($link);
-            $res = json_decode($res, true, 512, JSON_THROW_ON_ERROR);
-            if (empty($res['data'])) {
-                throw new CoreException('Данных для обработки не найдено');
-            }
-            $result= [];
-            /** @var DB $DB */
-            $DB = DB::getInstance();
-            foreach($res['data'] as $thread) {
-                $result[] = $DB->addItem('visavi_themes', ['thread_id' => (int)$thread['id'], 'title' => addslashes($thread['title'])]);
-            }
-            return $result;
-        }
-
-        public function saveSiteScreen(string $url = 'it-stories.ru')
-        {
-            $image = file_get_contents('https://screen.2ip.ru/?url=' . $url);
-            if (empty($image)) {
-                throw new CoreException('Не удалось получить содержимое');
-            }
-            return file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/uploads/screens/' . $url . ' .png', $image);
-        }
-
-
         public static function getStory($from = null)
         {
             $tableName = 'podslyshano';
@@ -506,17 +478,6 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             }
 
             return 'Добавлено постов: ' . count($result);
-        }
-
-
-        public static function addIntoVisits($pageId, $date, $count) {
-            $DB = DB::getInstance();
-            /** @var DB $DB */
-            $arData = ['page_id' => $pageId, 'counter' => $count, 'date' => date('Y-m-d', strtotime($date))];
-            //INSERT INTO `visits` (`id`, `page_id`, `counter`, `date`) VALUES (NULL, '123', '12', '2023-02-22');
-            $res = $DB->addItem('visits', $arData);
-
-            return $arData;
         }
 
     }

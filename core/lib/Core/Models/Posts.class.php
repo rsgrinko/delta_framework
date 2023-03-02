@@ -31,7 +31,7 @@
 
     class Posts
     {
-        private const TABLE          = 'posts';
+        private const TABLE = DB_TABLE_PREFIX . 'posts';
 
         private const TABLE_SECTIONS = 'sections';
 

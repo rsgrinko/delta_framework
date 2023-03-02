@@ -81,6 +81,7 @@
     const DB_USER     = 'rsgrinko_delta';
     const DB_PASSWORD = '2670135';
     const DB_NAME     = 'rsgrinko_delta';
+    const DB_TABLE_PREFIX = 'd_';
 
     /**
      * Путь до шаблонов

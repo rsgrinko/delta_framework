@@ -30,12 +30,12 @@
         /**
          * Таблица с ролями пользователей
          */
-        const USER_ROLES_TABLE = 'user_roles';
+        const USER_ROLES_TABLE = DB_TABLE_PREFIX . 'user_roles';
 
         /**
          * Таблица с ролями
          */
-        const ROLES_TABLE = 'roles';
+        const ROLES_TABLE = DB_TABLE_PREFIX . 'roles';
 
         /**
          * Роль "администратор"

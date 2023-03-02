@@ -194,7 +194,7 @@
         </div>
     </div>
 <?php
-    $result['progress'] = ob_get_clean();
+    $result['memory'] = ob_get_clean();
     ob_start();
     $memory = SystemFunctions::getHostMemoryInfo();
     ?>

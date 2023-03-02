@@ -29,7 +29,7 @@
         /**
          * Таблица заданий
          */
-        const TABLE = 'files';
+        const TABLE = DB_TABLE_PREFIX . 'files';
 
         /**
          * Папка с файлами

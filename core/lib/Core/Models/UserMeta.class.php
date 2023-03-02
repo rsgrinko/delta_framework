@@ -9,7 +9,7 @@
         /**
          * Таблица с мета полями
          */
-        const TABLE = 'user_meta';
+        const TABLE = DB_TABLE_PREFIX . 'user_meta';
 
         /**
          * @var User $user
