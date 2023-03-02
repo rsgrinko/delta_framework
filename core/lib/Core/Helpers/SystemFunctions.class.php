@@ -98,6 +98,7 @@
             }
 
             $oses = [
+                'Postman'            => '/PostmanRuntime/i',
                 'iOS'            => '/(iPhone)|(iPad)/i',
                 'Windows 3.11'   => '/Win16/i',
                 'Windows 95'     => '/(Windows 95)|(Win95)|(Windows_95)/i',
@@ -124,7 +125,7 @@
             ];
 
             foreach ($oses as $os => $pattern) {
-                if (preg_match($pattern, $_SERVER['HTTP_USER_AGENT'])) {
+                if (@preg_match($pattern, $_SERVER['HTTP_USER_AGENT'])) {
                     return $os;
                 }
             }

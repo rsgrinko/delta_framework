@@ -450,10 +450,13 @@
                 $fields[$key] = Sanitize::sanitizeString($value);
             }
             $cacheId = md5('User_getAllUserData_' . $this->id);
+            foreach($fields as $key => $value) {
+                $beforeData[$key] = $this->getAllUserData()[$key];
+            }
             /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
             Log::logToFile(
-                'Данные пользователя изменены', 'User.log', ['userId' => $this->id, 'before' => $this->getAllUserData(), 'after' => func_get_args()]
+                'Данные пользователя изменены', 'User.log', ['userId' => $this->id, 'before' => $beforeData, 'after' => $fields]
             );
             Cache::delete($cacheId);
             return $DB->update(self::TABLE, ['id' => $this->id], $fields);

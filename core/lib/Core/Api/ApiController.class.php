@@ -34,9 +34,13 @@
         /** @var User $userObject Объект пользователя */
         private $userObject;
 
+        /** @var Request $request Объект запроса */
+        private $request;
+
         public function __construct(User $userObject)
         {
             $this->userObject = $userObject;
+            $this->request   = new Request();
         }
 
         /**
@@ -53,6 +57,50 @@
             $result['email_confirmed'] = $result['email_confirmed'] === CODE_VALUE_Y;
             unset($result['password'], $result['token'], $result['image_id']);
             ApiView::output($result);
+        }
+
+        /**
+         * Получение информации о ролях текущего пользователя
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         */
+        public function getUserRoles(): void
+        {
+            $result = $this->userObject->getRolesObject()->getFullRoles();
+            ApiView::output($result);
+        }
+
+        /**
+         * Отправка кода верификации
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         */
+        public function sendVerificationCode(): void
+        {
+            $result = $this->userObject->sendVerificationCode();
+            ApiView::output($result);
+        }
+
+        /**
+         * Смена имени пользователя
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         * @throws ApiException
+         */
+        public function changeName(): void
+        {
+            $name = $this->request->getProperty('name');
+            if (empty(trim($name))) {
+                throw new ApiException('Новое имя не может быть пустым', ApiException::ERROR_INPUT_DATA);
+            }
+            $this->userObject->update(['name' => $name]);
+            ApiView::output(true);
         }
 
 

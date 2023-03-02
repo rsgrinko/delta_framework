@@ -141,7 +141,7 @@
     /**
      * Флаг использования логирования
      */
-    const USE_LOG = false;
+    const USE_LOG = true;
 
     /**
      * E-Mail сайта

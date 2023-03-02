@@ -23,6 +23,10 @@
 
     class ApiException extends \Exception
     {
+
+        /** @var int ERROR_INPUT_DATA Ошибка входных данных */
+        const ERROR_INPUT_DATA = 10000;
+
         /** @var int ERROR_TOKEN_UNDEFINED Токен не определен */
         const ERROR_TOKEN_UNDEFINED = 10001;
 
