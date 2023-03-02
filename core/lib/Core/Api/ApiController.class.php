@@ -90,6 +90,14 @@
             ApiView::output(['userId' => $userId]);
         }
 
+        /**
+         * Авторизация пользователя и получение токена доступа
+         *
+         * @return void
+         * @throws ApiException
+         * @throws CoreException
+         * @throws \JsonException
+         */
         public static function getToken(): void
         {
             $request         = new Request();
