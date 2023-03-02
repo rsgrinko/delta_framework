@@ -66,6 +66,7 @@
       <path value="$PROJECT_DIR$/vendor/phenx/php-font-lib" />
       <path value="$PROJECT_DIR$/vendor/phenx/php-svg-lib" />
       <path value="$PROJECT_DIR$/vendor/php-ai/php-ml" />
+      <path value="$PROJECT_DIR$/vendor/workerman/workerman" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
