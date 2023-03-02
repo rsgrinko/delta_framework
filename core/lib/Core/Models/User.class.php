@@ -450,6 +450,7 @@
                 $fields[$key] = Sanitize::sanitizeString($value);
             }
             $cacheId = md5('User_getAllUserData_' . $this->id);
+            $beforeData = [];
             foreach($fields as $key => $value) {
                 $beforeData[$key] = $this->getAllUserData()[$key];
             }
