@@ -33,7 +33,7 @@
     {
         private const TABLE = DB_TABLE_PREFIX . 'posts';
 
-        private const TABLE_SECTIONS = 'sections';
+        private const TABLE_SECTIONS = DB_TABLE_PREFIX . 'sections';
 
         private $id = null;
         private $sectionId = null;

@@ -40,6 +40,139 @@
 
 
         типа статистика или хз
+
+        <p id="userList"></p>
+        <p id="app"></p>
+        <input id="message" type="text">
+        <button id="sendBtn">send</button>
+
+
+
+        <script>
+            let socket = new WebSocket('wss://dev.it-stories.ru/wss?userName=<?= $USER->getLogin()?>');
+
+            socket.onopen = function(e) {
+                /*const initMessage = {
+                    method: 'registration',
+                    userId: <?= $USER->getId() ?>,
+                date: Date.now()
+            };
+            socket.send(JSON.stringify(initMessage));*/
+            };
+
+            socket.onmessage = function(event) {
+                let data = JSON.parse(event.data);
+
+
+
+
+                // Обработка пингов
+                if (data.action === 'Ping') {
+                    const pongMessage = {action: 'Pong'};
+                    socket.send(JSON.stringify(pongMessage));
+                    return;
+                }
+
+                // Обработка подключившихся пользователей
+                if (data.action === 'PublicMessage') {
+                    $('#app').append(`<div class="messageBox"><div class="userLogin">${data.userName}</div><div class="message">${data.text}</div></div>`)
+                    return;
+                }
+
+                // Обработка при подключении
+                if (data.action === 'Connected') {
+                    $('#app').append(`<div class="messageBox"><div class="notification">Пользователь ${data.userName} подлючился в чат</div></div>`)
+                    //return;
+                }
+
+                // Обработка при подключении
+                if (data.action === 'Authorized') {
+                    $('#userList').html('');
+                    data.users.forEach(function(element){
+                        $('#userList').append(`<div class="userElement">${element.userName}</div>`)
+                    });
+                    return;
+                }
+
+                // Обработка при отклбчении
+                if (data.action === 'Disconnected') {
+                    $('#app').append(`<div class="messageBox"><div class="notification">Пользователь ${data.userName} покинул чат</div></div>`)
+
+                    $('#userList').html('');
+                    data.users.forEach(function(element){
+                        $('#userList').append(`<div class="userElement">${element.userName}</div>`)
+                    });
+                    return;
+                }
+
+
+
+                console.log('Данные получены с сервера: ' + JSON.stringify(data))
+
+
+
+                //$('#app').append(`<div class="messageBox"><div class="userLogin">${data.userName}</div><div class="message">${data.text}</div></div>`)
+
+
+                $('#app').html($('#app').html() + "<br>" + event.data);
+            };
+
+            socket.onclose = function(event) {
+                if (event.wasClean) {
+                    console.log(`[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`);
+                } else {
+                    // например, сервер убил процесс или сеть недоступна
+                    // обычно в этом случае event.code 1006
+                    console.log('[close] Соединение прервано');
+                }
+            };
+
+            socket.onerror = function(error) {
+                console.log(`[error]`);
+            };
+        </script>
+
+
+
+        <script>
+            $('#sendBtn').on('click', function(){
+                const message = {
+                    action: 'PublicMessage',
+                    text: $('#message').val()
+                };
+                socket.send(JSON.stringify(message));
+                $('#message').val('');
+            });
+        </script>
+        <style>
+            .messageBox {
+                border: 1px solid #dbdbdb;
+                margin: 5px;
+                padding: 5px;
+                background: #f9f9f9;
+            }
+            .userLogin {
+                font-weight: bold;
+                color: green;
+            }
+
+            .notification {
+                font-style: italic;
+                color: #e50000;
+            }
+
+            p#userList {
+                display: flex;
+                flex-wrap: wrap;
+            }
+            .userElement {
+                border: 1px solid #687cff;
+                margin: 2px;
+                padding: 5px;
+                background: blue;
+                color: white;
+            }
+        </style>
     </div><!-- contentpanel -->
 <?php
     require_once __DIR__ . '/inc/footer.php';
