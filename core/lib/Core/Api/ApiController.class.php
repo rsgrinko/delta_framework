@@ -23,7 +23,9 @@
 
     use Composer\Util\RemoteFilesystem;
     use Core\CoreException;
+    use Core\Models\DB;
     use Core\Models\File;
+    use Core\Models\MQ;
     use Core\Models\User;
 
     /**
@@ -166,6 +168,35 @@
             }
             $this->userObject->update(['name' => $name]);
             ApiView::output(true);
+        }
+
+        /**
+         * Получить статистику диспетчера очереди
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         * @throws ApiException
+         */
+        public function getMQStat(): void
+        {
+            $MQ              = new MQ();
+            $allCount        = $MQ->getCountTasks();
+            $countWorkers    = $MQ->getCountWorkers();
+            $limitWorkers    = MQ::WORKERS_LIMIT;
+            $activeCount     = $MQ->getCountTasks(['active' => 'Y']);
+            $inProgressCount = $MQ->getCountTasks(['active' => 'Y', 'in_progress' => 'Y']);
+            $errorCount      = $MQ->getCountTasks(['in_progress' => 'N', 'status' => MQ::STATUS_ERROR]);
+            ApiView::output(
+                [
+                    'limitWorkers'    => $limitWorkers,
+                    'countWorkers'    => $countWorkers,
+                    'allCount'        => $allCount,
+                    'activeCount'     => $activeCount,
+                    'inProgressCount' => $inProgressCount,
+                    'errorCount'      => $errorCount,
+                ]
+            );
         }
 
 
