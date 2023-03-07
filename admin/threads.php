@@ -110,21 +110,6 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">Текущая нагрузка на диспетчер очереди</h4>
-                        <p>Чем больше количество активных воркеров - тем больше нагрузка</p>
-                    </div><!-- panel-heading -->
-                    <div class="panel-body" id="progress">
-                        <div class="preloader"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
         <!-- table -->
         <div class="row">
             <div class="col-md-12">
@@ -175,7 +160,7 @@
                         data = JSON.parse(data);
                         $('#info_threads').html(data.info_threads);
                         $('#info_threads_history').html(data.info_threads_history);
-                        $('#progress').html(data.progress);
+                        //$('#progress').html(data.progress);
                         $('#memory').html(data.memory);
                         $('#threads_table').html(data.threads);
                         $('#threads_history_table').html(data.threads_history);

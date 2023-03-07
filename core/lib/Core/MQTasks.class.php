@@ -35,6 +35,11 @@
             SystemFunctions::sendTelegram('test task was completed');
         }
 
+        public static function testSleep(int $sec = 1) {
+            sleep($sec);
+            return 'sleep ' . $sec . ' sec.';
+        }
+
         /**
          * @throws CoreException
          */

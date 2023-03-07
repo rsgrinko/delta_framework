@@ -55,7 +55,7 @@
          */
         public static function logToFile(
             string $message,
-            string $filename = '',
+            string $filename = 'core.log',
             $content = null,
             int $priority = LOG_DEBUG,
             string $system = null,
