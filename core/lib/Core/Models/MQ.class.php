@@ -574,7 +574,7 @@
                         null,
                         false
                     );
-                    Log::logToSentry($this->getWorkerId() . ': Задания ' . $taskId . ' не найдено', 'DEBUG', ['taskId' => $taskId]);
+                    //Log::logToSentry($this->getWorkerId() . ': Задания ' . $taskId . ' не найдено', 'DEBUG', ['taskId' => $taskId]);
                 }
 
                 return $response;
@@ -695,7 +695,7 @@
                         null,
                         false
                     );
-                    Log::logToSentry($this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'], 'DEBUG', ['response' => $t->getMessage()]);
+                    //Log::logToSentry($this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'], 'DEBUG', ['response' => $t->getMessage()]);
                 }
             }
 
