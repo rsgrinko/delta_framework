@@ -59,6 +59,10 @@
         public static function output($data): void
         {
             header('Content-Type: application/json');
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Methods: *');
+            header('Access-Control-Allow-Headers: *');
             echo json_encode(
                 [
                     'success' => true,
@@ -78,6 +82,11 @@
          */
         public static function outputError (Throwable $exception): void
         {
+            header('Content-Type: application/json');
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Methods: *');
+            header('Access-Control-Allow-Headers: *');
             echo json_encode(
                 [
                     'success' => false,
