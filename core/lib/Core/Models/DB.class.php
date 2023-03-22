@@ -235,8 +235,10 @@
                 } elseif ($param === 'value') {
                     if (is_numeric($v)) {
                         $result .= $v . ', ';
+                    } elseif ($v === null) {
+                        $result .= 'NULL, ';
                     } else {
-                        $result .= '\'' . addslashes($v) . '\', ';
+                        $result .= '\'' . ($v === null ? null : addslashes($v)) . '\', ';
                     }
                 }
             }
