@@ -9,7 +9,7 @@
     {
         public function testGetAllUserData(): void
         {
-            $this->assertTrue(method_exists(TestCase::class, __FUNCTION__), TestCase::class . '\\' . __FUNCTION__ . '() - метод не найден');
+            $this->assertTrue(method_exists(TestClass::class, 'getAllUserData'), TestClass::class . '\\' . __FUNCTION__ . '() - метод не найден');
         }
 
     }
