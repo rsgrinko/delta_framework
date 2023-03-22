@@ -29,6 +29,7 @@
         "workerman/workerman": "^4.1"
     },
     "require-dev": {
-        "vimeo/psalm": "^4.27"
+        "vimeo/psalm": "^4.27",
+        "phpunit/phpunit": "^9.5"
     }
 }
