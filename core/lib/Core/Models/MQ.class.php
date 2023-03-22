@@ -372,7 +372,7 @@
          * @return \Core\Models\MQResponse
          * @throws CoreException
          */
-        public function massCreateTasks(int $count = 1, ?string $class = null, string $method, ?array $params = null): MQResponse
+        public function massCreateTasks(int $count, ?string $class, string $method, ?array $params = null): MQResponse
         {
             if (empty($params)) {
                 $params = [];
@@ -438,7 +438,7 @@
          * @return \Core\Models\MQResponse Идентификатор созданного задания
          * @throws CoreException
          */
-        public function createTask(?string $class = null, string $method, ?array $params = null): MQResponse
+        public function createTask(?string $class, string $method, ?array $params = null): MQResponse
         {
             if (empty($params)) {
                 $params = [];
