@@ -7,6 +7,8 @@ stages:          # List of stages for jobs, and their order of execution
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
+    - apt-get update
+    - apt-get install php-zip
     - php -v
     - echo "Installing composer..."
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
