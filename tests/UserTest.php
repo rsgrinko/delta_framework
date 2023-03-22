@@ -9,7 +9,7 @@
     {
         public function testGetAllUserData(): void
         {
-            $testClassMock = $this->getMockBuilder(TestClass::class)->getMock();
+            $testClassMock = $this->getMockBuilder(TestClass::class)->setMethodsExcept(['getAllUserData'])->getMock();
                                           //->getMockBuilder(TestClass::class)
                                           //->setConstructorArgs([1])
                                           //->getMock();
