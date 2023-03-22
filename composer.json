@@ -24,11 +24,8 @@
       "ext-simplexml": "*",
       "ext-dom": "*",
       "ext-pdo": "*",
-      "ext-gd": "*",
-      "ext-exif": "*",
       "ext-mbstring": "*",
         "dompdf/dompdf": "^2.0",
-        "php-ai/php-ml": "^0.9.0",
         "workerman/workerman": "^4.1"
     },
     "require-dev": {
