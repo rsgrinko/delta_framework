@@ -7,13 +7,14 @@ stages:          # List of stages for jobs, and their order of execution
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
-    - echo "Compiling the code..."
     - php -v
+    - echo "Installing composer..."
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php composer-setup.php
     - php -r "unlink('composer-setup.php');"
     - pwd
     - ls
+    - php composer.phar install
     - echo "Compile complete."
 
 unit-test-job:   # This job runs in the test stage.
