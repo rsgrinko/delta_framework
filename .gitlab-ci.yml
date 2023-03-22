@@ -1,4 +1,4 @@
-image: php:7.4
+image: composer:latest
 stages:          # List of stages for jobs, and their order of execution
   - build
   - test
@@ -7,16 +7,11 @@ stages:          # List of stages for jobs, and their order of execution
 build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
-    - apt-get update
-    - apt-get install php-zip
     - php -v
     - echo "Installing composer..."
-    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    - php composer-setup.php
-    - php -r "unlink('composer-setup.php');"
     - pwd
     - ls
-    - php composer.phar install
+    - composer install
     - echo "Compile complete."
 
 unit-test-job:   # This job runs in the test stage.
