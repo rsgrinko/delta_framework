@@ -71,6 +71,12 @@
     define('START_TIME', microtime(true));                          // засекаем время старта скрипта
     const CORE_LOADED = true;                                       // флаг корректного запуска
 
+    if (empty($_SERVER['SERVER_NAME'])) {
+        $_SERVER['SERVER_NAME'] = 'localhost';
+    }
+    if (empty($_SERVER['DOCUMENT_ROOT'])) {
+        $_SERVER['DOCUMENT_ROOT'] = __DIR__. '/../';
+    }
     require_once __DIR__ . '/config.php';
 
 
