@@ -1,4 +1,4 @@
-CREATE TABLE if not exists `threads_history` (
+CREATE TABLE if not exists `d_threads_history` (
                                    `id` int(11) NOT NULL,
                                    `task_id` int(11) DEFAULT NULL,
                                    `execution_time` varchar(255) DEFAULT NULL,
@@ -10,6 +10,6 @@ CREATE TABLE if not exists `threads_history` (
                                    `params` text,
                                    `status` varchar(255) DEFAULT NULL,
                                    `response` text
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-ALTER TABLE `threads_history` ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `id` (`id`);
-ALTER TABLE `threads_history` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7946;
+) ENGINE=innodb DEFAULT CHARSET=utf8;
+ALTER TABLE `d_threads_history` ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `id` (`id`);
+ALTER TABLE `d_threads_history` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7946;
