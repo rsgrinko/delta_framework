@@ -1,4 +1,4 @@
-CREATE TABLE `threads` (
+CREATE TABLE `d_threads` (
                            `id` int(11) NOT NULL,
                            `active` varchar(1) NOT NULL DEFAULT 'N',
                            `in_progress` varchar(1) NOT NULL DEFAULT 'N',
@@ -13,6 +13,6 @@ CREATE TABLE `threads` (
                            `params` text,
                            `status` varchar(255) DEFAULT NULL,
                            `response` text
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-ALTER TABLE `threads` ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `id` (`id`);
-ALTER TABLE `threads` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78989;
+) ENGINE=innodb DEFAULT CHARSET=utf8;
+ALTER TABLE `d_threads` ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `id` (`id`);
+ALTER TABLE `d_threads` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78989;

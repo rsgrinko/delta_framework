@@ -390,7 +390,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                     foreach ($res['photos'] as $arImage) {
                         $result[] = [
                             'date' => $arImage['earth_date'],
-                            'src'  => $arImage['img_src'],
+                            'src' => $arImage['img_src'],
                         ];
                     }
                     $page++;
@@ -400,33 +400,6 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             }
             return $result;
         }
-
-        public static function saveSolImages($sol)
-        {
-            $counter = 0;
-            $files   = [];
-            $res     = self::getSolImages($sol);
-            sleep(5);
-
-            if (empty($res)) {
-                throw new CoreException('Изображений с ровера за ' . $sol . ' сол нет');
-            }
-            foreach ($res as $arImage) {
-                $folder = 'ftp://admin:j2medit@10.8.0.2/mars/' . $arImage['date'];
-                if (!file_exists($folder)) {
-                    if (!mkdir($folder) && !is_dir($folder)) {
-                        //throw new CoreException('Папку "' . $folder . '" не удалось создать');
-                    }
-                }
-                if (copy($arImage['src'], $folder . '/' . basename($arImage['src']))) {
-                    $counter++;
-                    $files[] = basename($arImage['src']);
-                    //throw new CoreException('Не удалось сохранить файл  "' . $folder . '/' . basename($arImage['src']) . '" не удалось создать');
-                }
-            }
-            return ['count' => $counter, 'files' => $files];
-        }
-
 
         public static function getStory($from = null)
         {

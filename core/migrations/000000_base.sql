@@ -1,5 +1,5 @@
 -- Таблица versions --
-create table if not exists `migrations` (
+create table if not exists `d_migrations` (
     `id` int(10) unsigned not null auto_increment,
     `name` varchar(255) not null,
     `date_created` timestamp default current_timestamp,
