@@ -9,12 +9,7 @@
     {
         public function testGetAllUserData(): void
         {
-            $testClassMock = $this->getMockBuilder(TestClass::class)->setMethodsExcept(['getAllUserData'])->getMock();
-                                          //->getMockBuilder(TestClass::class)
-                                          //->setConstructorArgs([1])
-                                          //->getMock();
-
-            $this->assertTrue(method_exists($testClassMock, 'getAllUserData'), TestClass::class . '\getAllUserData() - метод не найден');
+            $this->assertTrue(0, 'Сообщение об ошибке');
         }
 
     }

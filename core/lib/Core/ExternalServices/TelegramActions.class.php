@@ -231,15 +231,18 @@
          */
         public static function __callStatic(string $name, ?array $arguments): void
         {
-            $message = 'Команда ' . self::$cmd . ' не найдена.' . PHP_EOL;
+            /*$message = 'Команда ' . self::$cmd . ' не найдена.' . PHP_EOL;
             if (!empty($arguments)) {
                 $message .= 'Аргументы: ' . implode(', ', $arguments) . PHP_EOL;
             }
             if (self::getEventType() !== 'callback') {
                 $message .= '<code>' . print_r(self::$data, true) . '</code>';
-            }
+            }*/
+            //ChatGPT connect...
+            $gptObject = new ChatGPT();
             Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(self::getChatId(), $message, '', self::getInlineKeyboard(), self::getKeyboard());
+            //Telegram::execute(self::getChatId(), $message, '', self::getInlineKeyboard(), self::getKeyboard());
+            Telegram::execute(self::getChatId(), htmlspecialchars($gptObject->ask($name)), '', self::getInlineKeyboard(), self::getKeyboard());
         }
 
         /**
@@ -389,223 +392,5 @@
                 self::getInlineKeyboard(),
                 self::getKeyboard()
             );
-        }
-
-        /**
-         * Команда /online
-         *
-         * @return void
-         */
-        public static function commandOnline(): void
-        {
-            Online::removeInactive();
-            $result  = Online::getOnline();
-            $message = '<b>Посетители онлайн (' . count($result) . ')</b>' . PHP_EOL;
-
-            foreach ($result as $key => $item) {
-                $message .= '✔ <b>Пользователь #' . ($key + 1) . '</b> ' . PHP_EOL . '<b>IP:</b> ' . $item['ip'] . PHP_EOL . '<b>Страница:</b> <code>'
-                            . $item['page'] . '</code>' . PHP_EOL . '<b>Referer:</b> <code>' . (!empty(
-                    trim(
-                        $item['referer']
-                    )
-                    ) ? SystemFunctions::getBaseUrl($item['referer']) : 'нет') . '</code>' . PHP_EOL . '<b>Бот:</b> ' . (SystemFunctions::isSearchBot(
-                            $item['useragent']
-                        ) ?? 'нет') . PHP_EOL . '<b>Последняя активность:</b> ' . SystemFunctions::secToString(time() - (int)$item['last_active'])
-                            . PHP_EOL . '<b>Геозона:</b> ' . SystemFunctions::gluingLocationToString(
-                        ['country' => $item['country'], 'region' => $item['region'], 'city' => $item['city']]
-                    ) . PHP_EOL . PHP_EOL;
-            }
-            Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(self::getChatId(), $message, '', self::getInlineKeyboard(), self::getKeyboard());
-        }
-
-        /**
-         * Команда /fail2ban
-         *
-         * @return void
-         */
-        public static function commandFail2ban(): void
-        {
-            $result  = Fail2ban::getBlockedIpList('10', 'last_active', 'DESC');
-            $message = '<b>Список заблокированных IP (' . Fail2ban::getBlockedIpCount() . ' из ' . Fail2ban::getAllIpCount() . ')</b>' . PHP_EOL;
-
-            foreach ($result as $key => $item) {
-                $message .= '🚩 <b> ' . $item['ip'] . '</b> ' . PHP_EOL . '<b>Попыток:</b> ' . $item['attempts'] . PHP_EOL . '<b>Активность:</b> '
-                            . SystemFunctions::secToString(time() - $item['last_active']) . PHP_EOL . '<b>Геозона:</b> '
-                            . SystemFunctions::gluingLocationToString(
-                        ['country' => $item['country'], 'region' => $item['region'], 'city' => $item['city']]
-                    ) . PHP_EOL . PHP_EOL;
-            }
-            Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(self::getChatId(), $message, '', self::getInlineKeyboard(), self::getKeyboard());
-        }
-
-        /**
-         * Команда /deploy
-         *
-         * @return void
-         */
-        public static function commandDeploy(): void
-        {
-            SystemFunctions::deploymentFromGit();
-            Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(self::getChatId(), 'Произведен деплоймент из ветки <b>master</b>', '', self::getInlineKeyboard(), self::getKeyboard());
-        }
-
-
-        /**
-         * Команда /stat
-         *
-         * @return void
-         */
-        public static function commandStat(): void
-        {
-            self::setInlineKeyboard(
-                [
-                    [
-                        ['text' => 'Очистка кэша', 'callback_data' => self::getPreparedCallbackData('clearcache')],
-                        ['text' => 'Сброс Opcache', 'callback_data' => self::getPreparedCallbackData('clearopcache')],
-                    ],
-                ]
-            );
-
-            $countCacheElements = \FCCache::getCountElements();
-            $cacheSize          = \FCCache::getCacheSize();
-            $usersOnline        = Online::getOnlineCount();
-            $countBlockedIp     = Fail2ban::getBlockedIpCount();
-            $countAllIp         = Fail2ban::getAllIpCount();
-            $arOpcache          = opcache_get_status();
-
-            $message = '📱 <b>Статистика по проекту</b>' . PHP_EOL . '<b>В кэше:</b> ' . $countCacheElements . ' ' . SystemFunctions::numWord(
-                    $countCacheElements,
-                    ['элемент', 'элемента', 'элементов']
-                ) . PHP_EOL . '<b>Размер кэша:</b> ' . SystemFunctions::convertBytes($cacheSize) . PHP_EOL . '<b>В Opcache:</b> '
-                       . $arOpcache['opcache_statistics']['num_cached_scripts'] . ' ' . SystemFunctions::numWord(
-                    $arOpcache['opcache_statistics']['num_cached_scripts'],
-                    ['элемент', 'элемента', 'элементов']
-                ) . PHP_EOL . '<b>Opcache (используется):</b> ' . SystemFunctions::convertBytes($arOpcache['memory_usage']['used_memory']) . PHP_EOL
-                       . '<b>Opcache (свободно):</b> ' . SystemFunctions::convertBytes($arOpcache['memory_usage']['free_memory']) . PHP_EOL
-                       . '<b>Opcache (битая):</b> ' . SystemFunctions::convertBytes($arOpcache['memory_usage']['wasted_memory']) . PHP_EOL
-                       . '<b>Opcache (всего):</b> 512Mb' . PHP_EOL . '<b>Онлайн на сайте:</b> ' . $usersOnline . ' ' . SystemFunctions::numWord(
-                    $usersOnline,
-                    ['посетитель', 'посетителя', 'посетителей']
-                ) . PHP_EOL . '<b>Заблокировано:</b> ' . $countBlockedIp . ' ' . SystemFunctions::numWord(
-                    $countBlockedIp,
-                    ['адрес', 'адреса', 'адресов']
-                ) . ' из ' . $countAllIp;
-            Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(self::getChatId(), $message, '', self::getInlineKeyboard(), self::getKeyboard());
-        }
-
-        /**
-         * Команда /yastat
-         *
-         * @return void
-         */
-        public static function commandYaStat(): void
-        {
-            $objectYandex = new Yandex(
-                YANDEX_APP_ID, YANDEX_APP_SECRET, YANDEX_REDIRECT_URL
-            );
-            $objectYandex->loadConfig()->refreshToken();
-            $objectYandex->save();
-
-
-            $query = [
-                'oauth_token'     => $objectYandex->getAccessToken(),
-                'dimension_field' => 'date|day',
-                'period'          => 'thisyear',
-                'entity_field'    => 'page_level',
-                'field'           => 'partner_wo_nds',
-                'lang'            => 'ru',
-                'pretty'          => '0',
-
-            ];
-
-            $result = $objectYandex->request(
-                'partner2.yandex.ru',
-                'api/statistics2/get.json',
-                $query
-            );
-
-
-            $day_price = [];
-            foreach ($result['data']['points'] as $k => $item) {
-                $day = date("d") - 1;
-                if ($day == 0) {
-                    $day = 1;
-                } elseif ($day < 9) {
-                    $day = '0' . $day;
-                }
-                if ($item['dimensions']['date'][0] == date("Y-m-") . $day) {
-                    $day_price['yesterday'] = $item['measures'][0]['partner_wo_nds'];
-                }
-
-                if ($item['dimensions']['date'][0] == date("Y-m-d")) {
-                    $day_price['today'] = $item['measures'][0]['partner_wo_nds'];
-                }
-            }
-            $day_price['today']     = $day_price['today'] ?? '0';
-            $day_price['yesterday'] = $day_price['yesterday'] ?? '0';
-
-            $message = '<b>Статистика РСЯ</b>' . PHP_EOL . 'Доход за сегодня: ' . $day_price['today'] . ' р.' . PHP_EOL . 'Доход за вчера: '
-                       . $day_price['yesterday'] . ' р.' . PHP_EOL . 'Курс доллара: ' . SystemFunctions::getExchangeRates('USD', 2) . ' р.';
-            Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(self::getChatId(), $message, '', self::getInlineKeyboard(), self::getKeyboard());
-        }
-
-        /**
-         * Команда /getcam
-         *
-         * @return void
-         */
-        public static function commandGetCam(): void
-        {
-            $image = SystemFunctions::getCamScreen();
-            Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(
-                self::getChatId(),
-                'Снимок сделан ' . date('d.m.Y H:i:s', strtotime('+3 hours')),
-                $image,
-                self::getInlineKeyboard(),
-                self::getKeyboard()
-            );
-        }
-
-        /**
-         * Команда /clearcache
-         *
-         * @return void
-         */
-        public static function commandClearCache(): void
-        {
-            opcache_reset();
-            $cacheSize = SystemFunctions::convertBytes(\FCCache::getCacheSize());
-            \FCCache::clearCache();
-            Telegram::sendChatAction(self::getChatId()); // печатает...
-            Telegram::execute(self::getChatId(), 'Кэш очищен. Удалено ' . $cacheSize, '', self::getInlineKeyboard(), self::getKeyboard());
-        }
-
-        /**
-         * Callback очистка кэша
-         *
-         * @return void
-         */
-        public static function callbackClearcache(): void
-        {
-            $cacheSize = SystemFunctions::convertBytes(\FCCache::getCacheSize());
-            \FCCache::clearCache();
-            Telegram::answerCallbackQuery(self::getEventData()['callback_id'], 'Файловый кэш очищен. Удалено ' . $cacheSize, true);
-        }
-
-        /**
-         * Callback очистка Opcache
-         *
-         * @return void
-         */
-        public static function callbackClearOpcache(): void
-        {
-            opcache_reset();
-            Telegram::answerCallbackQuery(self::getEventData()['callback_id'], 'Opcache очищен.', false);
         }
     }

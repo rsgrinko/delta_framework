@@ -77,7 +77,7 @@
     /**
      * Параметры SQL базы
      */
-    const DB_HOST     = 'localhost';
+    const DB_HOST     = 'dev.it-stories.ru';//'localhost';
     const DB_USER     = 'rsgrinko_delta';
     const DB_PASSWORD = '2670135';
     const DB_NAME     = 'rsgrinko_delta';

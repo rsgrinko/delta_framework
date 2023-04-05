@@ -345,6 +345,7 @@
                 } else {
                     $this->eventType = null;
                 }
+                $this->setChat($this->eventChatId);
             }
             return $this;
         }
@@ -360,6 +361,7 @@
         }
 
 
+
         /**
          * Получение конкретного типа
          *
@@ -368,6 +370,16 @@
         public function getMessageType(): ?string
         {
             return $this->messageType;
+        }
+
+        /**
+         * Получение сообщения, полученного от пользователя
+         *
+         * @return string|null
+         */
+        public function getMessage(): ?string
+        {
+            return $this->event['message'];
         }
 
         /**
