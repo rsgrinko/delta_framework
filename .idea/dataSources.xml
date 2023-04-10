@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:mysql://its-dev.site:3306/delta_core</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="test.db" uuid="c1199c0a-fc79-4092-9eb0-f1273cdcbe20">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:D:\phpstorm\delta-project\test.db.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
