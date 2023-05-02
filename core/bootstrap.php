@@ -68,8 +68,8 @@
     }
 
     // Если имеется файл локальной конфигурации - подключаем его
-    if (file_exists(__DIR__ . '/config.local.php')) {
-        require_once __DIR__ . '/config.local.php';
+    if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/config.local.php')) {
+        require_once $_SERVER['DOCUMENT_ROOT'] . '/config.local.php';
     }
     require_once __DIR__ . '/config.php';
 
