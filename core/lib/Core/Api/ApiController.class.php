@@ -23,6 +23,7 @@
 
     use Composer\Util\RemoteFilesystem;
     use Core\CoreException;
+    use Core\Helpers\Mail;
     use Core\Models\DB;
     use Core\Models\File;
     use Core\Models\MQ;
@@ -214,6 +215,31 @@
                     'randomInt' =>  random_int(1000, 9999),
                 ]
             );
+        }
+
+        /**
+         * Отправка писем
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         */
+        public function sendMail(): void
+        {
+            $mailObject   = new Mail();
+            $mailTo       = $this->request->getProperty('to');
+            $mailSubject  = $this->request->getProperty('subject');
+            $mailBody     = $this->request->getProperty('body');
+            $mailTemplate = $this->request->getProperty('template');
+            $mailFrom     = 'noreply@it-stories.ru';
+            $result       = $mailObject->setTo($mailTo, 'user')
+                                       ->setFrom($mailFrom, 'Info System')
+                                       ->setTemplate($mailTemplate ?: MAIL_TEMPLATE_DEFAULT)
+                                       ->setTemplateVars(['TITLE' => $mailSubject])
+                                       ->setSubject($mailSubject)
+                                       ->setBody($mailBody)
+                                       ->send();
+            ApiView::output(['result' => $result]);
         }
 
 
