@@ -18,12 +18,13 @@
      * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
-
     use Core\Models\User;
     use Core\Helpers\Cache;
     use Core\Template;
     use Core\CoreException;
     use Core\Models\Router;
+
+    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
@@ -43,18 +44,6 @@
         $sentryScope->setExtra('user_login', $_SESSION['login'] ?? '');
         $sentryScope->setExtra('user_token', $_SESSION['token'] ?? '');
     });
-    /*
-        try {
-        $this->functionFailsForSure();
-    } catch (\Throwable $exception) {
-        \Sentry\captureException($exception);
-    }
-
-    // OR
-
-    \Sentry\captureLastError();
-        */
-
 
     ob_start(function ($buffer) {
         try {
@@ -68,14 +57,19 @@
         }
     });
 
-    define('START_TIME', microtime(true));                          // засекаем время старта скрипта
-    const CORE_LOADED = true;                                       // флаг корректного запуска
+    define('START_TIME', microtime(true)); // засекаем время старта скрипта
+    const CORE_LOADED = true; // флаг корректного запуска
 
     if (empty($_SERVER['SERVER_NAME'])) {
         $_SERVER['SERVER_NAME'] = 'localhost';
     }
     if (empty($_SERVER['DOCUMENT_ROOT'])) {
         $_SERVER['DOCUMENT_ROOT'] = __DIR__. '/../';
+    }
+
+    // Если имеется файл локальной конфигурации - подключаем его
+    if (file_exists(__DIR__ . '/config.local.php')) {
+        require_once __DIR__ . '/config.local.php';
     }
     require_once __DIR__ . '/config.php';
 
@@ -92,18 +86,6 @@
             }
         }
     });
-
-    require_once __DIR__ . '/routes.php';
-
-    /**
-     * Инициализация шаблонизатора
-     */
-    $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
-    $twig   = new \Twig\Environment($loader, [
-        'debug' => true,
-        //'cache' => CACHE_DIR,
-    ]);
-    $twig->addExtension(new \Twig\Extension\DebugExtension());
 
     Cache::init(CACHE_DIR, USE_CACHE);
 
@@ -148,6 +130,16 @@
      * Запускаем маршрутизатор если не сказано иного
      */
     if (defined('USE_ROUTER') && USE_ROUTER === true) {
+        /**
+         * Инициализация шаблонизатора
+         */
+        $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
+        $twig   = new \Twig\Environment($loader, [
+            'debug' => true,
+            //'cache' => CACHE_DIR,
+        ]);
+        $twig->addExtension(new \Twig\Extension\DebugExtension());
+        require_once __DIR__ . '/routes.php';
         Router::execute();
         die();
     }
