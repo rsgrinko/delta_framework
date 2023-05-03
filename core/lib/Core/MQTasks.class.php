@@ -22,6 +22,7 @@
     namespace Core;
 
     use Core\Helpers\Cache;
+    use Core\Helpers\Mail;
     use Core\Helpers\SystemFunctions;
     use Core\Helpers\Thumbs;
     use Core\ExternalServices\TelegramSender;
@@ -456,6 +457,43 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             }
 
             return 'Добавлено постов: ' . count($result);
+        }
+
+        /**
+         * Отправка E-Mail
+         *
+         * @param string      $fromMail     E-Mail отправителя
+         * @param string|null $fromName     Имя отправителя
+         * @param string      $toMail       E-Mail получателя
+         * @param string|null $toName       Имя получателя
+         * @param string      $subject      Тема письма
+         * @param string      $body         Тело письма
+         * @param string|null $template     Шаблон
+         * @param array|null  $templateVars Переменные шаблона
+         *
+         * @return array
+         * @throws CoreException
+         */
+        public static function sendMail(
+            string $fromMail,
+            ?string $fromName,
+            string $toMail,
+            ?string $toName,
+            string $subject,
+            string $body,
+            ?string $template = null,
+            ?array $templateVars = null
+        ): array {
+            $mailObject = new Mail();
+            $mailObject->setTo($toMail, $toName)
+                       ->setFrom($fromMail, $fromName)
+                       ->setSubject($subject)->setBody($body);
+            if ($template !== null && $templateVars !== null) {
+                $mailObject->setTemplate($template)
+                           ->setTemplateVars($templateVars);
+            }
+
+            return $mailObject->send();
         }
 
     }

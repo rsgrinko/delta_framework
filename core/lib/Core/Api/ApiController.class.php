@@ -226,20 +226,29 @@
          */
         public function sendMail(): void
         {
-            $mailObject   = new Mail();
-            $mailTo       = $this->request->getProperty('to');
-            $mailSubject  = $this->request->getProperty('subject');
-            $mailBody     = $this->request->getProperty('body');
-            $mailTemplate = $this->request->getProperty('template');
-            $mailFrom     = 'noreply@it-stories.ru';
-            $result       = $mailObject->setTo($mailTo, 'user')
-                                       ->setFrom($mailFrom, 'Info System')
-                                       ->setTemplate($mailTemplate ?: MAIL_TEMPLATE_DEFAULT)
-                                       ->setTemplateVars(['TITLE' => $mailSubject])
-                                       ->setSubject($mailSubject)
-                                       ->setBody($mailBody)
-                                       ->send();
-            ApiView::output(['result' => $result]);
+            $responseObject = (new MQ())->setPriority(7)
+                             ->setAttempts(2)
+                             ->createTask('Core\MQTasks',
+                                          'sendMail',
+                                          [
+                                              SERVER_EMAIL,
+                                              SERVER_EMAIL_NAME,
+                                              $this->request->getProperty('to'),
+                                              null,
+                                              $this->request->getProperty('subject'),
+                                              $this->request->getProperty('body'),
+                                              MAIL_TEMPLATE_DEFAULT,
+                                              ['TITLE' => $this->request->getProperty('subject')],
+                                          ]
+                             );
+
+
+            ApiView::output(
+                [
+                    'status'   => $responseObject->getStatus(),
+                    'response' => $responseObject->getResponse(),
+                ]
+            );
         }
 
 
