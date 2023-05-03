@@ -24,7 +24,8 @@
     use Core\CoreException;
     use Core\Models\Router;
 
-    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+    //error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+    error_reporting(E_ALL);
 
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
@@ -67,11 +68,12 @@
         $_SERVER['DOCUMENT_ROOT'] = __DIR__. '/../';
     }
 
+    require_once __DIR__ . '/config.php';
+
     // Если имеется файл локальной конфигурации - подключаем его
     if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/config.local.php')) {
         require_once $_SERVER['DOCUMENT_ROOT'] . '/config.local.php';
     }
-    require_once __DIR__ . '/config.php';
 
 
     /**
