@@ -61,6 +61,9 @@
             string $system = null,
             bool $addEnv = true
         ): int {
+            if (!USE_LOG) {
+                return 1;
+            }
             $jsonOptions = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
             $message     = str_replace(["\r\n", "\r", "\n"], PHP_EOL, trim($message));
             $logFile     = LOG_PATH . '/' . $filename;

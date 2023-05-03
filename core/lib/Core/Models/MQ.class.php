@@ -228,16 +228,15 @@
                     foreach ($arTasks as $task) {
                         $arTaskIds[] = $task['id'];
                     }
-                    if (USE_LOG) {
-                        Log::logToFile(
-                            $this->getWorkerId() . ': Взято в работу заданий ' . count($arTaskIds),
-                            self::LOG_FILE,
-                            ['added' => count($arTaskIds), 'before' => $countTasks],
-                            LOG_INFO,
-                            null,
-                            false
-                        );
-                    }
+                    Log::logToFile(
+                        $this->getWorkerId() . ': Взято в работу заданий ' . count($arTaskIds),
+                        self::LOG_FILE,
+                        ['added' => count($arTaskIds), 'before' => $countTasks],
+                        LOG_INFO,
+                        null,
+                        false
+                    );
+
                     $this->DB->query('UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_Y . '" WHERE id IN (' . implode(',', $arTaskIds) . ')');
                 }
             }
@@ -252,7 +251,7 @@
          */
         public function run(bool $childProcess = false): void
         {
-            if (USE_LOG && !$childProcess) {
+            /*if (!$childProcess) {
                 Log::logToFile(
                     $this->getWorkerId() . ': Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
                     self::LOG_FILE,
@@ -261,7 +260,7 @@
                     null,
                     false
                 );
-            }
+            }*/
             // Поиск и исправление зависших заданий
             $this->searchAndFixStuckTasks();
 
@@ -269,45 +268,43 @@
             $this->setTasksActiveStatus();
 
             if ($this->hasMaxWorkers() && !$childProcess) {
-                if (USE_LOG) {
-                    Log::logToFile(
-                        $this->getWorkerId() . ': Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
-                        self::LOG_FILE,
-                        [],
-                        LOG_NOTICE,
-                        null,
-                        false
-                    );
-                }
+                /*
+                Log::logToFile(
+                    $this->getWorkerId() . ': Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
+                    self::LOG_FILE,
+                    [],
+                    LOG_NOTICE,
+                    null,
+                    false
+                );
+                */
                 return;
             }
             $arTasks = $this->getActiveTasks();
 
             if (!empty($arTasks)) {
-                if (USE_LOG) {
-                    Log::logToFile(
-                        $this->getWorkerId() . ': Запущено выполнение заданий из очереди',
-                        self::LOG_FILE,
-                        ['count' => count($arTasks)],
-                        LOG_INFO,
-                        null,
-                        false
-                    );
-                }
+                Log::logToFile(
+                    $this->getWorkerId() . ': Запущено выполнение заданий из очереди',
+                    self::LOG_FILE,
+                    ['count' => count($arTasks)],
+                    LOG_INFO,
+                    null,
+                    false
+                );
                 foreach ($arTasks as $task) {
                     $this->execute($task['id']);
                 }
             } else {
-                if (USE_LOG) {
-                    Log::logToFile(
-                        $this->getWorkerId() . ': Нечего выполнять - завершаем работу',
-                        self::LOG_FILE,
-                        [],
-                        LOG_INFO,
-                        null,
-                        false
-                    );
-                }
+                /*
+                Log::logToFile(
+                    $this->getWorkerId() . ': Нечего выполнять - завершаем работу',
+                    self::LOG_FILE,
+                    [],
+                    LOG_INFO,
+                    null,
+                    false
+                );
+                */
                 return;
             }
             $this->runNewWorker($this->getWorkerId()); // Запускаем дочерний воркер с тем же идентификатором
@@ -385,17 +382,14 @@
 
             $params = $this->convertToJson($params);
 
-            if (USE_LOG) {
-                Log::logToFile(
-                    $this->getWorkerId() . ': Массовое создание заданий',
-                    self::LOG_FILE,
-                    func_get_args(),
-                    LOG_DEBUG,
-                    null,
-                    false
-                );
-            }
-
+            Log::logToFile(
+                $this->getWorkerId() . ': Массовое создание заданий',
+                self::LOG_FILE,
+                func_get_args(),
+                LOG_DEBUG,
+                null,
+                false
+            );
 
             $arData = [];
             for ($i = 0; $i < $count; $i++) {
@@ -450,16 +444,14 @@
                 throw new CoreException('Попытка создания дубликата задания', CoreException::ERROR_DIPLICATE_TASK);
             }
 
-            if (USE_LOG) {
-                Log::logToFile(
-                    $this->getWorkerId() . ': Добавлено новое задание в очередь',
-                    self::LOG_FILE,
-                    func_get_args(),
-                    LOG_DEBUG,
-                    null,
-                    false
-                );
-            }
+            Log::logToFile(
+                $this->getWorkerId() . ': Добавлено новое задание в очередь',
+                self::LOG_FILE,
+                func_get_args(),
+                LOG_DEBUG,
+                null,
+                false
+            );
             if (!empty($this->priority)) {
                 $priority       = $this->priority;
                 $this->priority = null;
@@ -547,16 +539,14 @@
         {
             $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
 
-            if (USE_LOG) {
-                Log::logToFile(
-                    $this->getWorkerId() . ': Задание ' . $taskId . ' взято в работу',
-                    self::LOG_FILE,
-                    ['taskId' => $taskId],
-                    LOG_INFO,
-                    null,
-                    false
-                );
-            }
+            Log::logToFile(
+                $this->getWorkerId() . ': Задание ' . $taskId . ' взято в работу',
+                self::LOG_FILE,
+                ['taskId' => $taskId],
+                LOG_INFO,
+                null,
+                false
+            );
 
             $response = new MQResponse();
             $response->setTaskId($taskId);
@@ -565,17 +555,15 @@
                 // Если задание не найдено
                 $response->setStatus(self::STATUS_ERROR)->setResponse('Task ' . $taskId . ' not found');
 
-                if (USE_LOG) {
-                    Log::logToFile(
-                        $this->getWorkerId() . ': Задания ' . $taskId . ' не найдено',
-                        self::LOG_FILE,
-                        ['taskId' => $taskId],
-                        LOG_ERR,
-                        null,
-                        false
-                    );
-                    //Log::logToSentry($this->getWorkerId() . ': Задания ' . $taskId . ' не найдено', 'DEBUG', ['taskId' => $taskId]);
-                }
+                Log::logToFile(
+                    $this->getWorkerId() . ': Задания ' . $taskId . ' не найдено',
+                    self::LOG_FILE,
+                    ['taskId' => $taskId],
+                    LOG_ERR,
+                    null,
+                    false
+                );
+                //Log::logToSentry($this->getWorkerId() . ': Задания ' . $taskId . ' не найдено', 'DEBUG', ['taskId' => $taskId]);
 
                 return $response;
             }
@@ -588,16 +576,14 @@
                 // Данное задание уже выполняется другим воркером
                 $response->setStatus(self::STATUS_BUSY)->setResponse('Task ' . $taskId . ' already work');
 
-                if (USE_LOG) {
-                    Log::logToFile(
-                        $this->getWorkerId() . ': Задание ' . $taskId . ' уже выполняется другим воркером',
-                        self::LOG_FILE,
-                        ['taskId' => $taskId],
-                        LOG_INFO,
-                        null,
-                        false
-                    );
-                }
+                Log::logToFile(
+                    $this->getWorkerId() . ': Задание ' . $taskId . ' уже выполняется другим воркером',
+                    self::LOG_FILE,
+                    ['taskId' => $taskId],
+                    LOG_INFO,
+                    null,
+                    false
+                );
 
                 return $response;
             }
@@ -654,16 +640,14 @@
                          ->setAttemptsLimit($arTask['attempts_limit']);
                 $this->saveTaskToHistory($taskId);
 
-                if (USE_LOG) {
-                    Log::logToFile(
-                        $this->getWorkerId() . ': Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
-                        self::LOG_FILE,
-                        ['response' => $this->convertToJson($result)],
-                        LOG_INFO,
-                        null,
-                        false
-                    );
-                }
+                Log::logToFile(
+                    $this->getWorkerId() . ': Выполнено задание с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
+                    self::LOG_FILE,
+                    ['response' => $this->convertToJson($result)],
+                    LOG_INFO,
+                    null,
+                    false
+                );
             } catch (\Throwable|CoreException $t) {
                 $endTime = round(microtime(true) - $startTime, 4);
 
@@ -686,17 +670,15 @@
 
                 $response->setStatus(self::STATUS_ERROR)->setExecutionTime($endTime)->setResponse($t->getMessage());
 
-                if (USE_LOG) {
-                    Log::logToFile(
-                        $this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
-                        self::LOG_FILE,
-                        ['response' => $t->getMessage()],
-                        LOG_ERR,
-                        null,
-                        false
-                    );
-                    //Log::logToSentry($this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'], 'DEBUG', ['response' => $t->getMessage()]);
-                }
+                Log::logToFile(
+                    $this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'],
+                    self::LOG_FILE,
+                    ['response' => $t->getMessage()],
+                    LOG_ERR,
+                    null,
+                    false
+                );
+                //Log::logToSentry($this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'], 'DEBUG', ['response' => $t->getMessage()]);
             }
 
             return $response;
@@ -860,16 +842,14 @@
                         || (time() - strtotime($task['date_updated'])) > self::STUCK_TIME // Повисшие надолго
                     ) {
                         $arStuckTasks[] = (int)$task['id'];
-                        if (USE_LOG) {
-                            Log::logToFile(
-                                $this->getWorkerId() . ': Задание ' . $task['id'] . ' зависло',
-                                self::LOG_FILE,
-                                ['task' => json_encode($task, JSON_UNESCAPED_UNICODE)],
-                                LOG_WARNING,
-                                null,
-                                false
-                            );
-                        }
+                        Log::logToFile(
+                            $this->getWorkerId() . ': Задание ' . $task['id'] . ' зависло',
+                            self::LOG_FILE,
+                            ['task' => json_encode($task, JSON_UNESCAPED_UNICODE)],
+                            LOG_WARNING,
+                            null,
+                            false
+                        );
                     }
                 }
 
@@ -883,16 +863,14 @@
 
                     sendTelegram('Задания были возвращены в работу (' . count($arStuckTasks) . ' шт)' . PHP_EOL . implode(', ', $arStuckTasks));
 
-                    if (USE_LOG) {
-                        Log::logToFile(
-                            $this->getWorkerId() . ': Задания были возвращены в работу (' . count($arStuckTasks) . ')',
-                            self::LOG_FILE,
-                            ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
-                            LOG_DEBUG,
-                            null,
-                            false
-                        );
-                    }
+                    Log::logToFile(
+                        $this->getWorkerId() . ': Задания были возвращены в работу (' . count($arStuckTasks) . ')',
+                        self::LOG_FILE,
+                        ['tasks' => json_encode($arStuckTasks, JSON_UNESCAPED_UNICODE)],
+                        LOG_DEBUG,
+                        null,
+                        false
+                    );
                 }
             }
         }

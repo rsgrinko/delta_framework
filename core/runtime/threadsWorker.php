@@ -28,13 +28,27 @@
 
     require_once __DIR__ . '/init.php';
 
-    use Core\Helpers\SystemFunctions;
+    use Core\Helpers\{SystemFunctions, Log};
     use Core\Models\MQ;
+
     $isChildrenThread = isset($argv[1]) && $argv[1] === 'children';
-    $workerId = isset($argv[2]) && !empty($argv[2]) ? $argv[2] : null;
+    $workerId         = isset($argv[2]) && !empty($argv[2]) ? $argv[2] : null;
     try {
         (new MQ($workerId))->run($isChildrenThread);
     } catch (Throwable $t) {
+        Log::logToFile(
+            'Произошла ошибка при обработке очереди: ' . $t->getMessage(),
+            'threadsWorker.log',
+            [
+                'file'  => $t->getFile(),
+                'line'  => $t->getLine(),
+                'code'  => $t->getCode(),
+                'trace' => $t->getTraceAsString(),
+            ],
+            LOG_ERR,
+            null,
+            false
+        );
         SystemFunctions::sendTelegram(
             'ThreadsWorker: Произошла ошибка' . PHP_EOL . $t->getMessage() . PHP_EOL . 'File: ' . $t->getFile() . PHP_EOL . 'Line: ' . $t->getLine()
         );
