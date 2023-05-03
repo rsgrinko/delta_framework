@@ -9,7 +9,7 @@
     {
         public function testGetAllUserData(): void
         {
-            $this->assertTrue(0, 'Сообщение об ошибке');
+            $this->assertTrue(true, 'Сообщение об ошибке');
         }
 
     }

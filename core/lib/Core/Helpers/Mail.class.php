@@ -22,8 +22,10 @@
     namespace Core\Helpers;
 
     use Core\CoreException;
+    use Core\Models\DB;
     use Core\Models\User;
     use Core\Helpers\Log;
+    use Throwable;
 
     /**
      * Класс для отправки E-mail
@@ -73,6 +75,9 @@
          * @var User|null $user Объект пользователя
          */
         private $user = null;
+
+        /** @var string TABLE Таблица с логами отправки */
+        private const TABLE = DB_TABLE_PREFIX . 'mail_history';
 
         /**
          * Конструктор
@@ -248,8 +253,29 @@
             $message[] = '--' . $boundary . '--';
             $res       = [];
 
+            /** @var DB $DB */
+            $DB = DB::getInstance();
+
             foreach ($array_to as $to) {
-                $res[] = mb_send_mail($to, $subject, implode("\r\n", $message), implode("\r\n", $headers));
+                $result = mb_send_mail($to, $subject, implode("\r\n", $message), implode("\r\n", $headers));
+                $res[] = $result;
+
+                try {
+                    $DB->addItem(self::TABLE, [
+                        'to_mail'       => $this->toEmail,
+                        'to_name'       => $this->toName,
+                        'from_mail'     => $this->fromEmail,
+                        'from_name'     => $this->fromName,
+                        'subject'       => $this->subject,
+                        'send'          => $result ? CODE_VALUE_Y : CODE_VALUE_N,
+                        'template'      => $this->templateName,
+                        'template_vars' => json_encode($this->templateVars, JSON_UNESCAPED_UNICODE),
+                        'body'          => $this->body,
+                    ]);
+                } catch (Throwable $e) {
+                    // TODO Просто глушим, однако наверное надо залогировать в файл...
+                }
+
             }
 
             Log::logToFile('Отправлено письмо', 'Mail.log', ['to' => $this->toEmail, 'subject' => $subject, 'body' => implode(' ', $message)]);
