@@ -20,6 +20,7 @@
      */
     use Core\Models\User;
     use Core\Helpers\Cache;
+    use Core\Models\UTM;
     use Core\Template;
     use Core\CoreException;
     use Core\Models\Router;
@@ -89,7 +90,11 @@
         }
     });
 
+    // Инициализация кеша
     Cache::init(CACHE_DIR, USE_CACHE);
+
+    // Обработка UTM меток
+    (new UTM())->save();
 
     // очистка кэша
     if (isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
