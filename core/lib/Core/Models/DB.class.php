@@ -141,6 +141,44 @@
         }
 
         /**
+         * Получить информацию по таблице
+         *
+         * @param string $table Таблица
+         *
+         * @return array|null Информация по таблице
+         * @throws Throwable Возможный тип исключения
+         */
+        public function getColumnsList(string $table): array
+        {
+            $columns = $this->query('SHOW COLUMNS FROM `' . $table . '`');
+            $result  = [];
+            foreach ($columns as $info) {
+                $result[$info['Field']]['field'] = $info['Field'];
+                $typeData            = [];
+                preg_match_all('/^(\w+)(\(([\w,\']+)\))?(\s\w+)?$/m', $info['Type'], $typeData, PREG_SET_ORDER);
+
+                // Задаём тип колонки
+                if(empty($typeData[0][1]) === false) {
+                    $result[$info['Field']]['type'] = $typeData[0][1];
+                }
+
+                // Если это enum, то в скобках идут возможные значения, иначе там указана длинна указанного значения
+                if (empty($typeData[0][3]) === false) {
+                    if ($result[$info['Field']]['type'] === 'enum') {
+                        // Заменяем кавычки в начале и конце строки
+                        $typeData[0][3] = preg_replace('/^\'|\'$/m', '', $typeData[0][3]);
+                        // Разбиваем значения
+                        $result[$info['Field']]['enumValues'] = explode('\',\'', $typeData[0][3]);
+                    } else {
+                        $result[$info['Field']]['length'] = (int)$typeData[0][3];
+                    }
+                }
+
+            }
+            return $result;
+        }
+
+        /**
          * Вспомогательный метод, формирует WHERE из массива
          *
          * @param mixed  $where Массив условия выборки ['id' => 1] или прямая строка вида owner="admin"
@@ -352,7 +390,7 @@
             self::$quantity++;
             $result = $this->query('SELECT * FROM `' . $table . '` WHERE ' . $this->createWhere($where) . ' LIMIT 1');
             if ($result) {
-                return $result[0];
+                return array_shift($result);
             }
 
             return null;

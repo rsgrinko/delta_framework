@@ -945,4 +945,24 @@
 
             return null;
         }
+
+        /**
+         * Преобразование строки в camelCase
+         * Применение: преобразование названий столбцов таблицы в camelCase стиль
+         *
+         * @param string $string Строка вида "FIELD_ID"
+         *
+         * @return string Результат вида "fieldId"
+         */
+        public static function stringToCamelCase(string $string): string
+        {
+            $explodedString = explode('_', strtolower($string));
+            foreach ($explodedString as $index => $value) {
+                if ($index === 0) {
+                    continue;
+                }
+                $explodedString[$index] = ucfirst($value);
+            }
+            return implode('', $explodedString);
+        }
     }
