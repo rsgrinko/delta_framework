@@ -372,9 +372,9 @@
                     // Если такого столбца нет, то и смысла добавлять его нет
                     continue;
                 }
-                switch ($columnsInfo[$key]->type) {
+                switch ($columnsInfo[$key]['type']) {
                     case self::COLUMN_TYPE_ENUM:
-                        if (in_array($value, $columnsInfo[$key]->enumValues, true) === false) {
+                        if (in_array($value, $columnsInfo[$key]['enumValues'], true) === false) {
                             throw new CoreException('Недопустимое значение для enum поля ' . $key);
                         }
                         $result[$key] = $value;
@@ -389,7 +389,7 @@
                         if (is_string($value) === false) {
                             throw new CoreException('Значение ' . $key . ' должно быть строкой');
                         }
-                        $result[$key] = mb_substr($value, 0, $columnsInfo[$key]->length);
+                        $result[$key] = mb_substr($value, 0, $columnsInfo[$key]['length']);
                         break;
                     case self::COLUMN_TYPE_INT:
                         if (is_numeric($value) === false) {
