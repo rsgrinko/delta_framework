@@ -21,6 +21,7 @@
 
     namespace Core\Models;
 
+    use Core\DataBases\DB;
     use Throwable;
 
     /**
@@ -31,34 +32,34 @@
         private const TABLE = DB_TABLE_PREFIX . 'utm_history';
 
         /** @var int $id Идентификатор записи */
-        private $id;
+        private int $id;
 
         /** @var string $page Страница */
-        private $page;
+        private string $page;
 
         /** @var string $referer Реферер */
-        private $referer;
+        private string $referer;
 
         /** @var string $userAgent Браузер */
-        private $userAgent;
+        private string $userAgent;
 
         /** @var string $utmSource Источник перехода */
-        private $utmSource;
+        private string $utmSource;
 
         /** @var string $utmMedium Тип трафика */
-        private $utmMedium;
+        private string $utmMedium;
 
         /** @var string $utmCampaign Название рекламной кампании */
-        private $utmCampaign;
+        private string $utmCampaign;
 
         /** @var string $utmContent Дополнительная информация, которая помогает различать объявления */
-        private $utmContent;
+        private string $utmContent;
 
         /** @var string $utmTerm Ключевая фраза */
-        private $utmTerm;
+        private string $utmTerm;
 
         /** @var string $dateCreate Дата создания */
-        private $dateCreate;
+        private string $dateCreate;
 
         /**
          * Конструктор

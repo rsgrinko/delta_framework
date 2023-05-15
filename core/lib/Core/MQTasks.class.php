@@ -21,13 +21,10 @@
 
     namespace Core;
 
-    use Core\Helpers\Cache;
+    use Core\DataBases\DB;
     use Core\Helpers\Mail;
     use Core\Helpers\SystemFunctions;
     use Core\Helpers\Thumbs;
-    use Core\ExternalServices\TelegramSender;
-    use Core\Models\DB;
-    use Core\Models\MQ;
 
     class MQTasks
     {

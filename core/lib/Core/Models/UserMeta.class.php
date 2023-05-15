@@ -2,6 +2,7 @@
 
     namespace Core\Models;
 
+    use Core\DataBases\DB;
     use Core\Helpers\Cache;
 
     class UserMeta
@@ -14,7 +15,7 @@
         /**
          * @var User $user
          */
-        private $user = null;
+        private User $user;
 
         public function __construct(User $user)
         {

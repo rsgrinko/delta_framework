@@ -19,10 +19,9 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    use Core\CoreException;
-    use Core\ExternalServices\Telegram;
-    use Core\Models\{User, DB};
-    use Core\Helpers\{SystemFunctions, Cache, Log, Mail, Zip, Pagination, Files};
+    use Core\DataBases\DB;
+    use Core\Helpers\{Cache, Files};
+    use Core\Models\{User};
 
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
     /** @var $USER User */

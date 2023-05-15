@@ -26,8 +26,8 @@
     namespace Core\Models;
 
     use Core\CoreException;
+    use Core\DataBases\DB;
     use Core\Helpers\Sanitize;
-    use Core\Models\DB;
 
     class Posts
     {

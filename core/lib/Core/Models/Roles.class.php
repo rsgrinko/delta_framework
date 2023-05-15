@@ -22,8 +22,8 @@
     namespace Core\Models;
 
     use Core\CoreException;
+    use Core\DataBases\DB;
     use Core\Helpers\Cache;
-    use Core\Models\User;
 
     class Roles
     {
@@ -65,7 +65,7 @@
         /**
          * @var User $user
          */
-        private $user = null;
+        private User $user;
 
         public function __construct(User $user)
         {

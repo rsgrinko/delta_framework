@@ -22,9 +22,8 @@
     namespace Core\Helpers;
 
     use Core\CoreException;
-    use Core\Models\DB;
+    use Core\DataBases\DB;
     use Core\Models\User;
-    use Core\Helpers\Log;
     use Throwable;
 
     /**

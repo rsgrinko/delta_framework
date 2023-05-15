@@ -21,7 +21,7 @@
 
     namespace Core\Helpers;
 
-    use Core\Models\DB;
+    use Core\DataBases\DB;
 
     class Migration
     {
@@ -33,12 +33,12 @@
         /**
          * @var DB|null $DB Объект базы
          */
-        private $DB = null;
+        private ?DB $DB;
 
         /**
-         * @var null $sqlFolder Папка с миграциями
+         * @var string $sqlFolder Папка с миграциями
          */
-        private $sqlFolder = null;
+        private string $sqlFolder;
 
         /**
          * Конструктор

@@ -21,10 +21,7 @@
 
     namespace Core\Api;
 
-    use Composer\Util\RemoteFilesystem;
     use Core\CoreException;
-    use Core\Helpers\Mail;
-    use Core\Models\DB;
     use Core\Models\File;
     use Core\Models\MQ;
     use Core\Models\User;
@@ -36,10 +33,10 @@
     {
 
         /** @var User $userObject Объект пользователя */
-        private $userObject;
+        private User $userObject;
 
         /** @var Request $request Объект запроса */
-        private $request;
+        private Request $request;
 
         /**
          * Конструктор

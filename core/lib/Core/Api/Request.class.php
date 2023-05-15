@@ -14,10 +14,10 @@
         public const METHOD_GET = 'GET';
 
         /** @var array Свойства запроса */
-        protected $properties = [];
+        protected array $properties = [];
 
         /** @var string Тип запроса */
-        protected $method;
+        protected string $method;
 
         /**
          * Конструктор

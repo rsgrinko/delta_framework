@@ -21,11 +21,11 @@
 
     namespace Core\DataObjects;
     use Core\CoreException;
+    use Core\DataBases\DB;
     use Core\Helpers\SystemFunctions;
-    use Core\Models\DB;
-    use \DateTime;
-    use \JsonSerializable;
-    use \Throwable;
+    use DateTime;
+    use JsonSerializable;
+    use Throwable;
 
 
     /**
@@ -68,19 +68,19 @@
         protected const COLUMN_TYPE_ENUM = 'enum';
 
         /** @var int|null Идентификатор элемента */
-        protected $id;
+        protected ?int $id;
 
         /** @var array Переименование полей, если необходимо DB => MODEL */
-        protected $renameProps = [];
+        protected array $renameProps = [];
 
         /** @var array Поля, являющиеся флагами true|false */
-        protected $boolFields = [];
+        protected array $boolFields = [];
 
         /** @var array Список колонок для таблиц */
-        private static $columnList = [];
+        private static array $columnList = [];
 
         /** @var array Исходные данные */
-        protected $sourceData = [];
+        protected array $sourceData = [];
 
         /** @var string Формат времени */
         public const DATE_TIME_FORMAT = 'Y-m-d H:i:s';

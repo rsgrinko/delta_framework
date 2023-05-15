@@ -38,57 +38,57 @@
         /**
          * @var int $taskId Идентификатор задания
          */
-        private $taskId = 0;
+        private int $taskId = 0;
 
         /**
-         * @var ?string $dateCreated Дата создания
+         * @var string|null $dateCreated Дата создания
          */
-        private $dateCreated = null;
+        private ?string $dateCreated;
 
         /**
          * @var string $status Статус задания
          */
-        private $status = '';
+        private string $status = '';
 
         /**
          * @var array|null $params Параметры задания
          */
-        private $params = null;
+        private ?array $params = null;
 
         /**
          * @var string|null $paramsJson JSON параметры задания
          */
-        private $paramsJson = null;
+        private ?string $paramsJson = null;
 
         /**
          * @var string|null $executionTime Время выполнения задания
          */
-        private $executionTime = null;
+        private ?string $executionTime = null;
 
         /**
          * @var string|null $class Класс
          */
-        private $class = null;
+        private ?string $class = null;
 
         /**
          * @var string|null $method Метод
          */
-        private $method = null;
+        private ?string $method = null;
 
         /**
          * @var int|null $attempts Количество попыток
          */
-        private $attempts = null;
+        private ?int $attempts = null;
 
         /**
          * @var int|null $attempts Лимит количество попыток
          */
-        private $attemptsLimit = null;
+        private ?int $attemptsLimit = null;
 
         /**
          * @var string|null $response Результат выполнения задания
          */
-        private $response = null;
+        private ?string $response = null;
 
         /**
          * Конструктор

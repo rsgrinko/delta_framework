@@ -29,7 +29,7 @@
     namespace Core\ExternalServices;
 
     use Core\CoreException;
-    use Core\Models\DB;
+    use Core\DataBases\DB;
 
     class RemoteHosts
     {

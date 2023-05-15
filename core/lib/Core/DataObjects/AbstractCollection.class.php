@@ -31,7 +31,7 @@
     abstract class AbstractCollection implements IteratorAggregate, JsonSerializable
     {
         /** @var array Список элементов */
-        protected $collection = [];
+        protected array $collection = [];
 
         /** @var string Сортировка по возрастанию */
         public const SORT_ASC = 'ASC';

@@ -21,8 +21,8 @@
 
     namespace Core\Models;
 
-    use Core\Models\DB;
     use Core\CoreException;
+    use Core\DataBases\DB;
 
     class File
     {
@@ -39,27 +39,27 @@
         /**
          * Полный путь до папки с файлами
          */
-        private $folder = null;
+        private ?string $folder = null;
 
         /**
          * @var DB|null $DB Объект базы
          */
-        private $DB = null;
+        private ?DB $DB;
 
         /**
-         * @var null $id Идентификатор файла
+         * @var int|null $id Идентификатор файла
          */
-        private $id = null;
+        private ?int $id = null;
 
         /**
-         * @var null $name Имя файла
+         * @var string|null $name Имя файла
          */
-        private $name = null;
+        private ?string $name = null;
 
         /**
-         * @var null $path Расположение файла
+         * @var string|null $path Расположение файла
          */
-        private $path = null;
+        private ?string $path = null;
 
         /**
          * Конструктор

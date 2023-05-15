@@ -19,10 +19,11 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    namespace Core\Models;
+    namespace Core\DataBases;
 
-    use PDO;
     use Core\CoreException;
+    use PDO;
+    use Throwable;
 
     /**
      * Класс для работы с базой данных
@@ -37,9 +38,9 @@
         public object $db;
 
         /**
-         * @var object|null $instance Объект класса
+         * @var self|null $instance Объект класса
          */
-        private static ?object $instance = null;
+        private static ?self $instance = null;
 
         /**
          * @var int $quantity Количество обращений к базе
@@ -130,7 +131,7 @@
         /**
          * Получить объект класса
          *
-         * @return object
+         * @return self
          */
         public static function getInstance(): object
         {

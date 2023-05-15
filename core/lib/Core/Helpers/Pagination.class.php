@@ -23,13 +23,13 @@
 
     class Pagination
     {
-        private static $page;
+        private static ?int $page;
 
-        private static $total;
+        private static int $total;
 
-        private static $total_pages;
+        private static int $total_pages;
 
-        private static $limit;
+        private static ?string $limit;
 
         /**
          * Задание первоначальных данных для пагинации
@@ -38,7 +38,7 @@
          * @param int $total
          * @param int $limit
          */
-        public static function execute($page, $total, $limit): void
+        public static function execute(?int $page, int $total, ?string $limit): void
         {
             self::$page  = $page;
             self::$total = $total;

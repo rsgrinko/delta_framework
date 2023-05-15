@@ -22,8 +22,8 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\Models\{DB, MQResponse};
-    use Core\Helpers\{SystemFunctions, Log};
+    use Core\DataBases\DB;
+    use Core\Helpers\{Log};
 
     class MQ
     {
@@ -60,8 +60,8 @@
         /** Лимит количества запущенных воркеров */
         public const WORKERS_LIMIT = 2;
 
-        /** @var object|DB|null $DB Объект базы */
-        private $DB = null;
+        /** @var DB|null $DB Объект базы */
+        private ?DB $DB;
 
         /** Приоритет по умолчанию */
         public const DEFAULT_PRIORITY = 5;
@@ -72,20 +72,20 @@
         /** Время, после которого задача считается повисшей (15 минут) */
         public const STUCK_TIME = 60 * 15;
 
-        /** @var null $priority Приоритет задания */
-        private $priority = null;
+        /** @var int|null $priority Приоритет задания */
+        private ?int $priority = null;
 
-        /** @var null $runNow Флаг немедленного запуска */
-        private $runNow = false;
+        /** @var bool $runNow Флаг немедленного запуска */
+        private bool $runNow = false;
 
         /** @var bool $useCheckDuplicates Флаг проверки задания на дубликат */
-        public $useCheckDuplicates = true;
+        public bool $useCheckDuplicates = true;
 
-        /** @var null $attempts Количество попыток выполнения задания */
-        protected $attempts = self::DEFAULT_ATTEMPTS;
+        /** @var int $attempts Количество попыток выполнения задания */
+        protected int $attempts = self::DEFAULT_ATTEMPTS;
 
-        /** @var null $workerId Идентификатор воркера */
-        private $workerId = null;
+        /** @var string|null $workerId Идентификатор воркера */
+        private ?string $workerId = null;
 
         /**
          * Конструктор

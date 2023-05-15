@@ -32,7 +32,7 @@
         /**
          * @var array $routes Маршруты
          */
-        private static $routes = [];
+        private static array $routes = [];
 
         /**
          * Метод вывода 404 ошибки

@@ -80,7 +80,7 @@
          * @return void
          * @throws \JsonException
          */
-        public static function outputError (Throwable $exception): void
+        public static function outputError(Throwable $exception): void
         {
             header('Content-Type: application/json');
             header('Access-Control-Allow-Origin: *');
@@ -99,6 +99,5 @@
                 JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
             );
         }
-
-
     }
+

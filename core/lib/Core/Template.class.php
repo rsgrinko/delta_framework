@@ -25,7 +25,7 @@
 
     class Template
     {
-        private static $arTemplateVariables = [];
+        private static array $arTemplateVariables = [];
 
         public static function set(string $varName, string $varValue): void
         {
