@@ -29,34 +29,34 @@
      */
     class UTM {
         /** @var string TABLE Таблица */
-        private const TABLE = DB_TABLE_PREFIX . 'utm_history';
+        private const TABLE = 'its_utm_history';
 
-        /** @var int $id Идентификатор записи */
-        private int $id;
+        /** @var int|null $id Идентификатор записи */
+        private ?int $id = null;
 
-        /** @var string $page Страница */
-        private string $page;
+        /** @var string|null $page Страница */
+        private ?string $page = null;
 
-        /** @var string $referer Реферер */
-        private string $referer;
+        /** @var string|null $referer Реферер */
+        private ?string $referer = null;
 
-        /** @var string $userAgent Браузер */
-        private string $userAgent;
+        /** @var string|null $userAgent Браузер */
+        private ?string $userAgent = null;
 
-        /** @var string $utmSource Источник перехода */
-        private string $utmSource;
+        /** @var string|null $utmSource Источник перехода */
+        private ?string $utmSource = null;
 
-        /** @var string $utmMedium Тип трафика */
-        private string $utmMedium;
+        /** @var string|null $utmMedium Тип трафика */
+        private ?string $utmMedium = null;
 
-        /** @var string $utmCampaign Название рекламной кампании */
-        private string $utmCampaign;
+        /** @var string|null $utmCampaign Название рекламной кампании */
+        private ?string $utmCampaign = null;
 
-        /** @var string $utmContent Дополнительная информация, которая помогает различать объявления */
-        private string $utmContent;
+        /** @var string|null $utmContent Дополнительная информация, которая помогает различать объявления */
+        private ?string $utmContent = null;
 
-        /** @var string $utmTerm Ключевая фраза */
-        private string $utmTerm;
+        /** @var string|null $utmTerm Ключевая фраза */
+        private ?string $utmTerm = null;
 
         /** @var string $dateCreate Дата создания */
         private string $dateCreate;

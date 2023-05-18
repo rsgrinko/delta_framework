@@ -8,7 +8,7 @@
 
         private const BASE_URL = 'https://api.openai.com/v1/chat/completions';
 
-        public function __construct(string $token = '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')
+        public function __construct(string $token = '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')
         {
             $this->token = $token;
         }
