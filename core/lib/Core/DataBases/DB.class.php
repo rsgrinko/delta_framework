@@ -306,7 +306,9 @@
                     . '<b>QUERY:</b> ' . PHP_EOL . $sql
                 );
                 if(DEBUG) {
-                    throw new CoreException('В SQL запросе произошла ошибка. '.$this->db->errorInfo()[2].' Запрос: ' . $sql, CoreException::ERROR_SQL_QUERY);
+                    throw new CoreException(
+                        'В SQL запросе произошла ошибка: ' . $this->db->errorInfo()[2]
+                        . '. Запрос: ' . $sql, CoreException::ERROR_SQL_QUERY);
                 }
                 throw new CoreException('В SQL запросе произошла ошибка', CoreException::ERROR_SQL_QUERY);
             }

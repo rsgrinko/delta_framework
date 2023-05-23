@@ -19,6 +19,7 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
+    use Core\CoreException;
     use Core\Models\{User, Roles};
 
     require_once __DIR__ . '/inc/header.php';
@@ -167,11 +168,11 @@
                         } catch (ParseError $p) {
                             echo '<div class="alert alert-danger"><p><strong>(ParseError)</strong> Ошибка парсинга: ' . $p->getMessage()
                                  . '</p></div>';
+                        } catch (CoreException $e) {
+                            $e->showTrace();
+                            $e->showDetailTrace();
                         } catch (Throwable $e) {
                             echo '<div class="alert alert-danger"><p><strong>(Throwable)</strong> Ошибка при выполнении: ' . $e->getMessage()
-                                 . '</p></div>';
-                        } catch (Error $e) {
-                            echo '<div class="alert alert-danger"><p><strong>(Error)</strong>  Ошибка при выполнении: ' . $e->getMessage()
                                  . '</p></div>';
                         }
 

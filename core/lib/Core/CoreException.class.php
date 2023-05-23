@@ -21,6 +21,8 @@
 
     namespace Core;
 
+    use Core\Helpers\SystemFunctions;
+
     class CoreException extends \Exception
     {
         /**
@@ -74,6 +76,20 @@
         const ERROR_SQL_QUERY = 600;
 
         /**
+         * @param string|null $message Сообщение
+         * @param int         $code    Код исключения
+         *
+         * @throws self
+         */
+        public function __construct($message = null, $code = 0)
+        {
+            if (!$message) {
+                throw new static('Неопознанное исключение: '. get_class($this));
+            }
+            parent::__construct($message, $code);
+        }
+
+        /**
          * Возвращает обработанный callTrace текущего исключения
          *
          * @return array
@@ -104,6 +120,27 @@
             $arTrace = $this->generateCallTrace();
             foreach ($arTrace as $key => $value) {
                 echo '<span>' . $value . '</span><br>';
+            }
+            echo '</div>';
+        }
+
+        /**
+         * Отображение детального описания исключения
+         *
+         * @return void
+         */
+        public function showDetailTrace(): void
+        {
+            $trace = $this->getTrace();
+            echo '<div class="showDetailTrace" style="font-size: 0.9em;">';
+            echo '<span style="padding: 10px;font-size: 1.2em;color: red;">' . $this->getMessage() . '</span>';
+            foreach ($trace as $k => $traceLine) {
+                if (file_exists($traceLine['file'])) {
+                    echo '<div style="padding: 10px;border: 1px solid #c7c7c7;background: #f7f7f7;">';
+                    echo '<div><span style="font-weight: bold;font-size: 1.16em;">#' . $k . ' ' . $traceLine['file'] . '</span>';
+                    echo SystemFunctions::getFilePreviewByLine(file_get_contents($traceLine['file']), $traceLine['line']);
+                    echo '</div></div>';
+                }
             }
             echo '</div>';
         }

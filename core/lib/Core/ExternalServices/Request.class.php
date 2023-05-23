@@ -146,7 +146,7 @@
         private function sendRequest(): ?string
         {
             if (empty($this->url)) {
-                throw new CoreException('Адрес запроса не задан');
+                throw new ExternalServicesException('Адрес запроса не задан');
             }
 
             if ($this->usePostMethod === true) {

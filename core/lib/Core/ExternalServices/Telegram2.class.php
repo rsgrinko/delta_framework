@@ -115,7 +115,7 @@
             curl_close($ch);
             $res = json_decode($res, true);
             if (empty($res) || $res['ok'] !== true) {
-                throw new CoreException($res['description'], $res['error_code']);
+                throw new ExternalServicesException($res['description'], $res['error_code']);
             }
             return $res;
         }

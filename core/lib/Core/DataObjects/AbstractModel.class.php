@@ -232,6 +232,7 @@
          * @param bool $withoutNull Убирать значения с null
          *
          * @return array
+         * @throws \Exception
          */
         private function getDataDifference(bool $withoutNull = false): array
         {
@@ -375,32 +376,32 @@
                 switch ($columnsInfo[$key]['type']) {
                     case self::COLUMN_TYPE_ENUM:
                         if (in_array($value, $columnsInfo[$key]['enumValues'], true) === false) {
-                            throw new CoreException('Недопустимое значение для enum поля ' . $key);
+                            throw new DataObjectsException('Недопустимое значение для enum поля ' . $key);
                         }
                         $result[$key] = $value;
                         break;
                     case self::COLUMN_TYPE_BOOL:
                         if (is_bool($value) === false) {
-                            throw new CoreException('Значение ' . $key . ' должно быть булевым');
+                            throw new DataObjectsException('Значение ' . $key . ' должно быть булевым');
                         }
                         $result[$key] = $value;
                         break;
                     case self::COLUMN_TYPE_STRING:
                         if (is_string($value) === false) {
-                            throw new CoreException('Значение ' . $key . ' должно быть строкой');
+                            throw new DataObjectsException('Значение ' . $key . ' должно быть строкой');
                         }
                         $result[$key] = mb_substr($value, 0, $columnsInfo[$key]['length']);
                         break;
                     case self::COLUMN_TYPE_INT:
                         if (is_numeric($value) === false) {
-                            throw new CoreException('Значение ' . $key . ' должно быть целочисленным числом');
+                            throw new DataObjectsException('Значение ' . $key . ' должно быть целочисленным числом');
                         }
                         $result[$key] = (int)$value;
                         break;
                     case self::COLUMN_TYPE_DATETIME:
                         $date = strtotime($value);
                         if ($date === false) {
-                            throw new CoreException($key . ' имеет некорректное значение даты');
+                            throw new DataObjectsException($key . ' имеет некорректное значение даты');
                         }
                         $result[$key] = date(self::DATE_TIME_FORMAT, $date);
                         break;
@@ -408,7 +409,7 @@
                         try {
                             json_decode($value, false, 512, JSON_THROW_ON_ERROR);
                         } catch (Throwable $exception) {
-                            throw new CoreException($key . ' содержит некорректный json');
+                            throw new DataObjectsException($key . ' содержит некорректный json');
                         }
                         $result[$key] = $value;
                         break;
