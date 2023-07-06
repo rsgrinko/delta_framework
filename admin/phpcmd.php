@@ -166,14 +166,17 @@
                                 echo $execResult;
                             }
                         } catch (ParseError $p) {
-                            echo '<div class="alert alert-danger"><p><strong>(ParseError)</strong> Ошибка парсинга: ' . $p->getMessage()
-                                 . '</p></div>';
+                            echo '<div class="alert alert-danger"><p>';
+                            CoreException::showDetailTraceFromException($p);
+                            echo '</p></div>';
                         } catch (CoreException $e) {
-                            $e->showTrace();
+                            echo '<div class="alert alert-danger"><p>';
                             $e->showDetailTrace();
+                            echo '</p></div>';
                         } catch (Throwable $e) {
-                            echo '<div class="alert alert-danger"><p><strong>(Throwable)</strong> Ошибка при выполнении: ' . $e->getMessage()
-                                 . '</p></div>';
+                            echo '<div class="alert alert-danger"><p>';
+                            CoreException::showDetailTraceFromException($e);
+                            echo '</p></div>';
                         }
 
                         echo '</p>';

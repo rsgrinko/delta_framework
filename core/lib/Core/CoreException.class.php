@@ -22,6 +22,7 @@
     namespace Core;
 
     use Core\Helpers\SystemFunctions;
+    use Throwable;
 
     class CoreException extends \Exception
     {
@@ -125,15 +126,16 @@
         }
 
         /**
-         * Отображение детального описания исключения
+         * Отображение окна трассировки
+         * @param array  $trace Трассировка
+         * @param string $message Сообщение
          *
          * @return void
          */
-        public function showDetailTrace(): void
+        private static function printTraceBox(array $trace, string $message): void
         {
-            $trace = $this->getTrace();
             echo '<div class="showDetailTrace" style="font-size: 0.9em;">';
-            echo '<span style="padding: 10px;font-size: 1.2em;color: red;">' . $this->getMessage() . '</span>';
+            echo '<span style="padding: 10px;font-size: 1.2em;color: red;">' . $message . '</span>';
             foreach ($trace as $k => $traceLine) {
                 if (file_exists($traceLine['file'])) {
                     echo '<div style="padding: 10px;border: 1px solid #c7c7c7;background: #f7f7f7;">';
@@ -144,4 +146,26 @@
             }
             echo '</div>';
         }
+
+        /**
+         * Отображение детального описания исключения
+         *
+         * @return void
+         */
+        public function showDetailTrace(): void
+        {
+            self::printTraceBox($this->getTrace(), $this->getMessage());
+        }
+
+        /**
+         * Отображение детального описания исключения из стороннего исключения
+         * @param Throwable $exception Объект исключения
+         *
+         * @return void
+         */
+        public static function showDetailTraceFromException(Throwable $exception)
+        {
+            self::printTraceBox($exception->getTrace(), $exception->getMessage());
+        }
+
     }
