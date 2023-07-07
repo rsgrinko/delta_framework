@@ -51,10 +51,10 @@
             <div class="col-md">
 
                 {% if isAuthorized %}
+                    <h1>Добро пожаловать!</h1>
                     {{ userDataTable |raw }}
                 {% else %}
                     <h1>Вы не авторизованы :(</h1>
-
                 {% endif %}
 
             </div>

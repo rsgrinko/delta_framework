@@ -20,7 +20,7 @@ final class Threads extends AbstractMigration
               ->addColumn('attempts', 'integer', ['default' => 0])
               ->addColumn('attempts_limit', 'integer', ['default' => 1])
               ->addColumn('date_created', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
-              ->addColumn('date_updated', 'datetime', ['null' => true, 'default' => null])
+              ->addColumn('date_updated', 'datetime', ['null' => true, 'default' => null, 'update' => 'CURRENT_TIMESTAMP'])
               ->addColumn('class', 'string', ['limit' => 255, 'default' => null])
               ->addColumn('method', 'string', ['limit' => 255, 'default' => null])
               ->addColumn('params', 'text', ['default' => null])

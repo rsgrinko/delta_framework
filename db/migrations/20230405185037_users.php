@@ -42,7 +42,7 @@ final class Users extends AbstractMigration
               ->addColumn('token', 'string', ['limit' => 255, 'default' => null])
               ->addColumn('last_active', 'string', ['limit' => 100, 'default' => null])
               ->addColumn('date_created', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
-              ->addColumn('date_updated', 'datetime', ['null' => true, 'default' => null])
+              ->addColumn('date_updated', 'datetime', ['null' => true, 'default' => null, 'update' => 'CURRENT_TIMESTAMP'])
               ->addIndex(['login'])
               ->addIndex(['token'])
               ->addIndex(['email'])

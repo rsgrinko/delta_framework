@@ -48,7 +48,7 @@ final class Roles extends AbstractMigration
         $table->addColumn('name', 'text', ['default' => null])
               ->addColumn('description', 'text', ['default' => null])
               ->addColumn('date_created', 'datetime', ['default' => 'CURRENT_TIMESTAMP'])
-              ->addColumn('date_updated', 'datetime', ['null' => true, 'default' => null])
+              ->addColumn('date_updated', 'datetime', ['null' => true, 'default' => null, 'update' => 'CURRENT_TIMESTAMP'])
               ->create();
         $table->insert($this->data);
         $table->save();

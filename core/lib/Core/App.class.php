@@ -54,7 +54,7 @@
                     'userDataTable' => User::isAuthorized() ? str_replace(
                         '<table style="',
                         '<table style="width:100%;',
-                        SystemFunctions::arrayToTable($USER->getAllUserData(), 'Информация о пользователе')
+                        SystemFunctions::arrayToTable($USER->getAllUserData(), 'Информация о текущем пользователе')
                     ) : '',
                     'statString' => 'Использовано ОЗУ: '
                                     . round(memory_get_usage() / 1024 / 1024, 2) . ' МБ / БД: '
