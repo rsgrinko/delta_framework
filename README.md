@@ -33,7 +33,7 @@ Delta Framework - простой фреймворк для разработки 
 ![Дашбоарт](./uploads/phpcmd.PNG)
 
 ### Список пользователей
-![Дашбоарт](./uploads/userlist.PNG)
+![Дашбоарт](./uploads/userslist.png)
 
 ## Начало использования
 
