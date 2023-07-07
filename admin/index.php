@@ -19,6 +19,9 @@
      * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
+
+    use Core\Helpers\Cache;use Core\Helpers\Files;use Core\Models\{User, Roles};
+
     require_once __DIR__ . '/inc/header.php';
 ?>
     <div class="pageheader">
@@ -29,7 +32,7 @@
             <div class="media-body">
                 <ul class="breadcrumb">
                     <li><a href=""><i class="glyphicon glyphicon-home"></i></a></li>
-                    <li>Дашюоард</li>
+                    <li>Дашбоард</li>
                 </ul>
                 <h4>Дашбоард</h4>
             </div>
@@ -39,140 +42,173 @@
     <div class="contentpanel">
 
 
-        типа статистика или хз
-
-        <p id="userList"></p>
-        <p id="app"></p>
-        <input id="message" type="text">
-        <button id="sendBtn">send</button>
 
 
+        <div class="row">
 
-        <script>
-            let socket = new WebSocket('wss://dev.it-stories.ru/wss?userName=<?= $USER->getLogin()?>');
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Версия ядра</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= CORE_VERSION ?>
+                    </div>
+                </div>
+            </div>
 
-            socket.onopen = function(e) {
-                /*const initMessage = {
-                    method: 'registration',
-                    userId: <?= $USER->getId() ?>,
-                date: Date.now()
-            };
-            socket.send(JSON.stringify(initMessage));*/
-            };
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Версия PHP</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= phpversion() ?>
+                    </div>
+                </div>
+            </div>
 
-            socket.onmessage = function(event) {
-                let data = JSON.parse(event.data);
+            <div class="col-md-3">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Корневая директория</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= ROOT_PATH ?>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Логирование</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= USE_LOG ? 'Включено' : 'Отключено' ?>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Отладка</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= DEBUG ? 'Включена' : 'Отключена' ?>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Всего пользователей в базе</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= User::getUsersCount() ?>
+                    </div>
+                </div>
+            </div>
 
-                // Обработка пингов
-                if (data.action === 'Ping') {
-                    const pongMessage = {action: 'Pong'};
-                    socket.send(JSON.stringify(pongMessage));
-                    return;
-                }
-
-                // Обработка подключившихся пользователей
-                if (data.action === 'PublicMessage') {
-                    $('#app').append(`<div class="messageBox"><div class="userLogin">${data.userName}</div><div class="message">${data.text}</div></div>`)
-                    return;
-                }
-
-                // Обработка при подключении
-                if (data.action === 'Connected') {
-                    $('#app').append(`<div class="messageBox"><div class="notification">Пользователь ${data.userName} подлючился в чат</div></div>`)
-                    //return;
-                }
-
-                // Обработка при подключении
-                if (data.action === 'Authorized') {
-                    $('#userList').html('');
-                    data.users.forEach(function(element){
-                        $('#userList').append(`<div class="userElement">${element.userName}</div>`)
-                    });
-                    return;
-                }
-
-                // Обработка при отклбчении
-                if (data.action === 'Disconnected') {
-                    $('#app').append(`<div class="messageBox"><div class="notification">Пользователь ${data.userName} покинул чат</div></div>`)
-
-                    $('#userList').html('');
-                    data.users.forEach(function(element){
-                        $('#userList').append(`<div class="userElement">${element.userName}</div>`)
-                    });
-                    return;
-                }
-
-
-
-                console.log('Данные получены с сервера: ' + JSON.stringify(data))
-
-
-
-                //$('#app').append(`<div class="messageBox"><div class="userLogin">${data.userName}</div><div class="message">${data.text}</div></div>`)
-
-
-                $('#app').html($('#app').html() + "<br>" + event.data);
-            };
-
-            socket.onclose = function(event) {
-                if (event.wasClean) {
-                    console.log(`[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`);
-                } else {
-                    // например, сервер убил процесс или сеть недоступна
-                    // обычно в этом случае event.code 1006
-                    console.log('[close] Соединение прервано');
-                }
-            };
-
-            socket.onerror = function(error) {
-                console.log(`[error]`);
-            };
-        </script>
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Подтвержденных E-Mail</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= User::getUsersCount(true) ?>
+                    </div>
+                </div>
+            </div>
 
 
 
-        <script>
-            $('#sendBtn').on('click', function(){
-                const message = {
-                    action: 'PublicMessage',
-                    text: $('#message').val()
-                };
-                socket.send(JSON.stringify(message));
-                $('#message').val('');
-            });
-        </script>
-        <style>
-            .messageBox {
-                border: 1px solid #dbdbdb;
-                margin: 5px;
-                padding: 5px;
-                background: #f9f9f9;
-            }
-            .userLogin {
-                font-weight: bold;
-                color: green;
-            }
 
-            .notification {
-                font-style: italic;
-                color: #e50000;
-            }
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Ролей в БД</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= count(Roles::getAllRoles()) ?>
+                    </div>
+                </div>
+            </div>
 
-            p#userList {
-                display: flex;
-                flex-wrap: wrap;
-            }
-            .userElement {
-                border: 1px solid #687cff;
-                margin: 2px;
-                padding: 5px;
-                background: blue;
-                color: white;
-            }
-        </style>
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Файловый кеш</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= USE_CACHE ? 'Включен' : 'Отключен' ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Размер кеша</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= Files::convertBytes(Cache::getCacheSize()) ?>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="col-md-3">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Расположение кеша</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= CACHE_DIR ?>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">E-Mail сайта</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= SERVER_EMAIL ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Имя E-Mail сайта</h3>
+                    </div>
+                    <div class="panel-body">
+                        <?= SERVER_EMAIL_NAME ?>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
     </div><!-- contentpanel -->
 <?php
     require_once __DIR__ . '/inc/footer.php';
