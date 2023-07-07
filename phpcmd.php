@@ -19,6 +19,7 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
+    die();
     use Core\DataBases\DB;
     use Core\Helpers\{Cache, Files};
     use Core\Models\{User};

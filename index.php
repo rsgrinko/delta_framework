@@ -85,11 +85,11 @@
 
                     //echo str_replace('<table style="', '<table style="width:100%;', SystemFunctions::arrayToTable(Cache::getCacheInfo(), 'Информация о кэше'));
 
-                    $count = (int)(DB::getInstance())->query('select count(*) as count from users')[0]['count'];
+                    $count = (int)(DB::getInstance())->query('select count(*) as count from d_users')[0]['count'];
                     Pagination::execute($_REQUEST['page'], $count, 2);
                     $limit = Pagination::getLimit();
 
-                    $arData = (DB::getInstance())->query('select * from users order by id desc limit ' . $limit);
+                    $arData = (DB::getInstance())->query('select * from d_users order by id desc limit ' . $limit);
 
                     $arResult = [];
                     foreach ($arData as $element) {

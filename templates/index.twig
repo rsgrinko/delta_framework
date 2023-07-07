@@ -1,536 +1,78 @@
-{% extends 'layout.twig' %}
-
-
-
-{% block title %}Главная страница{% endblock %}
-
-{% block main %}
-    <!-- featured
-    ================================================== -->
-    <section class="s-featured">
-        <div class="row">
-            <div class="col-full">
-
-                <div class="featured-slider featured" data-aos="zoom-in">
-
-                    <div class="featured__slide">
-                        <div class="entry">
-
-                            <div class="entry__background" style="background-image:url('/assets/images/thumbs/featured/featured-guitarman.jpg');"></div>
-
-                            <div class="entry__content">
-                                <span class="entry__category"><a href="#0">Music</a></span>
-
-                                <h1><a href="#0" title="">What Your Music Preference Says About You and Your Personality.</a></h1>
-
-                                <div class="entry__info">
-                                    <a href="#0" class="entry__profile-pic">
-                                        <img class="avatar" src="/assets/images/avatars/user-05.jpg" alt="">
-                                    </a>
-                                    <ul class="entry__meta">
-                                        <li><a href="#0">Jonathan Smith</a></li>
-                                        <li>June 02, 2018</li>
-                                    </ul>
-                                </div>
-                            </div> <!-- end entry__content -->
-
-                        </div> <!-- end entry -->
-                    </div> <!-- end featured__slide -->
-
-                    <div class="featured__slide">
-
-                        <div class="entry">
-
-                            <div class="entry__background" style="background-image:url('/assets/images/thumbs/featured/featured-watch.jpg');"></div>
-
-                            <div class="entry__content">
-                                <span class="entry__category"><a href="#0">Management</a></span>
-
-                                <h1><a href="#0" title="">The Pomodoro Technique Really Works.</a></h1>
-
-                                <div class="entry__info">
-                                    <a href="#0" class="entry__profile-pic">
-                                        <img class="avatar" src="/assets/images/avatars/user-03.jpg" alt="">
-                                    </a>
-
-                                    <ul class="entry__meta">
-                                        <li><a href="#0">John Doe</a></li>
-                                        <li>June 13, 2018</li>
-                                    </ul>
-                                </div>
-                            </div> <!-- end entry__content -->
-
-                        </div> <!-- end entry -->
-
-                    </div> <!-- end featured__slide -->
-
-                    <div class="featured__slide">
-
-                        <div class="entry">
-
-                            <div class="entry__background" style="background-image:url('/assets/images/thumbs/featured/featured-beetle.jpg');"></div>
-
-                            <div class="entry__content">
-                                <span class="entry__category"><a href="#0">LifeStyle</a></span>
-
-                                <h1><a href="#0" title="">The difference between Classics, Vintage & Antique Cars.</a></h1>
-
-                                <div class="entry__info">
-                                    <a href="#0" class="entry__profile-pic">
-                                        <img class="avatar" src="/assets/images/avatars/user-03.jpg" alt="">
-                                    </a>
-
-                                    <ul class="entry__meta">
-                                        <li><a href="#0">John Doe</a></li>
-                                        <li>June 12, 2018</li>
-                                    </ul>
-                                </div>
-                            </div> <!-- end entry__content -->
-
-                        </div> <!-- end entry -->
-
-                    </div> <!-- end featured__slide -->
-
-                </div> <!-- end featured -->
-
-            </div> <!-- end col-full -->
-        </div>
-    </section> <!-- end s-featured -->
-
-
-    <!-- s-content
-    ================================================== -->
-    <section class="s-content">
-
-        <div class="row entries-wrap wide">
-            <div class="entries">
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/lamp-400.jpg"
-                                     srcset="/assets/images/thumbs/post/lamp-400.jpg 1x, /assets/images/thumbs/post/lamp-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Design</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">3 Benefits of Minimalism In Interior Design.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 15, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/tulips-400.jpg"
-                                     srcset="/assets/images/thumbs/post/tulips-400.jpg 1x, /assets/images/thumbs/post/tulips-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Health</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">10 Interesting Facts About Caffeine.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 14, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/music-400.jpg"
-                                     srcset="/assets/images/thumbs/post/music-400.jpg 1x, /assets/images/thumbs/post/music-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Health</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">The Power of Music to Reduce Stress.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 14, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/watch-400.jpg"
-                                     srcset="/assets/images/thumbs/post/watch-400.jpg 1x, /assets/images/thumbs/post/watch-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Management</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">The Pomodoro Technique Really Works.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 12, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/wheel-400.jpg"
-                                     srcset="/assets/images/thumbs/post/wheel-400.jpg 1x, /assets/images/thumbs/post/wheel-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Lifestyle</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">Visiting Theme Parks Improves Your Health.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 12, 2017</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/guitarist-400.jpg"
-                                     srcset="/assets/images/thumbs/post/guitarist-400.jpg 1x, /assets/images/thumbs/post/guitarist-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Music</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">What Your Music Preference Says About You and Your Personality.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 02, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/jump-400.jpg"
-                                     srcset="/assets/images/thumbs/post/jump-400.jpg 1x, /assets/images/thumbs/post/jump-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Relationships</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">Create Meaningful Family Moments.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 02, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/flowers-400.jpg"
-                                     srcset="/assets/images/thumbs/post/flowers-400.jpg 1x, /assets/images/thumbs/post/flowers-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Lifestyle</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">Gardening: The Secret to Happiness.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">June 01, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/woodcraft-400.jpg"
-                                     srcset="/assets/images/thumbs/post/woodcraft-400.jpg 1x, /assets/images/thumbs/post/woodcraft-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Creativity</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">An Examination of Minimalistic Design.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">May 30, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/fuji-400.jpg"
-                                     srcset="/assets/images/thumbs/post/fuji-400.jpg 1x, /assets/images/thumbs/post/fuji-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Creativity</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">What Skills Are Required For a Photographer?</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">May 30, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/beetle-400.jpg"
-                                     srcset="/assets/images/thumbs/post/beetle-400.jpg 1x, /assets/images/thumbs/post/beetle-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Lifestyle</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">Throwback To The Good Old Days.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">May 28, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-                <article class="col-block">
-
-                    <div class="item-entry" data-aos="zoom-in">
-                        <div class="item-entry__thumb">
-                            <a href="single-standard.html" class="item-entry__thumb-link">
-                                <img src="/assets/images/thumbs/post/sydney-400.jpg"
-                                     srcset="/assets/images/thumbs/post/sydney-400.jpg 1x, /assets/images/thumbs/post/sydney-800.jpg 2x" alt="">
-                            </a>
-                        </div>
-
-                        <div class="item-entry__text">
-                            <div class="item-entry__cat">
-                                <a href="category.html">Travel</a>
-                            </div>
-
-                            <h1 class="item-entry__title"><a href="single-standard.html">Planning Your First Trip To Sydney.</a></h1>
-
-                            <div class="item-entry__date">
-                                <a href="single-standard.html">May 28, 2018</a>
-                            </div>
-                        </div>
-                    </div> <!-- item-entry -->
-
-                </article> <!-- end article -->
-
-            </div> <!-- end entries -->
-        </div> <!-- end entries-wrap -->
-
-        <div class="row pagination-wrap">
-            <div class="col-full">
-                <nav class="pgn" data-aos="fade-up">
-                    <ul>
-                        <li><a class="pgn__prev" href="#0">Prev</a></li>
-                        <li><a class="pgn__num" href="#0">1</a></li>
-                        <li><span class="pgn__num current">2</span></li>
-                        <li><a class="pgn__num" href="#0">3</a></li>
-                        <li><a class="pgn__num" href="#0">4</a></li>
-                        <li><a class="pgn__num" href="#0">5</a></li>
-                        <li><span class="pgn__num dots">…</span></li>
-                        <li><a class="pgn__num" href="#0">8</a></li>
-                        <li><a class="pgn__next" href="#0">Next</a></li>
-                    </ul>
-                </nav>
+<!doctype html>
+<html lang="ru">
+<head>
+    <!-- Обязательные метатеги -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <title>Главная тестовая</title>
+</head>
+<body>
+<main>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark" aria-label="Fourth navbar example">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Delta Framework</a>
+            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04"
+                    aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="navbar-collapse collapse" id="navbarsExample04" style="">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">Админка</a>
+                    </li>
+                    {% if isAdmin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/?clear_cache=Y">Очистка кеша</a>
+                    </li>
+                    {% endif %}
+
+                    {% if isAdmin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/phpcmd.php">Командная строка PHP</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                    </li>
+                </ul>
             </div>
         </div>
+    </nav>
 
-    </section> <!-- end s-content -->
 
-    <!-- s-extra
-    ================================================== -->
-    <section class="s-extra">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-md">
 
-        <div class="row">
+                {% if isAuthorized %}
+                    {{ userDataTable |raw }}
+                {% else %}
+                    <h1>Вы не авторизованы :(</h1>
 
-            <div class="col-seven md-six tab-full popular">
-                <h3>Popular Posts</h3>
+                {% endif %}
 
-                <div class="block-1-2 block-m-full popular__posts">
-                    <article class="col-block popular__post">
-                        <a href="#0" class="popular__thumb">
-                            <img src="/assets/images/thumbs/small/tulips-150.jpg" alt="">
-                        </a>
-                        <h5>10 Interesting Facts About Caffeine.</h5>
-                        <section class="popular__meta">
-                            <span class="popular__author"><span>By</span> <a href="#0">John Doe</a></span>
-                            <span class="popular__date"><span>on</span> <time datetime="2018-06-14">Jun 14, 2018</time></span>
-                        </section>
-                    </article>
-                    <article class="col-block popular__post">
-                        <a href="#0" class="popular__thumb">
-                            <img src="/assets/images/thumbs/small/wheel-150.jpg" alt="">
-                        </a>
-                        <h5><a href="#0">Visiting Theme Parks Improves Your Health.</a></h5>
-                        <section class="popular__meta">
-                            <span class="popular__author"><span>By</span> <a href="#0">John Doe</a></span>
-                            <span class="popular__date"><span>on</span> <time datetime="2018-06-12">Jun 12, 2018</time></span>
-                        </section>
-                    </article>
-                    <article class="col-block popular__post">
-                        <a href="#0" class="popular__thumb">
-                            <img src="/assets/images/thumbs/small/shutterbug-150.jpg" alt="">
-                        </a>
-                        <h5><a href="#0">Key Benefits Of Family Photography.</a></h5>
-                        <section class="popular__meta">
-                            <span class="popular__author"><span>By</span> <a href="#0">John Doe</a></span>
-                            <span class="popular__date"><span>on</span> <time datetime="2018-06-12">Jun 12, 2018</time></span>
-                        </section>
-                    </article>
-                    <article class="col-block popular__post">
-                        <a href="#0" class="popular__thumb">
-                            <img src="/assets/images/thumbs/small/cookies-150.jpg" alt="">
-                        </a>
-                        <h5><a href="#0">Absolutely No Sugar Oatmeal Cookies.</a></h5>
-                        <section class="popular__meta">
-                            <span class="popular__author"><span>By</span> <a href="#0"> John Doe</a></span>
-                            <span class="popular__date"><span>on</span> <time datetime="2018-06-12">Jun 12, 2018</time></span>
-                        </section>
-                    </article>
-                    <article class="col-block popular__post">
-                        <a href="#0" class="popular__thumb">
-                            <img src="/assets/images/thumbs/small/beetle-150.jpg" alt="">
-                        </a>
-                        <h5><a href="#0">Throwback To The Good Old Days.</a></h5>
-                        <section class="popular__meta">
-                            <span class="popular__author"><span>By</span> <a href="#0">John Doe</a></span>
-                            <span class="popular__date"><span>on</span> <time datetime="2018-06-12">Jun 12, 2018</time></span>
-                        </section>
-                    </article>
-                    <article class="col-block popular__post">
-                        <a href="#0" class="popular__thumb">
-                            <img src="/assets/images/thumbs/small/salad-150.jpg" alt="">
-                        </a>
-                        <h5>Healthy Mediterranean Salad Recipes</h5>
-                        <section class="popular__meta">
-                            <span class="popular__author"><span>By</span> <a href="#0"> John Doe</a></span>
-                            <span class="popular__date"><span>on</span> <time datetime="2018-06-12">Jun 12, 2018</time></span>
-                        </section>
-                    </article>
-                </div> <!-- end popular_posts -->
-            </div> <!-- end popular -->
-
-            <div class="col-four md-six tab-full end">
-                <div class="row">
-                    <div class="col-six md-six mob-full categories">
-                        <h3>Categories</h3>
-
-                        <ul class="linklist">
-                            <li><a href="#0">Lifestyle</a></li>
-                            <li><a href="#0">Travel</a></li>
-                            <li><a href="#0">Recipes</a></li>
-                            <li><a href="#0">Management</a></li>
-                            <li><a href="#0">Health</a></li>
-                            <li><a href="#0">Creativity</a></li>
-                        </ul>
-                    </div> <!-- end categories -->
-
-                    <div class="col-six md-six mob-full sitelinks">
-                        <h3>Site Links</h3>
-
-                        <ul class="linklist">
-                            <li><a href="#0">Home</a></li>
-                            <li><a href="#0">Blog</a></li>
-                            <li><a href="#0">Styles</a></li>
-                            <li><a href="#0">About</a></li>
-                            <li><a href="#0">Contact</a></li>
-                            <li><a href="#0">Privacy Policy</a></li>
-                        </ul>
-                    </div> <!-- end sitelinks -->
-                </div>
             </div>
-        </div> <!-- end row -->
+        </div>
+    </div>
+</main>
+<footer class="py-3 my-4">
+    <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Home</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Features</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Pricing</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
+    </ul>
 
-    </section> <!-- end s-extra -->
-{% endblock %}
+    <p class="text-center text-muted">{{ statString }}</p>
+    <p class="text-center text-muted">© <?= date('Y'); ?> Delta Project</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

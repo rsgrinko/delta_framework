@@ -21,21 +21,47 @@
 
     namespace Core;
 
-    use Core\Models\Posts;
+    use Core\DataBases\DB;
+    use Core\Helpers\Cache;
+    use Core\Helpers\Files;
+    use Core\Helpers\SystemFunctions;
+    use Core\Models\{Posts, User};
 
     class App
     {
+
+        /**
+         * Отрисовка главной страницы
+         *
+         * @return void
+         * @throws CoreException
+         */
         public static function index()
         {
             global $twig, $USER;
-            $userData = $USER ? $USER->getAllUserData() : '';
-            $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
+
+            $finish_time = microtime(true);
+            $delta       = round($finish_time - START_TIME, 3);
+            if ($delta < 0.001) {
+                $delta = 0.001;
+            }
+
             echo $twig->render(
                 'index.twig',
                 [
-                    'sections' => (new Posts())->getMainSections(),
-                    'user' => $USER ? $USER->getAllUserData() : null,
-                ]
+                    'isAuthorized'  => User::isAuthorized(),
+                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
+                    'userDataTable' => User::isAuthorized() ? str_replace(
+                        '<table style="',
+                        '<table style="width:100%;',
+                        SystemFunctions::arrayToTable($USER->getAllUserData(), 'Информация о пользователе')
+                    ) : '',
+                    'statString' => 'Использовано ОЗУ: '
+                                    . round(memory_get_usage() / 1024 / 1024, 2) . ' МБ / БД: '
+                                    . round(DB::$workingTime,3) . ' сек (' . DB::$quantity . ' шт.) / Кэш: '
+                                    . Files::convertBytes(Cache::getCacheSize())
+                                    . ' / Генерация: ' . $delta . ' сек',
+                            ]
             );
         }
 
