@@ -965,4 +965,93 @@
             }
             return implode('', $explodedString);
         }
+
+        /**
+         * Генерация кода для каптчи
+         * @param int $min Минимальное количество символов
+         * @param int $max Максимальное количество символов
+         *
+         * @return void
+         */
+        public static function generateCode(int $min = 4, int $max = 8): string
+        {
+            $chars  = 'ABCDEFGHJKLMNPRSTUVXYZ23456789';
+            $length = rand($min, $max);
+            $numChars = strlen($chars);
+            $str = '';
+            for ($i = 0; $i < $length; $i++) {
+                $str .= substr($chars, rand(1, $numChars) - 1, 1);
+            }
+
+            // Перемешиваем, на всякий случай
+            $array_mix = preg_split('//', $str, -1, PREG_SPLIT_NO_EMPTY);
+            srand ((float)microtime()*1000000);
+            shuffle ($array_mix);
+
+            return implode('', $array_mix);
+        }
+
+        /**
+         * Генерация и отображение картинки-каптчи
+         *
+         * @param string $code Код
+         *
+         * @return void
+         */
+        public static function showCaptcha(string $code = 'test'): void
+        {
+            $width  = 80;
+            $height = 30;
+            $img    = imagecreate($width, $height);
+
+            // Задаем фон
+            imagecolorallocate($img, 255, 255, 255);
+
+            // Задаем цвета
+            $lineColor = imagecolorallocate($img, 150, 150, 150);
+            $pixelColor = imagecolorallocate($img, 150, 150, 150);
+            $whiteColor = imagecolorallocate($img, 255, 255, 255);
+            $blackColor = imagecolorallocate($img, 0, 0, 0);
+
+            // Рисуем линии 1
+            for ($i = 0; $i < 3; $i++) {
+                $x1 = 0;
+                $x2 = $width;
+                $y1 = rand(0, $height);
+                $y2 = rand(00, $height);
+                imageline($img, $x1, $y1, $x2, $y2, $lineColor);
+            }
+
+            // Рисуем линии 2
+            for ($i = 0; $i < 3; $i++) {
+                $x1 = rand(0, $width);
+                $x2 = rand(0, $width);
+                $y1 = 0;
+                $y2 = $height;
+                imageline($img, $x1, $y1, $x2, $y2, $lineColor);
+            }
+
+            // Рисуем пиксели
+            for ($i = 0; $i < 200; $i++) {
+                imagesetpixel($img, rand() % $width, rand() % $height, $pixelColor);
+            }
+
+            // Рисуем тень для кода
+            imagestring($img, 5, 4, 7, $code, $blackColor);
+            imagestring($img, 5, 6, 7, $code, $blackColor);
+            imagestring($img, 5, 5, 6, $code, $blackColor);
+            imagestring($img, 5, 5, 8, $code, $blackColor);
+
+            // Рисуем сам код
+            imagestring($img, 5, 5, 7, $code, $whiteColor); //main
+
+            header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', 10000) . ' GMT');
+            header('Cache-Control: no-store, no-cache, must-revalidate');
+            header('Cache-Control: post-check=0, pre-check=0', false);
+            header('Pragma: no-cache');
+            header('Content-Type: image/png');
+
+            imagepng($img);
+        }
     }

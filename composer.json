@@ -26,7 +26,8 @@
       "ext-pdo": "*",
       "ext-mbstring": "*",
       "dompdf/dompdf": "^2.0",
-      "robmorgan/phinx": "^0.13.4"
+      "robmorgan/phinx": "^0.13.4",
+      "ext-gd": "*"
     },
     "require-dev": {
         "vimeo/psalm": "^4.27",
