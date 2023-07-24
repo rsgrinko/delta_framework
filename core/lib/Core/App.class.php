@@ -26,6 +26,36 @@
 
     class App
     {
+        /**
+         * Получение параметров для шаблона в целом
+         *
+         * @return array
+         */
+        private static function getLayoutParams(): array
+        {
+            global $USER;
+
+            return [
+                'isAuthorized'  => User::isAuthorized(),
+                'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
+                'currentYear' => date('Y'),
+            ];
+        }
+
+        /**
+         * Отдача на рендер
+         *
+         * @param string $template Шаблон
+         * @param array  $params Параметры
+         *
+         * @return void
+         */
+        private static function render(string $template, array $params = []): void
+        {
+            global $twig;
+            $params = array_merge(self::getLayoutParams(), $params);
+            echo $twig->render($template, $params);
+        }
 
         /**
          * Отрисовка главной страницы
@@ -35,14 +65,7 @@
          */
         public static function index()
         {
-            global $twig, $USER;
-            echo $twig->render(
-                'index.twig',
-                [
-                    'isAuthorized'  => User::isAuthorized(),
-                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
-                ]
-            );
+            self::render('index.twig');
         }
 
         /**
@@ -53,7 +76,6 @@
          */
         public static function info()
         {
-            global $twig, $USER;
             $buildInfo = [
                 'Версия ядра'               => CORE_VERSION,
                 'Лимит пагинации'           => PAGINATION_LIMIT,
@@ -62,14 +84,7 @@
                 'E-Mail сайта'              => SERVER_EMAIL,
                 'Имя отправителя сайта'     => SERVER_EMAIL_NAME,
             ];
-            echo $twig->render(
-                'info.twig',
-                [
-                    'isAuthorized'  => User::isAuthorized(),
-                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
-                    'data' => $buildInfo,
-                ]
-            );
+            self::render('info.twig', ['data' => $buildInfo]);
         }
 
         /**
@@ -80,15 +95,8 @@
          */
         public static function dialogs()
         {
-            global $twig, $USER;
-            echo $twig->render(
-                'dialogs.twig',
-                [
-                    'isAuthorized'  => User::isAuthorized(),
-                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
-                    'dialogs'       => $USER->getDialogs(),
-                ]
-            );
+            global $USER;
+            self::render('dialogs.twig', ['dialogs' => $USER->getDialogs()]);
         }
 
         /**
@@ -99,58 +107,18 @@
          */
         public static function dialog(int $id)
         {
-            global $twig, $USER;
-            echo $twig->render(
-                'dialog.twig',
-                [
-                    'isAuthorized'  => User::isAuthorized(),
-                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
-                    'messages'      => $USER->getMessages($id, true),
-                    'userId'        => $USER->getId(),
-                ]
-            );
+            global $USER;
+            self::render('dialog.twig', ['messages' => $USER->getMessages($id, true), 'userId' => $USER->getId()]);
         }
 
-        public static function sections()
-        {
-            global $twig, $USER;
-            $userData = $USER ? $USER->getAllUserData() : '';
-            $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
-            echo $twig->render(
-                'sections.twig',
-                [
-                    'sections' => (new Posts())->getMainSections(),
-                    'user' => $USER ? $USER->getAllUserData() : null,
-                ]
-            );
-        }
 
-        public static function section($sectionId)
+        /**
+         *Тестовая
+         *
+         * @return void
+         */
+        public static function test()
         {
-            global $twig, $USER;
-            $userData = $USER ? $USER->getAllUserData() : '';
-            $userRoles = $USER ? $USER->getRolesObject()->getFullRoles() : '';
-            echo $twig->render(
-                'section.twig',
-                [
-                    'sections' => (new Posts())->getMainSections(),
-                    'user' => $USER ? $USER->getAllUserData() : null,
-                    'sectionId' => $sectionId,
-                ]
-            );
-        }
-
-        public static function test(int $id = 1)
-        {
-            global $twig;
-            $navbarItems = [
-                ['name' => 'Главная', 'url' => '/', 'active' => true],
-                ['name' => 'Админка', 'url' => '/admin', 'active' => false],
-                ['name' => 'Командная PHP строка', 'url' => '/phpcmd.php', 'active' => false],
-                ['name' => 'Тест', 'url' => '/test', 'active' => false],
-            ];
-
-            $res = (new \Core\Models\User($id))->getAllUserData();
-            echo $twig->render('test.twig', ['navbarItems' => $navbarItems, 'userId' => $id, 'res' => print_r($res, true)]);
+            self::render('test.twig');
         }
     }
