@@ -32,6 +32,7 @@
          * Получение параметров для шаблона в целом
          *
          * @return array
+         * @throws CoreException
          */
         private static function getLayoutParams(): array
         {
@@ -60,9 +61,10 @@
          * Отдача на рендер
          *
          * @param string $template Шаблон
-         * @param array  $params Параметры
+         * @param array  $params   Параметры
          *
          * @return void
+         * @throws CoreException
          */
         private static function render(string $template, array $params = []): void
         {
@@ -71,23 +73,11 @@
             echo $twig->render($template, $params);
         }
 
-        /**
-         * Отрисовка главной страницы
-         *
-         * @return void
-         * @throws CoreException
-         */
         public static function index()
         {
             self::render('index.twig');
         }
 
-        /**
-         * Информация о сборке
-         * я
-         * @return void
-         * @throws CoreException
-         */
         public static function info()
         {
             $buildInfo = [
@@ -101,24 +91,12 @@
             self::render('info.twig', ['data' => $buildInfo]);
         }
 
-        /**
-         * Отрисовка диалогов
-         *
-         * @return void
-         * @throws CoreException
-         */
         public static function dialogs()
         {
             global $USER;
             self::render('dialogs.twig', ['dialogs' => User::isAuthorized() ? $USER->getDialogs() : []]);
         }
 
-        /**
-         * Отрисовка диалога
-         *
-         * @return void
-         * @throws CoreException
-         */
         public static function dialog(int $id)
         {
             global $USER;
@@ -153,13 +131,10 @@
             self::render('users.twig', ['users' => $arUsers]);
         }
 
-        /**
-         *Тестовая
-         *
-         * @return void
-         */
-        public static function test()
+
+        public static function test($a = null, $b = null, $c = null, $d = null)
         {
+            print_r([$a, $b, $c, $d]);
             self::render('test.twig');
         }
 
@@ -186,5 +161,11 @@
         public static function loginFailed()
         {
             self::render('login.twig', ['failed' => true]);
+        }
+
+        public static function userProfile(int $id)
+        {
+            $userData = (new User($id))->getAllUserData(true);
+            self::render('userProfile.twig', ['userData' => $userData]);
         }
     }

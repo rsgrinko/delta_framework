@@ -1,0 +1,15 @@
+{% extends 'layout.twig' %}
+
+{% block title %}Профиль пользователя {{ userData.login }}{% endblock %}
+
+{% block main %}
+    <h1>Профиль пользователя {{ userData.login }}</h1>
+    <p>
+        <span>ID: {{ userData.id }}</span><br>
+        <span>Логин: {{ userData.login }}</span><br>
+        <span>Имя: {{ userData.name }}</span><br>
+        <span>E-Mail: {{ userData.email }}</span><br>
+        <span>Был активен: {{ userData.last_active }}</span><br>
+
+    </p>
+{% endblock %}

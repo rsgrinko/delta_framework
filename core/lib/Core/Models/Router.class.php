@@ -37,6 +37,11 @@
         private static array $routes = [];
 
         /**
+         * @var array $paginationRoutes Маршруты, использующие пагинацию
+         */
+        private static array $paginationRoutes = [];
+
+        /**
          * Метод вывода 404 ошибки
          */
         private static function notFound()
@@ -76,6 +81,12 @@
                 {
                     array_shift($params);
                     Registry::set('currentPage', $callback);
+                    // Проверка на пагинацию
+                    /*if (preg_match('/\/page\/(\d+)$/', $params[1], $paginationParams)) {
+                        Registry::set('usePagination', true);
+                        Registry::set('page', $paginationParams[1]);
+                    }*/
+
                     return call_user_func_array($callback, array_values($params));
                 }
             }

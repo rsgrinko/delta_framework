@@ -5,9 +5,25 @@
 {% block main %}
     <h1>Список пользователей</h1>
     <p>
-    <ul>{% for user in users %}
-            <li>{{ user.login }}</li>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Логин</th>
+            <th>Имя</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.login }}</td>
+                <td>{{ user.name }}</td>
+                <td><a href="/users/{{ user.id }}">Открыть профиль</a></td>
+            </tr>
         {% endfor %}
-    </ul>
+        </tbody>
+    </table>
     </p>
 {% endblock %}

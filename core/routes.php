@@ -22,8 +22,12 @@
 
     use Core\Models\Router;
 
+    Router::route('/404', function () {
+        header('HTTP/1.0 404 Not Found');
+        echo '404 - Page Not Found';
+    });
+
     Router::route('/', '\Core\App::index');
-    Router::route('/test', '\Core\App::test', true);
     Router::route('/info', '\Core\App::info');
 
     Router::route('/login', '\Core\App::login');
@@ -31,29 +35,21 @@
     Router::route('/login/failed', '\Core\App::loginFailed');
     Router::route('/logout', '\Core\App::logout');
 
-
     Router::route('/dialogs', '\Core\App::dialogs');
     Router::route('/dialog/(\d+)', '\Core\App::dialog');
 
     Router::route('/users', '\Core\App::users');
+    Router::route('/users/(\d+)', '\Core\App::userProfile');
     Router::route('/users/(\d+)/sendMessage', '\Core\App::sendMessage');
 
-    Router::route('/404', function () {
-        header('HTTP/1.0 404 Not Found');
-        echo '404 - Page Not Found';
-    });
+    Router::route('/test', '\Core\App::test', true);
+    Router::route('/test/(\d+)', '\Core\App::test');
+    Router::route('/test/(\d+)/page/(\d+)', '\Core\App::test');
 
+    /** Тестовые маршруты */
     Router::route('/sections', '\Core\App::sections');
     Router::route('/section/(\d+)', '\Core\App::section');
 
     Router::route('blog/(\w+)/(\d+)', function ($category, $id) {
         echo $category . ':' . $id;
     });
-
-
-
-   // Router::route('/test/(\d+)', '\Core\App::test');
-
-
-
-

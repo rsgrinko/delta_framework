@@ -70,7 +70,7 @@
             /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
             $dialogs = $DB->query(
-                'SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `send`="' . $this->user->getId() . '" OR `receive`="' . $this->user->getId() . '"'
+                'SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `send`="' . $this->user->getId() . '" OR `receive`="' . $this->user->getId() . '" ORDER BY `date_updated` DESC'
             );
             if (empty($dialogs)) {
                 return [];
