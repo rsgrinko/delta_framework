@@ -3,6 +3,7 @@
 <head>
     <title>{% block title %}Delta Framework{% endblock %}</title>
     <link href="/assets/css/style.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
 
@@ -14,12 +15,24 @@
 
     <div class="header">
         <div class="mainMenu">
-            <div class="menuItem"><a href="/">Главная</a></div>
+            <div class="menuItem {% if currentPage == 'index' %}active{% endif %}"><a href="/">Главная</a></div>
             <div class="menuItem"><a href="/admin/">Админка</a></div>
-            <div class="menuItem"><a href="/">Link</a></div>
-            <div class="menuItem"><a href="/info">Информация о сборке</a></div>
-            <div class="menuItem"><a href="/test">Тестовая</a></div>
+            {% if isAuthorized %}
+                <div class="menuItem {% if currentPage == 'dialogs' %}active{% endif %}"><a href="/dialogs">Диалоги</a></div>
+            {% endif %}
+            <div class="menuItem {% if currentPage == 'users' %}active{% endif %}"><a href="/users">Список пользователей</a></div>
+            <div class="menuItem {% if currentPage == 'info' %}active{% endif %}"><a href="/info">Информация о сборке</a></div>
+            <div class="menuItem {% if currentPage == 'test' %}active{% endif %}"><a href="/test">Тестовая</a></div>
+
+            <div class="userInfo">
+                {% if isAuthorized %}
+                    {{ userData.name }} [<a href="/logout">Выход</a>]
+                {%  else %}
+                    Гость [<a href="/login">Войти</a>]
+                {% endif %}
+            </div>
         </div>
+
 
     </div>
     <div class="content">
@@ -28,7 +41,7 @@
     </div>
 
     <div class="footer">
-        <a href="https://github.com/rsgrinko/delta_framework" target="_blank">DeltaFramework</a> by Roman S Grinko, {{ currentYear }}
+        <a href="https://github.com/rsgrinko/delta_framework" target="_blank">DeltaFramework</a> by <a href="https://it-stories.ru/about" target="_blank">Roman S Grinko</a>, {{ currentYear }} | Generation time: {{ executionTime }}
     </div>
 </div>
 </body>

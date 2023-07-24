@@ -21,6 +21,7 @@
 
     namespace Core;
 
+    use Core\Helpers\Registry;
     use Core\Helpers\SystemFunctions;
     use Core\Models\{Posts, User};
 
@@ -35,10 +36,21 @@
         {
             global $USER;
 
+            $finish_time = microtime(true);
+            $delta       = round($finish_time - START_TIME, 3);
+            if ($delta < 0.001) {
+                $delta = 0.001;
+            }
+
+            $currentPage = explode('::', Registry::get('currentPage'))[1];
+
             return [
+                'currentPage'   => $currentPage,
+                'executionTime' => $delta . ' cek.',
                 'isAuthorized'  => User::isAuthorized(),
                 'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
-                'currentYear' => date('Y'),
+                'userData'      => User::isAuthorized() ? $USER->getAllUserData(true) : [],
+                'currentYear'   => date('Y'),
             ];
         }
 
@@ -127,6 +139,10 @@
             header('Location: /dialog/' . (int)$_REQUEST['dialogId']);
         }
 
+        public static function users()
+        {
+            self::render('users.twig');
+        }
 
         /**
          *Тестовая
@@ -136,5 +152,30 @@
         public static function test()
         {
             self::render('test.twig');
+        }
+
+        public static function logout()
+        {
+            User::logout();
+            header('Location: /');
+        }
+
+        public static function loginAuthorize()
+        {
+            if (User::securityAuthorize($_REQUEST['login'], $_REQUEST['password'], false)) {
+                header('Location: /');
+            } else {
+                header('Location: /login/failed');
+            }
+        }
+
+        public static function login()
+        {
+            self::render('login.twig', ['failed' => false]);
+        }
+
+        public static function loginFailed()
+        {
+            self::render('login.twig', ['failed' => true]);
         }
     }

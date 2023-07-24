@@ -1,0 +1,15 @@
+{% extends 'layout.twig' %}
+{% block title %}Авторизация{% endblock %}
+{% block main %}
+    <h1>Авторизация</h1>
+    {% if failed %}
+        <div class="alert alert-error">Ошибка авторизации</div>
+    {% endif %}
+    <p>
+    <form action="/login/authorize" method="POST">
+        <input class="input" type="text" name="login" placeholder="Введите логин">
+        <input class="input" type="password" name="password" placeholder="Введите пароль">
+        <button class="button w100" type="submit">Войти</button>
+    </form>
+    </p>
+{% endblock %}

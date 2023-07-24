@@ -26,10 +26,16 @@
     Router::route('/test', '\Core\App::test');
     Router::route('/info', '\Core\App::info');
 
+    Router::route('/login', '\Core\App::login');
+    Router::route('/login/authorize', '\Core\App::loginAuthorize');
+    Router::route('/login/failed', '\Core\App::loginFailed');
+    Router::route('/logout', '\Core\App::logout');
+
 
     Router::route('/dialogs', '\Core\App::dialogs');
     Router::route('/dialog/(\d+)', '\Core\App::dialog');
 
+    Router::route('/users', '\Core\App::users');
     Router::route('/users/(\d+)/sendMessage', '\Core\App::sendMessage');
 
     Router::route('/404', function () {

@@ -21,6 +21,8 @@
 
     namespace Core\Models;
 
+    use Core\Helpers\Registry;
+
     class Router
     {
 
@@ -68,6 +70,7 @@
                 if (preg_match($pattern, $_SERVER['REQUEST_URI'], $params)) // сравнение идет через регулярное выражение
                 {
                     array_shift($params);
+                    Registry::set('currentPage', $callback);
                     return call_user_func_array($callback, array_values($params));
                 }
             }
