@@ -1,129 +1,56 @@
-<!doctype html>
-<html lang="ru">
-<head>
-    <!-- Обязательные метатеги -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/css/custom.css">
-    <title>Главная тестовая</title>
-</head>
-<body>
-<main>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark" aria-label="Fourth navbar example">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Delta Framework</a>
-            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04"
-                    aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+{% extends 'layout.twig' %}
+{% block title %}Диалоги{% endblock %}
+{% block main %}
+    {% if isAuthorized %}
+        <h1>Диалог # {{ dialog_id }} с "{{ companionName }} ({{ companionId }})"</h1>
 
-            <div class="navbar-collapse collapse" id="navbarsExample04" style="">
-                <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Главная</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Админка</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dialogs">Диалоги</a>
-                    </li>
-                    {% if isAdmin %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="/?clear_cache=Y">Очистка кеша</a>
-                        </li>
-                    {% endif %}
+        <!--
+        <table class="table">
+            <thead>
+            <tr>
+                <td>ID</td>
+                <td>От</td>
+                <td>Кому</td>
+                <td>Дата</td>
+                <td>Сообщение</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for message in messages %}
+                <tr>
+                    <td>{{ message.id }}</td>
+                    <td>{{ message.user_from_data.name }} ({{ message.user_from_data.login }})</td>
+                    <td>{{ message.user_to_data.name }} ({{ message.user_to_data.login }})</td>
+                    <td>{{ message.date }}</td>
+                    <td>{{ message.text }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        -->
 
-                    {% if isAdmin %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="/phpcmd.php">Командная строка PHP</a>
-                        </li>
-                    {% endif %}
 
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                    </li>
-                </ul>
-            </div>
+
+
+        <div class="messageBox">
+            {% for message in messages %}
+                <div class="message {% if message.user_from == userId %}fromMe{% else %}fromCompanion{% endif %}">{{ message.text }}</div>
+            {% endfor %}
         </div>
-    </nav>
-
-
-    <div class="container">
-        <div class="row justify-content-md-center">
-            <div class="col-md">
-
-                {% if isAuthorized %}
-                    <h1>Диалог # {{ dialog_id }}</h1>
-
-
-                    <table>
-                        <thead>
-                        <tr>
-                            <td>ID</td>
-                            <td>От</td>
-                            <td>Кому</td>
-                            <td>Дата</td>
-                            <td>Сообщение</td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for message in messages %}
-                            <tr>
-                                <td>{{ message.id }}</td>
-                                <td>{{ message.user_from_data.name }} ({{ message.user_from_data.login }})</td>
-                                <td>{{ message.user_to_data.name }} ({{ message.user_to_data.login }})</td>
-                                <td>{{ message.date }}</td>
-                                <td>{{ message.text }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
 
 
 
 
 
-                    <div class="messages">
-                        {% for message in messages %}
-                        <div class="dialogContainer {% if message.user_from == userId %}darker{% endif %}">
-                            <div class="messageFromName">{{ message.user_from_data.name }}</div>
-                            <p>{{ message.text }}</p>
-                            <span class="{% if message.user_from == userId %}time-left{% else %}time-right{% endif %}">{{ message.date }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
+        <p>
+        <form method="POST" action="/users/{{ companionId }}/sendMessage">
+            <input type="hidden" name="dialogId" value="{{ dialog_id }}">
+            <textarea name="message"></textarea>
+            <button class="button w100" type="submit">Отправить</button>
+        </form>
+        </p>
 
-
-
-
-
-
-
-
-
-
-                {% else %}
-                    <h1>Вы не авторизованы :(</h1>
-                {% endif %}
-
-            </div>
-        </div>
-    </div>
-</main>
-<footer class="py-3 my-4">
-    <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Home</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Features</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Pricing</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
-    </ul>
-
-    <p class="text-center text-muted">Тут будет статистика</p>
-    <p class="text-center text-muted">© <?= date('Y'); ?> Delta Project</p>
-</footer>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    {% else %}
+        <div class="alert alert-error">Вы не авторизованы</div>
+    {% endif %}
+{% endblock %}

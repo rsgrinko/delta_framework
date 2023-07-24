@@ -134,6 +134,7 @@
             } else {
                 $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
                 $result = array_merge($result, ['roles' => $this->getRolesObject()->getRoles()]);
+                $result['nameForDisplay'] = '[' . $result['id'] . '] (' . $result['login'] . ') ' . $result['name'];
 
                 // В случае запроса безопасных данных убираем лишнее
                 if ($onlySecureData) {
@@ -901,8 +902,8 @@
         {
             $dialogs = $this->getDialogObject()->getDialogs();
             foreach ($dialogs as $key => $dialog) {
-                $dialogs[$key]['send_user_data'] = (new self((int)$dialog['send']))->getAllUserData(true);
-                $dialogs[$key]['receive_user_data'] = (new self((int)$dialog['receive']))->getAllUserData(true);
+                $dialogs[$key]['companionId'] = $this->getDialogObject()->getDialogCompanionId((int)$dialog['id']);
+                $dialogs[$key]['companionData'] = (new self((int)$dialogs[$key]['companionId']))->getAllUserData(true);
             }
 
             return $dialogs;

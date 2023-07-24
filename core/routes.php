@@ -30,6 +30,8 @@
     Router::route('/dialogs', '\Core\App::dialogs');
     Router::route('/dialog/(\d+)', '\Core\App::dialog');
 
+    Router::route('/users/(\d+)/sendMessage', '\Core\App::sendMessage');
+
     Router::route('/404', function () {
         header('HTTP/1.0 404 Not Found');
         echo '404 - Page Not Found';

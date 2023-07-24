@@ -79,9 +79,36 @@
         }
 
         /**
+         * Получения ID собеседника диалога
+         *
+         * @param int $dialogId Идентификатор диалога
+         *
+         * @return int|null Идентификатор собеседника
+         * @throws CoreException
+         */
+        public function getDialogCompanionId(int $dialogId): ?int
+        {
+            /** @var $DB DB Объект базы данных */
+            $DB     = DB::getInstance();
+            $dialog = $DB->query('SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `id`="' . $dialogId . '"');
+            if (empty($dialog)) {
+                return null;
+            }
+            $dialog = array_shift($dialog);
+            if ((int)$dialog['send'] === $this->user->getId()) {
+                return (int)$dialog['receive'];
+            } elseif ((int)$dialog['receive'] === $this->user->getId()) {
+                return (int)$dialog['send'];
+            }
+
+            return null;
+        }
+
+        /**
          * Получение сообщений диалога
          *
-         * @param int $dialogId
+         * @param int  $dialogId         Идентификатор диаолога
+         * @param bool $markDialogViewed Пометить диалог прочитанным
          *
          * @return array
          * @throws CoreException

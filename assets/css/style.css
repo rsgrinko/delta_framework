@@ -129,3 +129,72 @@ body {
 .table tbody tr:nth-child(even){
     background: #F7F7F7;
 }
+
+
+.main textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 15px;
+    height: 150px;
+    border: 1px solid #00abff;
+    margin-bottom: 10px;
+}
+
+.main .w100 {
+    width: 100%;
+}
+.main .button {
+    background: #00abff;
+    color: white;
+    border: 0;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.main .button:hover {
+    background: #0085c7;
+}
+
+.main .messageBox {
+    display: flex;
+    flex-direction: column;
+}
+
+.main .messageBox .message {
+    width: 300px;
+    padding: 20px 10px;
+    position: relative;
+    background: #eee;
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.main .messageBox .message.fromMe {
+    align-self: end;
+    background: #00abff;
+    color: white;
+}
+
+.main .messageBox .message.fromCompanion:before {
+    content: "";
+    border: solid transparent;
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    border-right-color: #eee;
+    border-width: 9px;
+    margin-top: -9px;
+}
+
+.main .messageBox .message.fromMe:before {
+    content: "";
+    border: solid transparent;
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    border-right-color: #eeeeee;
+    border-width: 9px;
+    margin-top: -9px;
+    transform: rotate(180deg);
+}
+

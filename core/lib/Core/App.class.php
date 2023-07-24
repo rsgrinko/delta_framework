@@ -96,7 +96,7 @@
         public static function dialogs()
         {
             global $USER;
-            self::render('dialogs.twig', ['dialogs' => $USER->getDialogs()]);
+            self::render('dialogs.twig', ['dialogs' => User::isAuthorized() ? $USER->getDialogs() : []]);
         }
 
         /**
@@ -108,7 +108,23 @@
         public static function dialog(int $id)
         {
             global $USER;
-            self::render('dialog.twig', ['messages' => $USER->getMessages($id, true), 'userId' => $USER->getId()]);
+            self::render(
+                'dialog.twig',
+                [
+                    'dialog_id'     => $id,
+                    'messages'      => $USER->getMessages($id, true),
+                    'userId'        => $USER->getId(),
+                    'companionId'   => $USER->getDialogObject()->getDialogCompanionId($id),
+                    'companionName' => (new User($USER->getDialogObject()->getDialogCompanionId($id)))->getName(),
+                ]
+            );
+        }
+
+        public static function sendMessage(int $userId)
+        {
+            global $USER;
+            $USER->getDialogObject()->sendMessage($userId, $_REQUEST['message']);
+            header('Location: /dialog/' . (int)$_REQUEST['dialogId']);
         }
 
 
