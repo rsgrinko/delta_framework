@@ -54,6 +54,11 @@ body {
     border-radius: 0px 0px 10px 10px;
 }
 
+.main .footer a {
+    color: white;
+    text-decoration: none;
+}
+
 .main .content {
     padding: 10px;
     border-left: 1px solid #00abff;
