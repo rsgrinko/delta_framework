@@ -4,5 +4,10 @@
 
 {% block main %}
     <h1>Список пользователей</h1>
-    <p>This is sample text!</p>
+    <p>
+    <ul>{% for user in users %}
+            <li>{{ user.login }}</li>
+        {% endfor %}
+    </ul>
+    </p>
 {% endblock %}

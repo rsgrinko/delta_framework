@@ -23,7 +23,7 @@
     use Core\Models\Router;
 
     Router::route('/', '\Core\App::index');
-    Router::route('/test', '\Core\App::test');
+    Router::route('/test', '\Core\App::test', true);
     Router::route('/info', '\Core\App::info');
 
     Router::route('/login', '\Core\App::login');
@@ -52,7 +52,7 @@
 
 
 
-    Router::route('/test/(\d+)', '\Core\App::test');
+   // Router::route('/test/(\d+)', '\Core\App::test');
 
 
 

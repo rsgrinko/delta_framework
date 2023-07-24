@@ -211,7 +211,7 @@ body {
     position: absolute;
     left: 100%;
     top: 50%;
-    border-right-color: #eeeeee;
+    border-right-color: #00abff;
     border-width: 9px;
     margin-top: -9px;
     transform: rotate(180deg);

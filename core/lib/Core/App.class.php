@@ -21,6 +21,7 @@
 
     namespace Core;
 
+    use Core\Helpers\Pagination;
     use Core\Helpers\Registry;
     use Core\Helpers\SystemFunctions;
     use Core\Models\{Posts, User};
@@ -45,6 +46,7 @@
             $currentPage = explode('::', Registry::get('currentPage'))[1];
 
             return [
+                'salt'          => md5(random_int(1, 999999) . random_int(1, 999999) . random_int(1, 999999) . random_int(1, 999999)),
                 'currentPage'   => $currentPage,
                 'executionTime' => $delta . ' cek.',
                 'isAuthorized'  => User::isAuthorized(),
@@ -141,7 +143,14 @@
 
         public static function users()
         {
-            self::render('users.twig');
+            Pagination::execute($_REQUEST['page'], User::getAllCount(), PAGINATION_LIMIT);
+            $limit = Pagination::getLimit();
+            $limit= '0, 10';
+            $arUsers = User::getUsers($limit);
+            foreach($arUsers as $key => $user) {
+                unset($arUsers[$key]['password']);
+            }
+            self::render('users.twig', ['users' => $arUsers]);
         }
 
         /**

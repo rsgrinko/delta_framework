@@ -53,9 +53,14 @@
          *
          * @return void
          */
-        public static function route(string $pattern, $callback)
+        public static function route(string $pattern, $callback, bool $usePagination = false)
         {
-            $pattern                = '/^' . str_replace('/', '\/', $pattern) . '$/';
+            $pattern = str_replace('/', '\/', $pattern);
+            if ($usePagination) {
+                $pattern = '/(^' . $pattern . '$)|(^' . $pattern . '\/page\/(\d+))$/';
+            } else {
+                $pattern = '/^' . $pattern . '$/';
+            }
             self::$routes[$pattern] = $callback;
         }
 
