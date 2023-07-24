@@ -54,6 +54,13 @@
         public ?Mail $mailObject = null;
 
         /**
+         * Объект Dialog
+         *
+         * @var Dialog|null
+         */
+        public ?Dialog $dialogObject = null;
+
+        /**
          * Объект мета данных
          *
          * @var UserMeta|null
@@ -113,17 +120,30 @@
         /**
          * Получение всех полей пользователя
          *
+         * @param bool $onlySecureData Флаг получения только безопасных данных
+         *
          * @return array|null
          * @throws CoreException
          */
-        public function getAllUserData(): ?array
+        public function getAllUserData(bool $onlySecureData = false): ?array
         {
-            $cacheId = md5('User_getAllUserData_' . $this->id);
+            $onlySecureDataCacheKey = (int)$onlySecureData;
+            $cacheId = md5('User_getAllUserData_' . $onlySecureDataCacheKey . '_' . $this->id);
             if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
                 $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
                 $result = array_merge($result, ['roles' => $this->getRolesObject()->getRoles()]);
+
+                // В случае запроса безопасных данных убираем лишнее
+                if ($onlySecureData) {
+                    foreach($result as $key => $value) {
+                        if (in_array($key, ['password', 'email_confirmed', 'verification_code', 'token', 'roles', ''], true)) {
+                            unset($result[$key]);
+                        }
+                    }
+                }
+
                 Cache::set($cacheId, $result);
             }
 
@@ -750,6 +770,19 @@
         }
 
         /**
+         * Получить объект для работы с диалогами
+         *
+         * @return Dialog
+         */
+        public function getDialogObject(): Dialog
+        {
+            if (empty($this->dialogObject)) {
+                $this->dialogObject = (new Dialog($this));
+            }
+            return $this->dialogObject;
+        }
+
+        /**
          * Экспорт всех данных из таблицы пользователей
          *
          * @return string XML данные
@@ -856,5 +889,42 @@
             }
             $res = $DB->query($sql);
             return (int)$res[0]['count'];
+        }
+
+        /**
+         * Получение диалогов
+         *
+         * @return array
+         * @throws CoreException
+         */
+        public function getDialogs(): array
+        {
+            $dialogs = $this->getDialogObject()->getDialogs();
+            foreach ($dialogs as $key => $dialog) {
+                $dialogs[$key]['send_user_data'] = (new self((int)$dialog['send']))->getAllUserData(true);
+                $dialogs[$key]['receive_user_data'] = (new self((int)$dialog['receive']))->getAllUserData(true);
+            }
+
+            return $dialogs;
+        }
+
+        /**
+         * Получение диалогов
+         *
+         * @param int  $dialogId   Идентификатор диалога
+         * @param bool $markViewed Пометить прочитанным
+         *
+         * @return array
+         * @throws CoreException
+         */
+        public function getMessages(int $dialogId, bool $markViewed = false): array
+        {
+            $messages = $this->getDialogObject()->getMessages($dialogId, $markViewed);
+            foreach ($messages as $key => $message) {
+                $messages[$key]['user_from_data'] = (new self((int)$message['user_from']))->getAllUserData(true);
+                $messages[$key]['user_to_data'] = (new self((int)$message['user_to']))->getAllUserData(true);
+            }
+
+            return $messages;
         }
     }

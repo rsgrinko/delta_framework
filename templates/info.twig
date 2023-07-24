@@ -1,0 +1,23 @@
+{% extends 'layout.twig' %}
+{% block title %}Информация о сборке{% endblock %}
+{% block main %}
+    <h1>Информация о сборке</h1>
+    <p>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Ключ</th>
+            <th>Значение</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for key, value in data %}
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {%  endfor %}
+        </tbody>
+    </table>
+    </p>
+{% endblock %}

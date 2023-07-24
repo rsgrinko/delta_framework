@@ -21,9 +21,6 @@
 
     namespace Core;
 
-    use Core\DataBases\DB;
-    use Core\Helpers\Cache;
-    use Core\Helpers\Files;
     use Core\Helpers\SystemFunctions;
     use Core\Models\{Posts, User};
 
@@ -39,29 +36,78 @@
         public static function index()
         {
             global $twig, $USER;
-
-            $finish_time = microtime(true);
-            $delta       = round($finish_time - START_TIME, 3);
-            if ($delta < 0.001) {
-                $delta = 0.001;
-            }
-
             echo $twig->render(
                 'index.twig',
                 [
                     'isAuthorized'  => User::isAuthorized(),
                     'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
-                    'userDataTable' => User::isAuthorized() ? str_replace(
-                        '<table style="',
-                        '<table style="width:100%;',
-                        SystemFunctions::arrayToTable($USER->getAllUserData(), 'Информация о текущем пользователе')
-                    ) : '',
-                    'statString' => 'Использовано ОЗУ: '
-                                    . round(memory_get_usage() / 1024 / 1024, 2) . ' МБ / БД: '
-                                    . round(DB::$workingTime,3) . ' сек (' . DB::$quantity . ' шт.) / Кэш: '
-                                    . Files::convertBytes(Cache::getCacheSize())
-                                    . ' / Генерация: ' . $delta . ' сек',
-                            ]
+                ]
+            );
+        }
+
+        /**
+         * Информация о сборке
+         * я
+         * @return void
+         * @throws CoreException
+         */
+        public static function info()
+        {
+            global $twig, $USER;
+            $buildInfo = [
+                'Версия ядра'               => CORE_VERSION,
+                'Лимит пагинации'           => PAGINATION_LIMIT,
+                'Время для расчета онлайна' => USER_ONLINE_TIME,
+                'Время жизни кеша'          => CACHE_TTL,
+                'E-Mail сайта'              => SERVER_EMAIL,
+                'Имя отправителя сайта'     => SERVER_EMAIL_NAME,
+            ];
+            echo $twig->render(
+                'info.twig',
+                [
+                    'isAuthorized'  => User::isAuthorized(),
+                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
+                    'data' => $buildInfo,
+                ]
+            );
+        }
+
+        /**
+         * Отрисовка диалогов
+         *
+         * @return void
+         * @throws CoreException
+         */
+        public static function dialogs()
+        {
+            global $twig, $USER;
+            echo $twig->render(
+                'dialogs.twig',
+                [
+                    'isAuthorized'  => User::isAuthorized(),
+                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
+                    'dialogs'       => $USER->getDialogs(),
+                ]
+            );
+        }
+
+        /**
+         * Отрисовка диалога
+         *
+         * @return void
+         * @throws CoreException
+         */
+        public static function dialog(int $id)
+        {
+            global $twig, $USER;
+            echo $twig->render(
+                'dialog.twig',
+                [
+                    'isAuthorized'  => User::isAuthorized(),
+                    'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
+                    'messages'      => $USER->getMessages($id, true),
+                    'userId'        => $USER->getId(),
+                ]
             );
         }
 

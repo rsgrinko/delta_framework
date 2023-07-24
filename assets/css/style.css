@@ -1,0 +1,126 @@
+body {
+    background: linear-gradient(0deg, #b9deed, #efefef);
+}
+
+.main {
+    width: 1100px;
+    margin: 0 auto;
+    margin-top: 30px;
+}
+
+.main .logo {
+    text-align: center;
+}
+
+.main .header {
+    background: #00abff;
+    border-radius: 10px 10px 0px 0px;
+}
+
+.main .logo .logoText {
+    font-size: 3em;
+    font-weight: bolder;
+    text-shadow: 1px 1px black;
+    color: #00abff;
+}
+
+.main .header .mainMenu {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.main .header .mainMenu .menuItem {
+    padding: 10px;
+}
+
+.main .header .mainMenu .menuItem:hover {
+    background: #0085c7;
+}
+
+.main .header .mainMenu .menuItem:first-child:hover {
+    border-radius: 10px 0px 0px 0px;
+}
+
+.main .header .mainMenu .menuItem a {
+    text-decoration: none;
+    color: white;
+    text-shadow: 1px 1px black;
+}
+
+.main .footer {
+    background: #00abff;
+    color: white;
+    padding: 10px;
+    border-radius: 0px 0px 10px 10px;
+}
+
+.main .content {
+    padding: 10px;
+    border-left: 1px solid #00abff;
+    border-right: 1px solid #00abff;
+    background: white;
+}
+
+.main .content .breadcrumbs {
+    font-size: 0.8em;
+    font-style: italic;
+}
+
+.main .content .breadcrumbs a {
+    text-decoration: none;
+    color: #00abff;
+}
+
+.main .alert {
+    background: #57b6ef;
+    color: white;
+    padding: 5px 0px 5px 0px;
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.main .alert:before {
+    content: " ➡ ";
+}
+
+.main .alert.alert-error {
+    background: #d70b0b;
+}
+
+.main .alert.alert-success {
+    background: #389b38;
+}
+
+.main .alert.alert-info {
+    background: #00abff;
+}
+
+.main h1, .main h2, .main h3, .main h4 {
+    color: #00abff;
+}
+
+.table{
+    border: 1px solid #eee;
+    table-layout: fixed;
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse;
+}
+.table th {
+    font-weight: bold;
+    padding: 5px;
+    background: #efefef;
+    border: 1px solid #dddddd;
+}
+.table td{
+    padding: 5px 10px;
+    border: 1px solid #eee;
+    text-align: left;
+}
+.table tbody tr:nth-child(odd){
+    background: #fff;
+}
+.table tbody tr:nth-child(even){
+    background: #F7F7F7;
+}

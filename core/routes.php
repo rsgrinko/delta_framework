@@ -23,6 +23,12 @@
     use Core\Models\Router;
 
     Router::route('/', '\Core\App::index');
+    Router::route('/test', '\Core\App::test');
+    Router::route('/info', '\Core\App::info');
+
+
+    Router::route('/dialogs', '\Core\App::dialogs');
+    Router::route('/dialog/(\d+)', '\Core\App::dialog');
 
     Router::route('/404', function () {
         header('HTTP/1.0 404 Not Found');
@@ -37,7 +43,7 @@
     });
 
 
-    Router::route('/test', '\Core\App::test');
+
     Router::route('/test/(\d+)', '\Core\App::test');
 
 
