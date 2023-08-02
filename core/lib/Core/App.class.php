@@ -36,6 +36,7 @@
          */
         private static function getLayoutParams(): array
         {
+            /** @var User $USER */
             global $USER;
 
             $finish_time = microtime(true);
@@ -45,10 +46,12 @@
             }
 
             $currentPage = explode('::', Registry::get('currentPage'))[1];
+            $memoryUse   = memory_get_usage() - START_MEMORY;
 
             return [
                 'salt'          => md5(random_int(1, 999999) . random_int(1, 999999) . random_int(1, 999999) . random_int(1, 999999)),
                 'currentPage'   => $currentPage,
+                'memoryUse'     => SystemFunctions::convertBytes($memoryUse),
                 'executionTime' => $delta . ' cek.',
                 'isAuthorized'  => User::isAuthorized(),
                 'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
@@ -93,12 +96,14 @@
 
         public static function dialogs()
         {
+            /** @var User $USER */
             global $USER;
             self::render('dialogs.twig', ['dialogs' => User::isAuthorized() ? $USER->getDialogs() : []]);
         }
 
         public static function dialog(int $id)
         {
+            /** @var User $USER */
             global $USER;
             self::render(
                 'dialog.twig',
@@ -114,6 +119,7 @@
 
         public static function sendMessage(int $userId)
         {
+            /** @var User $USER */
             global $USER;
             $USER->getDialogObject()->sendMessage($userId, $_REQUEST['message']);
             header('Location: /dialog/' . (int)$_REQUEST['dialogId']);
@@ -167,5 +173,16 @@
         {
             $userData = (new User($id))->getAllUserData(true);
             self::render('userProfile.twig', ['userData' => $userData]);
+        }
+
+        public static function goToDialog(int $userId)
+        {
+            /** @var User $USER */
+            global $USER;
+            $dialogId = $USER->getDialogObject()->getDialogId($USER->getId(), $userId);
+            if (empty($dialogId)) {
+                $dialogId = $USER->getDialogObject()->createDialog($userId);
+            }
+            header('Location: /dialog/' . $dialogId);
         }
     }

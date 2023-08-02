@@ -71,15 +71,15 @@
             $size = str_replace('.', ',', round($size, 2));
             switch ($i) {
                 case 0:
-                    return $size .= ' Б';
+                    return $size .= ' b';
                 case 1:
-                    return $size .= ' КБ';
+                    return $size .= ' Kb';
                 case 2:
-                    return $size .= ' МБ';
+                    return $size .= ' Mb';
                 case 3:
-                    return $size .= ' ГБ';
+                    return $size .= ' Gb';
                 case 4:
-                    return $size .= 'ТБ';
+                    return $size .= 'Tb';
             }
             return 'Неизвестно';
         }

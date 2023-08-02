@@ -33,6 +33,8 @@
     }
     date_default_timezone_set('Europe/Moscow');
 
+    define('START_MEMORY', memory_get_usage());
+
     require_once __DIR__ . '/../vendor/autoload.php';
     \Sentry\init(
         [

@@ -499,6 +499,29 @@
             return null;
         }
 
+        /**
+         * Получение количества элементов
+         *
+         * @param string       $table Имя таблицы
+         * @param array|string $where Массив where
+         *
+         * @return int Количество элементов
+         */
+        public function getCountItems(string $table, $where): int
+        {
+            self::$quantity++;
+            $count = 0;
+            try {
+                $result = $this->query('SELECT COUNT(*) as count FROM `' . $table . '` WHERE ' . $this->createWhere($where));
+            } catch (Throwable $e) {
+                $result = false;
+            }
+            if ($result) {
+                $count = (int)$result[0]['count'];
+            }
+            return $count;
+        }
+
 
         /**
          * Получить все данные из таблицы

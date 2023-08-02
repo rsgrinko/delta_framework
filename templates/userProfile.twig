@@ -5,11 +5,14 @@
 {% block main %}
     <h1>Профиль пользователя {{ userData.login }}</h1>
     <p>
-        <span>ID: {{ userData.id }}</span><br>
-        <span>Логин: {{ userData.login }}</span><br>
-        <span>Имя: {{ userData.name }}</span><br>
-        <span>E-Mail: {{ userData.email }}</span><br>
-        <span>Был активен: {{ userData.last_active }}</span><br>
+        <span><b>ID:</b> {{ userData.id }}</span><br>
+        <span><b>Логин:</b> {{ userData.login }}</span><br>
+        <span><b>Имя:</b> {{ userData.name }}</span><br>
+        <span><b>E-Mail:</b> {{ userData.email }}</span><br>
+        <span><b>Был активен:</b> {{ userData.last_active }}</span><br>
+        <form action="/users/{{ userData.id }}/dialog" method="POST">
+            <button class="button" type="submit">Написать</button>
+        </form>
 
     </p>
 {% endblock %}

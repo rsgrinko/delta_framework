@@ -904,6 +904,7 @@
             foreach ($dialogs as $key => $dialog) {
                 $dialogs[$key]['companionId'] = $this->getDialogObject()->getDialogCompanionId((int)$dialog['id']);
                 $dialogs[$key]['companionData'] = (new self((int)$dialogs[$key]['companionId']))->getAllUserData(true);
+                $dialogs[$key]['unviewedCount'] = $this->getDialogObject()->getDialogUnviewedMessagesCount((int)$dialog['id']);
             }
 
             return $dialogs;

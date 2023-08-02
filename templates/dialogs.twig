@@ -9,6 +9,7 @@
             <tr>
                 <td>ID</td>
                 <td>Прочитано</td>
+                <td>Непрочитанных</td>
                 <td>С кем диалог</td>
                 <td>Действия</td>
             </tr>
@@ -18,6 +19,7 @@
                 <tr>
                     <td>{{ dialog.id }}</td>
                     <td>{{ dialog.viewed }}</td>
+                    <td>{{ dialog.unviewedCount }}</td>
                     <td>{{ dialog.companionData.nameForDisplay }}</td>
                     <td><a href="/dialog/{{ dialog.id }}">Открыть диалог</a></td>
                 </tr>

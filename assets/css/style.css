@@ -175,10 +175,18 @@ body {
 .main .messageBox {
     display: flex;
     flex-direction: column;
+
+    /*подумать
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 300px;
+    */
 }
 
 .main .messageBox .message {
-    width: 300px;
+    width: fit-content;
+    min-width: 300px;
+    max-width: 80%;
     padding: 20px 10px;
     position: relative;
     background: #eee;
@@ -192,6 +200,11 @@ body {
     align-self: end;
     background: #00abff;
     color: white;
+}
+
+.main .messageBox .message a {
+    color: inherit;
+    text-decoration: none;
 }
 
 .main .messageBox .message.fromCompanion:before {
@@ -221,6 +234,7 @@ body {
     font-weight: bold;
     position: absolute;
     top: 5px;
+    text-decoration: none;
 }
 
 .main .messageBox .message .text {
@@ -244,4 +258,17 @@ body {
 .main .header .mainMenu a {
     color: white;
     text-decoration: none;
+}
+
+.deliveryStatus {
+    background: #cecece;
+    width: 10px;
+    height: 10px;
+    border-radius: 45px;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+}
+.deliveryStatus.viewed {
+    background: #00f700;
 }

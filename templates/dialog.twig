@@ -4,47 +4,18 @@
     {% if isAuthorized %}
         <h1>Диалог # {{ dialog_id }} с "{{ companionName }} ({{ companionId }})"</h1>
 
-        <!--
-        <table class="table">
-            <thead>
-            <tr>
-                <td>ID</td>
-                <td>От</td>
-                <td>Кому</td>
-                <td>Дата</td>
-                <td>Сообщение</td>
-            </tr>
-            </thead>
-            <tbody>
-            {% for message in messages %}
-                <tr>
-                    <td>{{ message.id }}</td>
-                    <td>{{ message.user_from_data.name }} ({{ message.user_from_data.login }})</td>
-                    <td>{{ message.user_to_data.name }} ({{ message.user_to_data.login }})</td>
-                    <td>{{ message.date }}</td>
-                    <td>{{ message.text }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        -->
-
-
-
-
         <div class="messageBox">
             {% for message in messages %}
                 <div class="message {% if message.user_from == userId %}fromMe{% else %}fromCompanion{% endif %}">
-                    <div class="name">{{ message.user_from_data.name }}</div>
+                    <div class="name"><a href="/users/{{ message.user_from_data.id }}">{{ message.user_from_data.name }}</a></div>
                     <div class="text">{{ message.text }}</div>
                     <div class="date">{{ message.date }}</div>
+                    {% if message.user_from == userId%}
+                        <div class="deliveryStatus {% if message.user_from == userId and message.viewed == "Y" %}viewed{% endif %}">&nbsp;</div>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
-
-
-
-
 
         <p>
         <form method="POST" action="/users/{{ companionId }}/sendMessage">

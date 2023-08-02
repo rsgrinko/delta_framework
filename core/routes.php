@@ -41,6 +41,8 @@
     Router::route('/users', '\Core\App::users');
     Router::route('/users/(\d+)', '\Core\App::userProfile');
     Router::route('/users/(\d+)/sendMessage', '\Core\App::sendMessage');
+    Router::route('/users/(\d+)/dialog', '\Core\App::goToDialog');
+
 
     Router::route('/test', '\Core\App::test', true);
     Router::route('/test/(\d+)', '\Core\App::test');
