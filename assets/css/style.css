@@ -202,9 +202,23 @@ body {
     color: white;
 }
 
+
 .main .messageBox .message a {
     color: inherit;
     text-decoration: none;
+}
+
+img.dialogImage {
+    max-width: 300px;
+    max-height: 300px;
+}
+
+a.fileLink {
+    text-decoration: underline !important;
+}
+
+a.fileLink:before {
+    content: "📂 "
 }
 
 .main .messageBox .message.fromCompanion:before {

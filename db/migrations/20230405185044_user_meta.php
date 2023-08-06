@@ -5,6 +5,8 @@ use Phinx\Migration\AbstractMigration;
 
 final class UserMeta extends AbstractMigration
 {
+    private $table;
+
     public function init(): void
     {
         $this->table = 'd_user_meta';

@@ -14,6 +14,15 @@
         /** @var string Таблица с сообщениями */
         const TABLE_MESSAGES = DB_TABLE_PREFIX . 'messages';
 
+        /** @var string MESSAGE_TYPE_TEXT Тип сообщения: текст */
+        const MESSAGE_TYPE_TEXT = 'text';
+
+        /** @var string MESSAGE_TYPE_FILE Тип сообщения: файл */
+        const MESSAGE_TYPE_FILE = 'file';
+
+        /** @var string MESSAGE_TYPE_IMAGE Тип сообщения: изображение */
+        const MESSAGE_TYPE_IMAGE = 'image';
+
         /**
          * @var User $user Объект пользователя
          */
@@ -139,11 +148,11 @@
         }
 
         /**
-         * Отправка сообщения
+         * Отправка тестовых сообщения
          *
          * @throws CoreException
          */
-        public function sendMessage(int $to, string $message)
+        public function sendMessage(int $to, string $message): bool
         {
             if (!User::isUserExistsByParams(['id' => $to])) {
                 throw new CoreException('Пользователь с идентификатором ' . $to . ' отсутствует в базе', CoreException::ERROR_USER_NOT_FOUND);
@@ -157,7 +166,33 @@
                 $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed'=> CODE_VALUE_N, 'send' => $this->user->getId(), 'receive' => $to]);
             }
 
-            $result = $DB->addItem(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $message]);
+            $result = $DB->addItem(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => self::MESSAGE_TYPE_TEXT, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $message]);
+            return (int)$result > 0;
+        }
+
+        /**
+         * Отправка файлов
+         *
+         * @param int $fileId
+         *
+         *
+         * @throws CoreException
+         */
+        public function sendFile(int $to, int $fileId): bool
+        {
+            if (!User::isUserExistsByParams(['id' => $to])) {
+                throw new CoreException('Пользователь с идентификатором ' . $to . ' отсутствует в базе', CoreException::ERROR_USER_NOT_FOUND);
+            }
+            /** @var $DB DB Объект базы данных */
+            $DB = DB::getInstance();
+            $dialogId = self::getDialogId($this->user->getId(), $to);
+            if (empty($dialogId)) {
+                $dialogId = $this->createDialog($to);
+            } else {
+                $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed'=> CODE_VALUE_N, 'send' => $this->user->getId(), 'receive' => $to]);
+            }
+
+            $result = $DB->addItem(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => self::MESSAGE_TYPE_FILE, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $fileId]);
             return (int)$result > 0;
         }
 

@@ -5,6 +5,9 @@ use Phinx\Migration\AbstractMigration;
 
 final class UserRoles extends AbstractMigration
 {
+    private $table;
+    private $data;
+
     public function init(): void
     {
         $this->table = 'd_user_roles';

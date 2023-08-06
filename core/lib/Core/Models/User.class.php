@@ -28,6 +28,7 @@
     use Core\CoreException;
     use Core\Helpers\{Cache, Log, Mail, Sanitize, SystemFunctions};
     use Core\DataBases\DB;
+    use Throwable;
 
     class User
     {
@@ -925,6 +926,14 @@
             foreach ($messages as $key => $message) {
                 $messages[$key]['user_from_data'] = (new self((int)$message['user_from']))->getAllUserData(true);
                 $messages[$key]['user_to_data'] = (new self((int)$message['user_to']))->getAllUserData(true);
+                if ($message['type'] !== Dialog::MESSAGE_TYPE_TEXT) {
+                    $messages[$key]['file'] = (new File((int)$message['text']))->getAllProps();
+                    if ($messages[$key]['file'] === null) {
+                        $messages[$key]['file']['error'] = true;
+                    } else {
+                        $messages[$key]['file']['error'] = false;
+                    }
+                }
             }
 
             return $messages;

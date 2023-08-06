@@ -8,9 +8,27 @@
             {% for message in messages %}
                 <div class="message {% if message.user_from == userId %}fromMe{% else %}fromCompanion{% endif %}">
                     <div class="name"><a href="/users/{{ message.user_from_data.id }}">{{ message.user_from_data.name }}</a></div>
-                    <div class="text">{{ message.text }}</div>
+                    <div class="text">
+                        {% if message.type == 'text' %}
+                            {{ message.text }}
+                        {% elseif message.type == 'image' %}
+                            {% if message.file.error == false %}
+                                <a href="{{ message.file.path }}" target="_blank">
+                                    <img class="dialogImage" src="{{ message.file.path }}" alt="{{ message.file.name }}">
+                                </a>
+                            {% else %}
+                                <b>Некорректное изображение</b>
+                            {% endif %}
+                        {% elseif message.type == 'file' %}
+                            {% if message.file.error == false %}
+                                <a class="fileLink" href="{{ message.file.path }}" target="_blank">{{ message.file.name }}</a>
+                            {% else %}
+                                <b>Некорректный файл</b>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                     <div class="date">{{ message.date }}</div>
-                    {% if message.user_from == userId%}
+                    {% if message.user_from == userId %}
                         <div class="deliveryStatus {% if message.user_from == userId and message.viewed == "Y" %}viewed{% endif %}">&nbsp;</div>
                     {% endif %}
                 </div>

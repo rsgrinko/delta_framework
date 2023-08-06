@@ -5,6 +5,8 @@ use Phinx\Migration\AbstractMigration;
 
 final class Users extends AbstractMigration
 {
+    private $table;
+    private $data;
 
     public function init(): void
     {

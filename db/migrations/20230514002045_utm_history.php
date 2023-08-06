@@ -5,6 +5,8 @@
 
     final class UtmHistory extends AbstractMigration
     {
+        private $table;
+
         public function init()
         {
             $this->table = 'd_utm_history';

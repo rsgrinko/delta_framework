@@ -70,7 +70,7 @@
         {
             $this->folder = $_SERVER['DOCUMENT_ROOT'] . self::FOLDER;
             $this->DB     = DB::getInstance();
-            if (!empty($id)) {
+            if (!empty($id) && $id > 0) {
                 $this->id = $id;
                 $this->loadFileProps();
             }

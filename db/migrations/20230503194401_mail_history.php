@@ -5,6 +5,8 @@ use Phinx\Migration\AbstractMigration;
 
 final class MailHistory extends AbstractMigration
 {
+    private $table;
+
     public function init()
     {
         $this->table = 'd_mail_history';
