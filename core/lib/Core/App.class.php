@@ -24,7 +24,7 @@
     use Core\Helpers\Pagination;
     use Core\Helpers\Registry;
     use Core\Helpers\SystemFunctions;
-    use Core\Models\{Posts, User};
+    use Core\Models\{File, Posts, User};
 
     class App
     {
@@ -57,6 +57,7 @@
                 'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
                 'userData'      => User::isAuthorized() ? $USER->getAllUserData(true) : [],
                 'currentYear'   => date('Y'),
+                'newMessages'   => User::isAuthorized() ? $USER->getDialogObject()->getUnviewedMessagesCount() : 0,
             ];
         }
 
@@ -121,7 +122,15 @@
         {
             /** @var User $USER */
             global $USER;
-            $USER->getDialogObject()->sendMessage($userId, $_REQUEST['message']);
+            if (empty($_FILES['file']['tmp_name'])) {
+                $USER->getDialogObject()->sendMessage($userId, $_REQUEST['message']);
+            } else {
+                $fileObject = new File();
+                $fileObject->saveFile($_FILES['file']['tmp_name'], $_FILES['file']['name'], true);
+
+                $USER->getDialogObject()->sendFile($userId, $fileObject->getId(), in_array($_FILES['file']['type'], ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true));
+            }
+
             header('Location: /dialog/' . (int)$_REQUEST['dialogId']);
         }
 

@@ -36,10 +36,14 @@
         </div>
 
         <p>
-        <form method="POST" action="/users/{{ companionId }}/sendMessage">
+        <form method="POST" action="/users/{{ companionId }}/sendMessage" enctype="multipart/form-data">
             <input type="hidden" name="dialogId" value="{{ dialog_id }}">
             <textarea name="message"></textarea>
-            <button class="button w100" type="submit">Отправить</button>
+        <label class="input-file w100">
+            <input type="file" name="file">
+            <span class="w100">Выберите файл</span>
+        </label>
+            <button class="button w100" type="submit" value="sendMessage">Отправить</button>
         </form>
         </p>
 

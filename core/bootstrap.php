@@ -78,6 +78,20 @@
         require_once $_SERVER['DOCUMENT_ROOT'] . '/config.local.php';
     }
 
+    function dd($data): void
+    {
+        echo '<pre>';
+        print_r($data);
+        echo '</pre>';
+    }
+
+    function ddd($data): void
+    {
+        echo '<pre>';
+        print_r($data);
+        echo '</pre>';
+        die();
+    }
 
     /**
      * Реализация механизма автозагрузки классов

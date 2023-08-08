@@ -107,7 +107,7 @@
   <component name="PhpInterpreters">
     <interpreters>
       <interpreter id="9b5f2f5e-509e-45e2-a30a-b4d1544b217e" name="rsgrinko@dev.it-stories.ru:22 password" home="sshConfig://DATA" debugger_id="php.debugger.XDebug">
-        <remote_data INTERPRETER_PATH="/usr/bin/php" HELPERS_PATH="/home/rsgrinko/.phpstorm_helpers" INITIALIZED="false" VALID="true" RUN_AS_ROOT_VIA_SUDO="false" SSH_CONFIG_ID="b4bdc3dc-f3e4-4fbe-9d94-3cb514b49751" SSH_CONFIG_NAME="rsgrinko@dev.it-stories.ru:22 password" SSH_CREDENTIALS_ID="sshConfig://rsgrinko@dev.it-stories.ru:22 password" />
+        <remote_data INTERPRETER_PATH="/usr/bin/php" HELPERS_PATH="/home/rsgrinko/.phpstorm_helpers" INITIALIZED="false" VALID="true" RUN_AS_ROOT_VIA_SUDO="false" SSH_CONFIG_ID="b4bdc3dc-f3e4-4fbe-9d94-3cb514b49751" SSH_CONFIG_NAME="rsgrinko@dev.it-stories.ru:2222 password" SSH_CREDENTIALS_ID="sshConfig://rsgrinko@dev.it-stories.ru:22 password" />
       </interpreter>
     </interpreters>
   </component>

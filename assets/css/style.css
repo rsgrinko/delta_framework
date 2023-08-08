@@ -286,3 +286,47 @@ a.fileLink:before {
 .deliveryStatus.viewed {
     background: #00f700;
 }
+
+.input-file {
+    position: relative;
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.input-file span {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    outline: none;
+    text-decoration: none;
+    font-size: 14px;
+    vertical-align: middle;
+    color: rgb(255 255 255);
+    text-align: center;
+    background-color: #00abff;
+    padding: 10px;
+    box-sizing: border-box;
+    border: none;
+    margin: 0;
+}
+.input-file input[type=file] {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+    display: block;
+    width: 0;
+    height: 0;
+}
+
+/* Hover/active */
+.input-file:hover span {
+    background-color: #0085c7;
+}
+.input-file:active span {
+    background-color: #2E703A;
+}
+
+/* Disabled */
+.input-file input[type=file]:disabled + span {
+    background-color: #eee;
+}

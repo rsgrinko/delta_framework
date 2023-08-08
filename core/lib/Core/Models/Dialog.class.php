@@ -137,7 +137,7 @@
         {
             /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
-            $messages = $DB->query('SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`="' . $dialogId . '"');
+            $messages = $DB->query('SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`="' . $dialogId . '" ORDER BY id ASC');
             if ($markDialogViewed) {
                 $this->markDialogViewed($dialogId);
             }
@@ -173,12 +173,14 @@
         /**
          * Отправка файлов
          *
-         * @param int $fileId
+         * @param int  $to
+         * @param int  $fileId
+         * @param bool $sendAsImage
          *
-         *
+         * @return bool
          * @throws CoreException
          */
-        public function sendFile(int $to, int $fileId): bool
+        public function sendFile(int $to, int $fileId, bool $sendAsImage = false): bool
         {
             if (!User::isUserExistsByParams(['id' => $to])) {
                 throw new CoreException('Пользователь с идентификатором ' . $to . ' отсутствует в базе', CoreException::ERROR_USER_NOT_FOUND);
@@ -192,7 +194,7 @@
                 $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed'=> CODE_VALUE_N, 'send' => $this->user->getId(), 'receive' => $to]);
             }
 
-            $result = $DB->addItem(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => self::MESSAGE_TYPE_FILE, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $fileId]);
+            $result = $DB->addItem(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => $sendAsImage ? self::MESSAGE_TYPE_IMAGE : self::MESSAGE_TYPE_FILE, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $fileId]);
             return (int)$result > 0;
         }
 
@@ -208,6 +210,18 @@
             /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
             return $DB->getCountItems(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'viewed' => CODE_VALUE_N, 'user_to' => $this->user->getId()]);
+        }
+
+        /**
+         * Получение количества непрочитанных сообщений
+         *
+         * @return int Количество
+         */
+        public function getUnviewedMessagesCount(): int
+        {
+            /** @var $DB DB Объект базы данных */
+            $DB = DB::getInstance();
+            return $DB->getCountItems(self::TABLE_MESSAGES, ['viewed' => CODE_VALUE_N, 'user_to' => $this->user->getId()]);
         }
 
 
