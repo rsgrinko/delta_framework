@@ -38,6 +38,15 @@
         /** @var Request $request Объект запроса */
         private Request $request;
 
+        /** @var int $from Выборка ОТ */
+        private int $from;
+
+        /** @var int|null $to Выборка ДО */
+        private ?int $to;
+
+        /** @var int|null $count Общее количество записей */
+        private ?int $count;
+
         /**
          * Конструктор
          *
@@ -47,6 +56,36 @@
         {
             $this->userObject = $userObject;
             $this->request   = new Request();
+
+            // Задаем параметры пагинации при наличии
+            $from = $this->request->getProperty('from');
+            $to   = $this->request->getProperty('to');
+            if ($from !== null) {
+                $this->from = (int)$from;
+            } else {
+                $this->from = 0;
+            }
+
+            if ($to !== null) {
+                $this->to = (int)$to;
+            } else {
+                $this->to = PAGINATION_LIMIT;
+            }
+        }
+
+        /**
+         * Получение мета информации
+         *
+         * @return array
+         */
+        private function getMetaData(): array
+        {
+            return [
+                'count' => $this->count,
+                'from'  => $this->from,
+                'to'    => $this->to,
+            ];
+
         }
 
         /**
@@ -197,9 +236,25 @@
             );
         }
 
+        /**
+         * Тестовый метод 1 (не требующий авторизации)
+         *
+         * @return void
+         * @throws \JsonException
+         */
+        public static function test(): void
+        {
+            ApiView::output(
+                [
+                    'message'   => 'test completed',
+                    'randomInt' =>  random_int(1000, 9999),
+                    'hash'      =>  md5(time()),
+                ]
+            );
+        }
 
         /**
-         * Тестовый метод (не требующий авторизации)
+         * Тестовый метод 2 (не требующий авторизации)
          *
          * @return void
          * @throws \JsonException
@@ -248,5 +303,56 @@
             );
         }
 
+        /**
+         * Получение списка диалогов
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         */
+        public function getDialogs(): void
+        {
+            ApiView::output($this->userObject->getDialogs());
+        }
+
+        /**
+         * Получение сообщений диалога
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         */
+        public function getDialog(): void
+        {
+            $dialogId = (int)trim($this->request->getProperty('dialogId'));
+            if ($dialogId === 0) {
+                throw new ApiException('Идентификатор диалога некорректен', ApiException::ERROR_INPUT_DATA);
+            }
+            $this->count = $this->userObject->getDialogObject()->getDialogMessagesCount($dialogId);
+            ApiView::output(
+                $this->userObject->getDialogObject()->getMessages($dialogId, true, $this->getMetaData()),
+                $this->getMetaData()
+            );
+        }
+
+        /**
+         * Получение сообщений диалога
+         *
+         * @return void
+         * @throws CoreException
+         * @throws \JsonException
+         */
+        public function sendMessage(): void
+        {
+            $to = (int)trim($this->request->getProperty('toUserId'));
+            if ($to === 0) {
+                throw new ApiException('Идентификатор диалога некорректен', ApiException::ERROR_INPUT_DATA);
+            }
+            $message = trim($this->request->getProperty('message'));
+            if (empty($message)) {
+                throw new ApiException('Сообщение не может быть пустым', ApiException::ERROR_INPUT_DATA);
+            }
+            ApiView::output($this->userObject->getDialogObject()->sendMessage($to, $message));
+        }
 
     }

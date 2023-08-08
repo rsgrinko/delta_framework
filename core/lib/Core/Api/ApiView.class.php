@@ -56,20 +56,23 @@
          * @return void
          * @throws \JsonException
          */
-        public static function output($data): void
+        public static function output($data, $meta = []): void
         {
             header('Content-Type: application/json');
             header('Access-Control-Allow-Origin: *');
             header('Access-Control-Allow-Credentials: true');
             header('Access-Control-Allow-Methods: *');
             header('Access-Control-Allow-Headers: *');
-            echo json_encode(
-                [
-                    'success' => true,
-                    'time'    => time(),
-                    'data'    => self::prepare($data),
-                ],
-                JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+
+            $result = [
+                'success' => true,
+                'time'    => time(),
+            ];
+            if (!empty($meta)) {
+                $result['meta'] = $meta;
+            }
+            $result['data'] = self::prepare($data);
+            echo json_encode($result, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
             );
         }
 

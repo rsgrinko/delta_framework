@@ -133,11 +133,15 @@
          * @return array
          * @throws CoreException
          */
-        public function getMessages(int $dialogId, bool $markDialogViewed = false): array
+        public function getMessages(int $dialogId, bool $markDialogViewed = false, ?array $paginationData = null): array
         {
             /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
-            $messages = $DB->query('SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`="' . $dialogId . '" ORDER BY id ASC');
+            $paginationSqlString = '';
+            if ($paginationData !== null) {
+                $paginationSqlString = ' LIMIT ' . $paginationData['from'] . ', ' . $paginationData['to'];
+            }
+            $messages = $DB->query('SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`="' . $dialogId . '" ORDER BY id ASC' . $paginationSqlString);
             if ($markDialogViewed) {
                 $this->markDialogViewed($dialogId);
             }
@@ -222,6 +226,20 @@
             /** @var $DB DB Объект базы данных */
             $DB = DB::getInstance();
             return $DB->getCountItems(self::TABLE_MESSAGES, ['viewed' => CODE_VALUE_N, 'user_to' => $this->user->getId()]);
+        }
+
+        /**
+         * Получение количества сообщений в диалоге
+         *
+         * @param int $dialogId Идентификатор диалога
+         *
+         * @return int Количество
+         */
+        public function getDialogMessagesCount(int $dialogId): int
+        {
+            /** @var $DB DB Объект базы данных */
+            $DB = DB::getInstance();
+            return $DB->getCountItems(self::TABLE_MESSAGES, ['dialog_id' => $dialogId]);
         }
 
 
