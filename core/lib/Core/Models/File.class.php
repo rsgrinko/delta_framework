@@ -204,7 +204,7 @@
                     throw new CoreException('Не удалось скопировать файл', CoreException::ERROR_FILE_COPY);
                 }
             }
-            $this->name = $fileName;
+            $this->name = mysql_escape_string(htmlspecialchars(striptags(trim($fileName))));
             $this->path = self::FOLDER . '/' . $storageFileName;
 
             $this->id = $this->DB->addItem(self::TABLE, ['name' => $this->name, 'path' => $this->path]);
