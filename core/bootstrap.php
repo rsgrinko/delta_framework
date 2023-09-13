@@ -71,12 +71,14 @@
         $_SERVER['DOCUMENT_ROOT'] = __DIR__. '/../';
     }
 
-    require_once __DIR__ . '/config.php';
 
     // Если имеется файл локальной конфигурации - подключаем его
     if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/config.local.php')) {
         require_once $_SERVER['DOCUMENT_ROOT'] . '/config.local.php';
     }
+
+    // Подключим основной файл конфигурации
+    require_once __DIR__ . '/config.php';
 
     function dd($data): void
     {
