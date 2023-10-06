@@ -138,7 +138,7 @@
         User::logout();
     }
 
-    $ddosProtectObject = new DDosProtection('bootstrap');
+    $ddosProtectObject = new DDosProtection(basename(__FILE__));
     try {
         $userId = User::getCurrentUserId();
     } catch (CoreException $e) {
@@ -146,8 +146,8 @@
     }
     if (!empty($userId)) {
         try {
-            $ddosProtectObject->setUserId($userId);
             $USER = new User($userId);
+            $ddosProtectObject->setUserId($userId);
         } catch (CoreException $e) {
             $USER = null;
         }

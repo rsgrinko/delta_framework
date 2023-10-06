@@ -38,9 +38,9 @@
 
         private ?string $observedKey = null;
 
-        private int $maxAttempts = 5;
+        private int $maxAttempts = 10;
 
-        private int $timeInterval = 20;
+        private int $timeInterval = 10;
 
 
         public function __construct(?string $place = null)
