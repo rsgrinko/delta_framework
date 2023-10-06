@@ -60,19 +60,14 @@
                 </ul>
                 <h4>Командная строка</h4>
             </div>
-        </div><!-- media -->
-    </div><!-- pageheader -->
+        </div>
+    </div>
 
     <div class="contentpanel">
-        <!-- table -->
         <div class="row">
             <div class="col-md-12r">
-                <!---->
-
                 <form action="" method="POST">
                     <input type="hidden" name="execute" value="Y">
-
-
                     <div class="mb-3">
                         <?php
                             $userCodes = $USER->getMetaObject()->getMetaByName('code');
@@ -108,51 +103,24 @@
                             ?></textarea>
                     </div>
                     <div class="mb-3">
-                        <input id="use_pre" type="checkbox" name="use_pre" value="Y" <?php if (isset($_REQUEST['use_pre']) and $_REQUEST['use_pre']
-                                                                                                                               == 'Y') {
-                            echo 'checked';
-                        } ?>>
+                        <input id="use_pre"
+                               type="checkbox"
+                               name="use_pre"
+                               value="<?= CODE_VALUE_Y;?>"
+                               <?= (isset($_REQUEST['use_pre']) && $_REQUEST['use_pre'] === CODE_VALUE_Y ? 'checked' : '');?>
+                        >
                         <label for="use_pre" class="form-label"> Отображать результат выполнения как текст</label>
                     </div>
                     <div class="mb-3">
-
                         <input id="save" type="checkbox" name="save" value="Y">
                         <label for="save" class="form-label"> Сохранить вариант кода</label>
                     </div>
                     <div class="mb-3">
                         <input class="btn btn-primary" type="submit" name="btn" value="Выполнить">
                     </div>
-
-
                 </form>
-
-                <script>
-                    function b64EncodeUnicode(str) {
-                        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
-                            function toSolidBytes(match, p1) {
-                                return String.fromCharCode('0x' + p1);
-                            }));
-                    }
-
-                    function b64DecodeUnicode(str) {
-                        return decodeURIComponent(atob(str).split('').map(function (c) {
-                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                        }).join(''));
-                    }
-
-                    function addUseSection(button, id, text) {
-                        editor = document.getElementById("query");
-                        editor.value = b64DecodeUnicode(text) + "\n";
-                    }
-
-                    function deleteUserCode(id) {
-                        window.location.href = "phpcmd.php?delMeta=" + id
-                    }
-
-                </script>
-
                 <?php
-                    if (isset($_REQUEST['execute']) and $_REQUEST['execute'] == 'Y') {
+                    if (isset($_REQUEST['execute']) && $_REQUEST['execute'] == 'Y') {
                         echo '<h2 class="entry-title">Результат</h2><p class="exec_result">';
 
                         $execResult = '';
@@ -178,29 +146,38 @@
                             CoreException::showDetailTraceFromException($e);
                             echo '</p></div>';
                         }
-
                         echo '</p>';
                     }
                 ?>
-
-                <!----->
             </div>
         </div>
-        <!-- end table -->
-    </div><!-- contentpanel -->
+    </div>
+    <script>
+        function b64EncodeUnicode(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+                function toSolidBytes(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                }));
+        }
+
+        function b64DecodeUnicode(str) {
+            return decodeURIComponent(atob(str).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
+
+        function addUseSection(button, id, text) {
+            editor = document.getElementById("query");
+            editor.value = b64DecodeUnicode(text) + "\n";
+        }
+
+        function deleteUserCode(id) {
+            window.location.href = "phpcmd.php?delMeta=" + id
+        }
+    </script>
     <style>
-        button.btn.btn-primary.button-get {
-            border-radius: 3px 0px 0px 3px;
-        }
-
-        button.btn.btn-danger.button-delete {
-            margin-left: -5px;
-            border-radius: 0px 3px 3px 0px;
-        }
-
-        .phpcmdButton {
-            display: inline-block;
-            margin: 3px;
-        }
+        button.btn.btn-primary.button-get {border-radius: 3px 0px 0px 3px;}
+        button.btn.btn-danger.button-delete {margin-left: -5px;border-radius: 0px 3px 3px 0px;}
+        .phpcmdButton {display: inline-block;margin: 3px;}
     </style>
 <?php require_once __DIR__ . '/inc/footer.php'; ?>

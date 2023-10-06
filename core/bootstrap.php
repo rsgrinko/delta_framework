@@ -80,6 +80,12 @@
     // Подключим основной файл конфигурации
     require_once __DIR__ . '/config.php';
 
+    /**
+     * Отладочная функция: вывести данные
+     * @param mixed $data Данные
+     *
+     * @return void
+     */
     function dd($data): void
     {
         echo '<pre>';
@@ -87,6 +93,12 @@
         echo '</pre>';
     }
 
+    /**
+     * Отладочная функция: вывести данные и завершить работу скрипта
+     * @param mixed $data Данные
+     *
+     * @return void
+     */
     function ddd($data): void
     {
         echo '<pre>';
