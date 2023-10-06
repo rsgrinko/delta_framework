@@ -18,6 +18,8 @@
      * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
+
+    use Core\Helpers\DDosProtection;
     use Core\Models\User;
     use Core\Helpers\Cache;
     use Core\Models\UTM;
@@ -136,6 +138,7 @@
         User::logout();
     }
 
+    $ddosProtectObject = new DDosProtection('bootstrap');
     try {
         $userId = User::getCurrentUserId();
     } catch (CoreException $e) {
@@ -143,6 +146,7 @@
     }
     if (!empty($userId)) {
         try {
+            $ddosProtectObject->setUserId($userId);
             $USER = new User($userId);
         } catch (CoreException $e) {
             $USER = null;
@@ -150,6 +154,7 @@
     } else {
         $USER = null;
     }
+    $ddosProtectObject->checkDDos();
 
     // debug
     function sendTelegram(?string $message, ?string $file = null): void
