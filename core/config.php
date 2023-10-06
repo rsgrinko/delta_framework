@@ -208,3 +208,10 @@
     if (!defined('SERVER_EMAIL_NAME')) {
         define('SERVER_EMAIL_NAME', 'Delta Framework');
     }
+
+    /**
+     * Флаг использования Captcha
+     */
+    if (!defined('USE_CAPTCHA')) {
+        define('USE_CAPTCHA', true);
+    }

@@ -24,5 +24,4 @@
 
     require_once __DIR__ . '/bootstrap.php';
 
-    $_SESSION['captchaCode'] = SystemFunctions::generateCode(8, 8);
-    SystemFunctions::showCaptcha($_SESSION['captchaCode']);
+    SystemFunctions::showCaptcha();

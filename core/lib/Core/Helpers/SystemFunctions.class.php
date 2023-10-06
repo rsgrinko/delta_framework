@@ -975,7 +975,7 @@
          */
         public static function generateCode(int $min = 4, int $max = 8): string
         {
-            $chars  = 'ABCDEFGHJKLMNPRSTUVXYZ23456789';
+            $chars  = 'ABCDEFGHJKLMNPRSTVXYZ23456789';
             $length = rand($min, $max);
             $numChars = strlen($chars);
             $str = '';
@@ -994,12 +994,17 @@
         /**
          * Генерация и отображение картинки-каптчи
          *
-         * @param string $code Код
+         * @param string|null $code Код
          *
          * @return void
          */
-        public static function showCaptcha(string $code = 'test'): void
+        public static function showCaptcha(?string $code = null): void
         {
+            if ($code === null) {
+                $code = self::generateCode(8, 8);
+                $_SESSION['captchaCode'] = $code;
+            }
+
             $width  = 80;
             $height = 30;
             $img    = imagecreate($width, $height);
@@ -1010,7 +1015,7 @@
             // Задаем цвета
             $lineColor = imagecolorallocate($img, 150, 150, 150);
             $pixelColor = imagecolorallocate($img, 150, 150, 150);
-            $whiteColor = imagecolorallocate($img, 255, 255, 255);
+            $whiteColor = imagecolorallocate($img, 180, 255, 180);
             $blackColor = imagecolorallocate($img, 0, 0, 0);
 
             // Рисуем линии 1
@@ -1053,5 +1058,17 @@
             header('Content-Type: image/png');
 
             imagepng($img);
+        }
+
+        /**
+         * Проверка кода каптчи
+         *
+         * @param int $code Код
+         *
+         * @return bool Результат валидации
+         */
+        public static function isValidCaptcha(string $code): bool
+        {
+            return (string)$_SESSION['captchaCode'] === $code;
         }
     }

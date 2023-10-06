@@ -19,10 +19,17 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
+    use Core\Helpers\SystemFunctions;
     use Core\Models\User;
     use Core\CoreException;
 
     require_once __DIR__ . '/inc/bootstrap.php';
+
+    $captchaCorrect = true;
+    if (USE_CAPTCHA) {
+        $captchaCorrect = isset($_REQUEST['captchaCode']) && SystemFunctions::isValidCaptcha($_REQUEST['captchaCode']);
+    }
+
     if (User::isAuthorized()) {
         header('Location: index.php');
     } else {
@@ -42,6 +49,10 @@
             }
             if (!empty($_REQUEST['login']) && User::isUserExists($_REQUEST['login'])) {
                 $arErrors[] = 'Пользователь с таким логином уже зарегистрирован';
+            }
+
+            if ($captchaCorrect === false) {
+                $arErrors[] = 'Неверный код с картинки';
             }
 
             if (empty($arErrors)) {
@@ -118,6 +129,20 @@
                             <input value="<?php echo $_REQUEST['pass']; ?>" type="text" class="form-control" name="pass" placeholder="Пароль">
                         </div><!-- input-group -->
 
+                        <?php if (USE_CAPTCHA) { ?>
+                            <div class="input-group mb15">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-qrcode"></i></span>
+                                <img id="captchaCode" src="<?= SITE_URL ?>/core/captcha.php">
+                                <span id="updateCaptcha" style="margin-left: 37%;cursor: pointer;">Обновить код</span>
+                            </div><!-- input-group -->
+
+                            <div class="input-group mb15">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-qrcode"></i></span>
+                                <input type="text" class="form-control" name="captchaCode" placeholder="Код с картинки">
+                            </div><!-- input-group -->
+
+                        <?php } ?>
+
                         <div class="clearfix">
                             <div class="pull-right">
                                 <button type="submit" class="btn btn-success">Регистрация <i class="fa fa-angle-right ml5"></i>
@@ -143,7 +168,16 @@
         <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/jquery.cookies.js"></script>
 
         <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/custom.js"></script>
-
+        <?php if (USE_CAPTCHA) { ?>
+            <script>
+                $(document).ready(function () {
+                    var captchaSrc = $("#captchaCode").attr('src');
+                    $('#updateCaptcha').click(function () {
+                        $("#captchaCode").attr('src', captchaSrc + `?v=${new Date().getTime()}`);
+                    });
+                });
+            </script>
+        <?php } ?>
         </body>
         </html>
     <?php } ?>
