@@ -87,6 +87,9 @@
 
         public function checkDDos(): void
         {
+            if (USE_DDOS_PROTECTION === false) {
+                return;
+            }
             $this->clearData();
             $this->checkAndSetDefaultParams();
 
