@@ -94,7 +94,7 @@
             $DB = DB::getInstance();
             $item = $DB->getItem(self::TABLE, ['observed_key' => $this->observedKey]);
             if ($item) {
-                if ($item['attempts'] >= $item['attempts_limit'] && (time() - $item['last_active']) <= $item['time_interval']) {
+                if (USE_DDOS_PROTECTION && $item['attempts'] >= $item['attempts_limit'] && (time() - $item['last_active']) <= $item['time_interval']) {
                     echo '<div style="color: #b30000;background: #ffe2e2;padding: 10px;border: 1px solid #ffa0a0;margin: 10px;display: inline-block;">';
                     echo '<span style="font-weight:bold; font-size: 1.1em;">You are temporarily blocked (DDoS Guard))</span><br>';
                     echo 'Due to a large number of requests, you are temporarily blocked.<br>If this happened by mistake, contact the resource administrator.<br>';

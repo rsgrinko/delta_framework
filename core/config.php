@@ -215,3 +215,10 @@
     if (!defined('USE_CAPTCHA')) {
         define('USE_CAPTCHA', true);
     }
+
+    /**
+     * Флаг использования защиты от DDoS
+     */
+    if (!defined('USE_DDOS_PROTECTION')) {
+        define('USE_DDOS_PROTECTION', false);
+    }
