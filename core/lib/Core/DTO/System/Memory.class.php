@@ -1,7 +1,7 @@
 <?php
 
     /**
-     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Copyright (c) 2023 Roman Grinko <rsgrinko@gmail.com>
      * Permission is hereby granted, free of charge, to any person obtaining
      * a copy of this software and associated documentation files (the
      * "Software"), to deal in the Software without restriction, including
@@ -20,8 +20,21 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    use Core\Helpers\Captcha;
+    namespace Core\DTO\System;
 
-    require_once __DIR__ . '/bootstrap.php';
+    /**
+     * DTO Оперативная память
+     */
+     class Memory {
+         /** @var int $total Общий объем */
+         public int $total = 0;
 
-    Captcha::showCaptcha();
+         /** @var int $used Использовано */
+         public int $used = 0;
+
+         /** @var int $free Свободно */
+         public int $free = 0;
+
+         /** @var float $usedPercent Использовано в процентах */
+         public float $usedPercent = 0;
+     }

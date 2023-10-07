@@ -23,6 +23,7 @@
 
 
     use Core\CoreException;
+    use Core\DTO\System\Memory;
 
     /**
      * Класс вспомогательных методов
@@ -153,102 +154,31 @@
          */
         public static function generatePassword(int $number = 10, bool $useSpecialChars = true): string
         {
-            $number = ($number > 0) ? $number : 1;
-
-            $arChars        = [
-                'a',
-                'b',
-                'c',
-                'd',
-                'e',
-                'f',
-                'g',
-                'h',
-                'i',
-                'j',
-                'k',
-                'l',
-                'm',
-                'n',
-                'o',
-                'p',
-                'r',
-                's',
-                't',
-                'u',
-                'v',
-                'x',
-                'y',
-                'z',
-                'A',
-                'B',
-                'C',
-                'D',
-                'E',
-                'F',
-                'G',
-                'H',
-                'I',
-                'J',
-                'K',
-                'L',
-                'M',
-                'N',
-                'O',
-                'P',
-                'R',
-                'S',
-                'T',
-                'U',
-                'V',
-                'X',
-                'Y',
-                'Z',
-                '1',
-                '2',
-                '3',
-                '4',
-                '5',
-                '6',
-                '7',
-                '8',
-                '9',
-                '0',
+            $number   = ($number > 0) ? $number : 1;
+            $arChars  = [
+                          'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+                          'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u',
+                          'v', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F',
+                          'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+                          'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z', '1', '2',
+                          '3', '4', '5', '6', '7', '8', '9', '0',
             ];
             $arSpecialChars = [
-                '(',
-                ')',
-                '[',
-                ']',
-                '!',
-                '?',
-                '&',
-                '^',
-                '%',
-                '@',
-                '*',
-                '$',
-                '<',
-                '>',
-                '/',
-                '|',
-                '+',
-                '-',
-                '{',
-                '}',
-                '~',
+                          '(', ')', '[', ']', '!', '?', '&', '^', '%', '@',
+                          '*', '$', '<', '>', '/', '|', '+', '-', '{', '}',
+                          '~',
             ];
 
             if ($useSpecialChars) {
                 $arChars = array_merge($arChars, $arSpecialChars);
             }
 
-            $pass = '';
+            $password = '';
             for ($i = 0; $i < $number; $i++) {
                 $index = rand(0, count($arChars) - 1);
-                $pass  .= $arChars[$index];
+                $password  .= $arChars[$index];
             }
-            return $pass;
+            return $password;
         }
 
 
@@ -369,7 +299,7 @@
 
         /**
          * Метод для склонения слов в зависимости от числа
-         * Пример: numWord($secs, array('секунда', 'секунды', 'секунд'))
+         * Пример: numWord($secs, ['секунда', 'секунды', 'секунд'])
          *
          * @param int   $value Число
          * @param array $words Массив слов
@@ -658,6 +588,7 @@
          * @param array $arData Массив данных
          *
          * @return void
+         * @throws \Exception
          */
         public static function arrayToXml(array $arData = [], ?string $objectName = null): string
         {
@@ -676,16 +607,6 @@
             $dom->preserveWhiteSpace = false;
             $dom->formatOutput       = true;
             return $dom->saveXML();
-        }
-
-        public static function showPage()
-        {
-            $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
-            $twig   = new \Twig\Environment($loader, [
-                'cache' => CACHE_DIR,
-            ]);
-
-            echo $twig->render('index.tpl', ['name' => 'Roman']);
         }
 
         /**
@@ -759,59 +680,12 @@
         }
 
         /**
-         * Получение данных об оперативной памяти площадки
-         *
-         * @param bool $humanView Флаг человеческого представления данных
-         *
-         * @return int[] Данные о памяти
-         */
-        public static function getHostMemoryInfo(bool $humanView = false): array
-        {
-            $fh     = fopen('/proc/meminfo', 'rb');
-            $result = [
-                'total'     => 0,
-                'free'      => 0,
-                'swapTotal' => 0,
-                'swapFree'  => 0,
-            ];
-            while ($line = fgets($fh)) {
-                if (preg_match('/^MemTotal:\s+(\d+)\skB$/', $line, $matches)) {
-                    $result['total'] = (int)$matches[1] * 1024;
-                }
-                unset($matches);
-
-                if (preg_match('/^MemFree:\s+(\d+)\skB$/', $line, $matches)) {
-                    $result['free'] = (int)$matches[1] * 1024;
-                }
-                unset($matches);
-
-                if (preg_match('/^SwapFree:\s+(\d+)\skB$/', $line, $matches)) {
-                    $result['swapTotal'] = (int)$matches[1] * 1024;
-                }
-                unset($matches);
-
-                if (preg_match('/^SwapFree:\s+(\d+)\skB$/', $line, $matches)) {
-                    $result['swapFree'] = (int)$matches[1] * 1024;
-                }
-                unset($matches);
-            }
-            fclose($fh);
-
-            if ($humanView) {
-                $result = array_map(static function ($el) {
-                    return self::convertBytes($el);
-                }, $result);
-            }
-            return $result;
-        }
-
-        /**
          * Парсинг логов nginx
          *
-         * @param string   $logPath     Путь до файла логов
-         * @param bool     $isOnlyCount Только получение количества
-         * @param string|null $limit    Ограничение выборки "0, 10"
-         * @param bool     $isReverse   Реверсировать выборку
+         * @param string      $logPath     Путь до файла логов
+         * @param bool        $isOnlyCount Только получение количества
+         * @param string|null $limit       Ограничение выборки "0, 10"
+         * @param bool        $isReverse   Перевернуть выборку
          *
          * @return array|int
          * @throws CoreException
@@ -880,7 +754,8 @@
         }
 
         /**
-         * Возвращает кусок текстового содерживого с подсвеченной строкой
+         * Возвращает кусок текстового содержимого с подсвеченной строкой
+         *
          * @param string $fileText Текст
          * @param int    $lineNum Номер строки
          *
@@ -921,6 +796,7 @@
 
             $textBefore = '<div style="border:1px solid black">';
             $textAfter = '</div>';
+
             return $textBefore . implode(PHP_EOL . PHP_EOL, $result) . $textAfter;
         }
 
@@ -968,6 +844,9 @@
 
         /**
          * Генерация кода для каптчи
+         *
+         * TODO: реализовать схожий с генерацией пароля механизм
+         *
          * @param int $min Минимальное количество символов
          * @param int $max Максимальное количество символов
          *
@@ -992,83 +871,50 @@
         }
 
         /**
-         * Генерация и отображение картинки-каптчи
+         * Получение информации о памяти сервера
          *
-         * @param string|null $code Код
-         *
-         * @return void
+         * @return Memory DTO использования памяти
          */
-        public static function showCaptcha(?string $code = null): void
+        public static function getMemoryUse(): Memory
         {
-            if ($code === null) {
-                $code = self::generateCode(8, 8);
-                $_SESSION['captchaCode'] = $code;
+            $memoryObject = new Memory();
+            $memoryTotal  = null;
+            $memoryFree   = null;
+            if (!is_readable('/proc/meminfo')) {
+                return $memoryObject;
+            }
+            $stats = @file_get_contents('/proc/meminfo');
+            if ($stats === false) {
+                return $memoryObject;
             }
 
-            $width  = 80;
-            $height = 30;
-            $img    = imagecreate($width, $height);
+            $stats = str_replace("\r", '', $stats);
+            $stats = explode(PHP_EOL, $stats);
+            foreach ($stats as $statLine) {
+                $statLineData = explode(':', trim($statLine));
 
-            // Задаем фон
-            imagecolorallocate($img, 255, 255, 255);
+                // Всего
+                if (count($statLineData) == 2 && trim($statLineData[0]) == 'MemTotal') {
+                    $memoryTotal = trim($statLineData[1]);
+                    $memoryTotal = explode(' ', $memoryTotal);
+                    $memoryTotal = $memoryTotal[0];
+                    $memoryTotal *= 1024;
+                }
 
-            // Задаем цвета
-            $lineColor = imagecolorallocate($img, 150, 150, 150);
-            $pixelColor = imagecolorallocate($img, 150, 150, 150);
-            $whiteColor = imagecolorallocate($img, 180, 255, 180);
-            $blackColor = imagecolorallocate($img, 0, 0, 0);
-
-            // Рисуем линии 1
-            for ($i = 0; $i < 3; $i++) {
-                $x1 = 0;
-                $x2 = $width;
-                $y1 = rand(0, $height);
-                $y2 = rand(00, $height);
-                imageline($img, $x1, $y1, $x2, $y2, $lineColor);
+                // Свободно
+                if (count($statLineData) == 2 && trim($statLineData[0]) == 'MemFree') {
+                    $memoryFree = trim($statLineData[1]);
+                    $memoryFree = explode(' ', $memoryFree);
+                    $memoryFree = $memoryFree[0];
+                    $memoryFree *= 1024;
+                }
             }
 
-            // Рисуем линии 2
-            for ($i = 0; $i < 3; $i++) {
-                $x1 = rand(0, $width);
-                $x2 = rand(0, $width);
-                $y1 = 0;
-                $y2 = $height;
-                imageline($img, $x1, $y1, $x2, $y2, $lineColor);
-            }
+            $memoryObject->total       = $memoryTotal;
+            $memoryObject->free        = $memoryFree;
+            $memoryObject->used        = $memoryTotal - $memoryFree;
+            $memoryObject->usedPercent = 100 - ($memoryFree * 100 / $memoryTotal);
 
-            // Рисуем пиксели
-            for ($i = 0; $i < 200; $i++) {
-                imagesetpixel($img, rand() % $width, rand() % $height, $pixelColor);
-            }
-
-            // Рисуем тень для кода
-            imagestring($img, 5, 4, 7, $code, $blackColor);
-            imagestring($img, 5, 6, 7, $code, $blackColor);
-            imagestring($img, 5, 5, 6, $code, $blackColor);
-            imagestring($img, 5, 5, 8, $code, $blackColor);
-
-            // Рисуем сам код
-            imagestring($img, 5, 5, 7, $code, $whiteColor); //main
-
-            header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', 10000) . ' GMT');
-            header('Cache-Control: no-store, no-cache, must-revalidate');
-            header('Cache-Control: post-check=0, pre-check=0', false);
-            header('Pragma: no-cache');
-            header('Content-Type: image/png');
-
-            imagepng($img);
-        }
-
-        /**
-         * Проверка кода каптчи
-         *
-         * @param int $code Код
-         *
-         * @return bool Результат валидации
-         */
-        public static function isValidCaptcha(string $code): bool
-        {
-            return (string)$_SESSION['captchaCode'] === $code;
+            return $memoryObject;
         }
     }

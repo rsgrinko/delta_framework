@@ -19,7 +19,7 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    use Core\Helpers\SystemFunctions;
+    use Core\Helpers\Captcha;
     use Core\Models\User;
     use Core\CoreException;
 
@@ -27,7 +27,7 @@
 
     $captchaCorrect = true;
     if (USE_CAPTCHA) {
-        $captchaCorrect = isset($_REQUEST['captchaCode']) && SystemFunctions::isValidCaptcha($_REQUEST['captchaCode']);
+        $captchaCorrect = isset($_REQUEST['captchaCode']) && Captcha::isValidCaptcha($_REQUEST['captchaCode']);
     }
 
     if (User::isAuthorized()) {

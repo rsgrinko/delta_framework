@@ -98,7 +98,6 @@
 
             $i = 0;
             foreach ($frazes as $post) {
-                //sendTelegram($post);
                 $text = str_replace('<br />', PHP_EOL, $post);
                 $text = htmlspecialchars_decode($text);
                 $text = str_replace('\'', '\\\'', $text);
@@ -109,8 +108,12 @@
                     $itemId = $DB->addItem('bashorg', ['hash' => $hash, 'text' => $text]);
                     sendTelegram('<b>Добавлена цитата ID ' . $itemId . ' (' . $page . ' страница)</b>' . PHP_EOL . $text);
                 }
+                $text = null;
             }
-            sleep(2);
+            $DB = null;
+            $hash = null;
+            $file = null;
+            //sleep(2);
             if ($i < 1) {
                 throw new CoreException('Не найдено новых данных для добавления');
             }

@@ -196,12 +196,21 @@
 <?php
     $result['memory'] = ob_get_clean();
     ob_start();
-    $memory = SystemFunctions::getHostMemoryInfo();
+    //$memory = SystemFunctions::getHostMemoryInfo();
+    $memory = SystemFunctions::getMemoryUse();
+
+    if ($memory->usedPercent < 30) {
+        $progressClass = 'progress-bar-success';
+    } elseif ($memory->usedPercent >= 50 && $memory->usedPercent < 80) {
+        $progressClass = 'progress-bar-warning';
+    } else {
+        $progressClass = 'progress-bar-danger';
+    }
     ?>
     <div class="progress">
-        <div style="width: <?= round(($memory['free'] + $memory['swapFree']) / ($memory['total'] + $memory['swapTotal']) * 100, 2); ?>%" aria-valuemax="100" aria-valuemin="0"
-             aria-valuenow="40" role="progressbar" class="progress-bar progress-bar-warning">
-            <span class="sr-only">40% Complete (success)</span>
+        <div style="width: <?= round($memory->usedPercent, 2); ?>%" aria-valuemax="100" aria-valuemin="0"
+             aria-valuenow="<?= round($memory->usedPercent); ?>" role="progressbar" class="progress-bar <?= $progressClass; ?>">
+            <span><?= round($memory->usedPercent, 2); ?>%</span>
         </div>
     </div>
     <?php
