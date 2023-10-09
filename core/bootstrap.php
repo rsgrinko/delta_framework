@@ -20,13 +20,12 @@
      */
 
     use Core\CoreException;
-    use Core\ExternalServices\Request;
+    use Core\ExternalServices\Request\Request;
     use Core\Helpers\Cache;
     use Core\Helpers\DDosProtection;
     use Core\Models\Router;
     use Core\Models\User;
     use Core\Models\UTM;
-    use Core\Template;
 
     error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
     //error_reporting(E_ALL);

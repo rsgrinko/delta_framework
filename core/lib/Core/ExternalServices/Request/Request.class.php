@@ -20,8 +20,10 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    namespace Core\ExternalServices;
+    namespace Core\ExternalServices\Request;
     
+    use Throwable;
+
     /**
      * Класс запросов к внешним системам
      */
@@ -38,6 +40,9 @@
 
         /** @var string $responseHeader Заголовки ответа */
         private string $responseHeader = '';
+
+        /** @var string[] Заголовки запроса */
+        private array $requestHeaders = [];
 
         /** @var int[] Успешные коды ответов */
         private const SUCCESS_HTTP_CODES = [
@@ -60,6 +65,11 @@
         public function __construct(string $baseUrl)
         {
             $this->baseUrl = $baseUrl;
+            try {
+                $this->requestHeaders = ['User-Agent: ' . (new FakeUserAgent())->generate()];
+            } catch (Throwable $e) {
+                $this->requestHeaders = ['User-Agent: Chrome'];
+            }
             return $this;
         }
 
@@ -78,6 +88,7 @@
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_HEADER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $this->requestHeaders);
             $result = curl_exec($ch);
 
             $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
