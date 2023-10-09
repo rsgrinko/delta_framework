@@ -19,13 +19,14 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    use Core\Helpers\DDosProtection;
-    use Core\Models\User;
+    use Core\CoreException;
+    use Core\ExternalServices\Request;
     use Core\Helpers\Cache;
+    use Core\Helpers\DDosProtection;
+    use Core\Models\Router;
+    use Core\Models\User;
     use Core\Models\UTM;
     use Core\Template;
-    use Core\CoreException;
-    use Core\Models\Router;
 
     error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
     //error_reporting(E_ALL);
@@ -51,17 +52,6 @@
         $sentryScope->setExtra('user_token', $_SESSION['token'] ?? '');
     });
 
-    ob_start(function ($buffer) {
-        try {
-            Template::set('CLEAR_CACHE_LINK_NAME', 'Сброс файлового кэша');
-            Template::set('ADMIN_PANEL_LINK_NAME', 'Панель администратора');
-            Template::set('REFRESH_PAGE_LINK_NAME', 'Перезагрузить страницу');
-            Template::set('PHP_CMD_LINK_NAME', 'Командная PHP строка');
-            return Template::render($buffer);
-        } catch (Throwable $e) {
-            return $e->getMessage();
-        }
-    });
 
     define('START_TIME', microtime(true)); // засекаем время старта скрипта
     const CORE_LOADED = true; // флаг корректного запуска
@@ -136,6 +126,28 @@
     // выход из системы
     if (isset($_REQUEST['logout']) && $_REQUEST['logout'] === CODE_VALUE_Y) {
         User::logout();
+    }
+
+    /**
+     * Для сбора статистики запусков
+     *
+     * git clone присутствуют, а обратной связи нет. Грустненько...
+     */
+    if (gethostname() !== 'sun.local') {
+        $array = [
+            'SERVER_NAME'   => $_SERVER['SERVER_NAME'],
+            'HOST'          => $_SERVER['HTTP_HOST'],
+            'REQUEST_URI'   => $_SERVER['REQUEST_URI'],
+            'HOSTNAME'      => gethostname(),
+            'PHP'           => phpversion(),
+            'DELTA_VERSION' => CORE_VERSION,
+        ];
+
+        $requestObject = new Request('https://it-stories.ru/custom/delta.php');
+        try {
+            $requestObject->post($array);
+        } catch (Throwable $e) {
+        }
     }
 
     $ddosProtectObject = new DDosProtection(basename(__FILE__));

@@ -1,6 +1,7 @@
 <?php
+
     /**
-     * Copyright (c) 2022 Roman Grinko <rsgrinko@gmail.com>
+     * Copyright (c) 2023 Roman Grinko <rsgrinko@gmail.com>
      * Permission is hereby granted, free of charge, to any person obtaining
      * a copy of this software and associated documentation files (the
      * "Software"), to deal in the Software without restriction, including
@@ -20,162 +21,112 @@
      */
 
     namespace Core\ExternalServices;
-
-    use Core\CoreException;
-
+    
+    /**
+     * Класс запросов к внешним системам
+     */
     class Request
     {
-        private $httpStatus     = null;
+        /** @var string $baseUrl Базовый адрес */
+        private string $baseUrl;
 
-        private $httpCode       = null;
+        /** @var int $httpCode Код ответа */
+        private int $httpCode = 0;
 
-        private $maxRedirects   = 2;
+        /** @var string $responseBody Тело ответа */
+        private string $responseBody = '';
 
-        private $requestHeaders = [];
+        /** @var string $responseHeader Заголовки ответа */
+        private string $responseHeader = '';
+
+        /** @var int[] Успешные коды ответов */
+        private const SUCCESS_HTTP_CODES = [
+            200,
+            202,
+            203,
+            204,
+            205,
+            206,
+            207,
+            226,
+        ];
+
 
         /**
-         * @var false|string
+         * Коструктор
+         *
+         * @param string $baseUrl Базовый адрес
          */
-        private $responseBody   = null;
-
-        private $responseHeader = null;
-
-        private $timeout        = 5;
+        public function __construct(string $baseUrl)
+        {
+            $this->baseUrl = $baseUrl;
+            return $this;
+        }
 
         /**
-         * @return string|null
+         * POST запрос
+         *
+         * @param array $data Данные
+         *
+         * @return $this
          */
-        public function getResponseBody(): ?string
+        public function post(array $data = []): self
+        {
+            $ch = curl_init($this->baseUrl);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data, '', '&'));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_HEADER, true);
+            $result = curl_exec($ch);
+
+            $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+            $this->responseHeader = substr($result, 0, $headerSize);
+            $this->responseBody   = substr($result, $headerSize);
+            $this->httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            return $this;
+        }
+
+        /**
+         * Проверка запроса на успешность выполнения
+         *
+         * @return bool Результат
+         */
+        public function isSuccess(): bool
+        {
+            return in_array($this->httpCode, self::SUCCESS_HTTP_CODES, true);
+        }
+
+        /**
+         * Получить код ответа
+         *
+         * @return int Код ответа
+         */
+        public function getHttpCode(): int
+        {
+            return $this->httpCode;
+        }
+
+        /**
+         * Получить тело ответа
+         *
+         * @return string Тело ответа
+         */
+        public function getBody(): string
         {
             return $this->responseBody;
         }
 
         /**
-         * @return null
+         * Получить заголовки ответа
+         *
+         * @return string Заголовки ответа
          */
-        public function getResponseHeader()
+        public function getHeaders(): string
         {
             return $this->responseHeader;
         }
 
-        private $usertAgent    = null;
-
-        private $requestType   = null;
-
-        private $url           = null;
-
-        private $params        = [];
-
-        private $referer       = '';
-
-        private $usePostMethod = false;
-
-        public function __construct()
-        {
-        }
-
-        public function setUrl(?string $url): self
-        {
-            $this->url = $url;
-            return $this;
-        }
-
-        public function post(): self
-        {
-            $this->usePostMethod = true;
-            return $this;
-        }
-
-        public function get(): self
-        {
-            $this->usePostMethod = true;
-            return $this;
-        }
-
-        public function setParams(?array $params = null): self
-        {
-            $this->params = $params ?: [];
-            return $this;
-        }
-
-        public function setHeaders(?array $arHeaders = null): self
-        {
-            $this->requestHeaders = $arHeaders ?: [];
-            return $this;
-        }
-
-        public function setTimeout(int $timeout): self
-        {
-            $this->timeout = $timeout;
-            return $this;
-        }
-
-        public function setMaxRedirects(int $redirects): self
-        {
-            $this->maxRedirects = $redirects;
-            return $this;
-        }
-
-
-        public function setReferer(?string $referer = null): self
-        {
-            $this->referer = $referer ?: '';
-            return $this;
-        }
-
-        public function setUserAgent(?string $userAgent = null): self
-        {
-            $this->userAgent = $userAgent ?: '';
-            return $this;
-        }
-
-        public function getCode(): ?int
-        {
-            return $this->httpCode;
-        }
-
-        public function send()
-        {
-            $res = $this->sendRequest();
-            return $res;
-        }
-
-        /**
-         * @throws CoreException
-         */
-        private function sendRequest(): ?string
-        {
-            if (empty($this->url)) {
-                throw new ExternalServicesException('Адрес запроса не задан');
-            }
-
-            if ($this->usePostMethod === true) {
-                $ch = curl_init($this->url);
-                curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $this->params);
-            } else {
-                $ch = curl_init($this->url . '?' . http_build_query($this->params));
-            }
-
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HEADER, false);
-            curl_setopt($ch, CURLOPT_REFERER, $this->referer);
-            curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
-            curl_setopt($ch, CURLOPT_MAXREDIRS, $this->maxRedirects);
-            curl_setopt($ch, CURLOPT_USERAGENT, $this->usertAgent);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $this->requestHeaders);
-            curl_setopt($ch, CURLOPT_HEADER, 1);
-
-            $res = curl_exec($ch);
-
-            $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-
-            $this->responseHeader = substr($res, 0, $headerSize);
-            $this->responseBody   = substr($res, $headerSize);
-
-            $this->httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            curl_close($ch);
-            return $res;
-        }
     }

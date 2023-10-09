@@ -58,7 +58,7 @@
         public const EXECUTION_TASKS_LIMIT = 100;
 
         /** Лимит количества запущенных воркеров */
-        public const WORKERS_LIMIT = 2;
+        public const WORKERS_LIMIT = 1;
 
         /** @var DB|null $DB Объект базы */
         private ?DB $DB;
