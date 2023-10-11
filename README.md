@@ -1,7 +1,8 @@
 # Delta Framework
-
+![GitHub](https://img.shields.io/github/license/rsgrinko/delta_framework)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/rsgrinko/delta_framework)
 ## Описание
-Delta Framework - простой фреймворк для разработки веб-проектов. Его разработка была начата в свободное от работы время и выполнялась полность в свое удовольствие.
+Delta Framework - простой фреймворк для разработки веб-проектов. Его разработка была начата в свободное от работы время и выполнялась полностью в свое удовольствие.
 На текущий момент в нем имеется:
 
 - [X] Авторизация
