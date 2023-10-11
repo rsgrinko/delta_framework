@@ -21,6 +21,8 @@
 
     namespace Core\Helpers;
 
+    use mysql_xdevapi\Result;
+
     /**
      * Класс для работы с Captcha
      */
@@ -36,8 +38,14 @@
         {
             if ($code === null) {
                 $code = SystemFunctions::generateCode(8, 8);
-                $_SESSION['captchaCode'] = $code;
             }
+
+            $_SESSION['captcha'] = [
+                'captchaCode'   => $code,
+                'verified'      => false,
+                'generatedTime' => time(),
+                'generatedDate' => date(DATETIME_FORMAT),
+            ];
 
             $width  = 80;
             $height = 30;
@@ -103,6 +111,21 @@
          */
         public static function isValidCaptcha(string $code): bool
         {
-            return (string)$_SESSION['captchaCode'] === $code;
+            $result                              = (string)$_SESSION['captcha']['captchaCode'] === $code;
+            $_SESSION['captcha']['verified']     = $result;
+            $_SESSION['captcha']['verifiedTime'] = time();
+            $_SESSION['captcha']['verifiedDate'] = date(DATETIME_FORMAT);
+
+            return $result;
+        }
+
+        /**
+         * Очистка данных каптчи
+         *
+         * @return void
+         */
+        public static function clearSession(): void
+        {
+            unset($_SESSION['captcha']);
         }
     }

@@ -162,9 +162,11 @@
         <?php if (USE_CAPTCHA) { ?>
             <script>
                 $(document).ready(function () {
-                    var captchaSrc = $("#captchaCode").attr('src');
-                    $('#updateCaptcha').click(function () {
-                        $("#captchaCode").attr('src', captchaSrc + `?v=${new Date().getTime()}`);
+                    let $captchaImage = $('#captchaCode'),
+                        $captchaSrc   = $captchaImage.attr('src'),
+                        $updateBtn    = $('#updateCaptcha');
+                    $updateBtn.click(function () {
+                        $captchaImage.attr('src', $captchaSrc + `?v=${new Date().getTime()}`);
                     });
                 });
             </script>

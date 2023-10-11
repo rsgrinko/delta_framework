@@ -156,6 +156,10 @@ body {
     padding: 10px;
 }
 
+.main .input.captchaInput {
+    width: 98%;
+}
+
 .main .w100 {
     width: 100%;
 }

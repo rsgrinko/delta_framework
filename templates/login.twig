@@ -3,12 +3,31 @@
 {% block main %}
     <h1>Авторизация</h1>
     {% if failed %}
-        <div class="alert alert-error">Ошибка авторизации</div>
+        <div class="alert alert-error">{{ errorMessage }}</div>
     {% endif %}
     <p>
     <form action="/login/authorize" method="POST">
         <input class="input" type="text" name="login" placeholder="Введите логин">
         <input class="input" type="password" name="password" placeholder="Введите пароль">
+
+        {% if USE_CAPTCHA %}
+            <div class="input captchaInput">
+                <img id="captchaCode" src="{{ SITE_URL }}/core/captcha.php">
+                <span id="updateCaptcha" class="button" style="vertical-align: super;">Обновить код</span>
+            </div>
+            <input type="text" class="input" name="captchaCode" placeholder="Код с картинки">
+            <script>
+                $(document).ready(function () {
+                    let $captchaImage = $('#captchaCode'),
+                        $captchaSrc   = $captchaImage.attr('src'),
+                        $updateBtn    = $('#updateCaptcha');
+                    $updateBtn.click(function () {
+                        $captchaImage.attr('src', $captchaSrc + `?v=${new Date().getTime()}`);
+                    });
+                });
+            </script>
+        {% endif %}
+
         <button class="button w100" type="submit">Войти</button>
     </form>
     </p>

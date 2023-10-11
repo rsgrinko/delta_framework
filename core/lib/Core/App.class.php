@@ -21,6 +21,7 @@
 
     namespace Core;
 
+    use Core\Helpers\Captcha;
     use Core\Helpers\Pagination;
     use Core\Helpers\Registry;
     use Core\Helpers\SystemFunctions;
@@ -49,6 +50,8 @@
             $memoryUse   = memory_get_usage() - START_MEMORY;
 
             return [
+                'SITE_URL'      => SITE_URL,
+                'USE_CAPTCHA'   => USE_CAPTCHA,
                 'salt'          => md5(random_int(1, 999999) . random_int(1, 999999) . random_int(1, 999999) . random_int(1, 999999)),
                 'currentPage'   => $currentPage,
                 'memoryUse'     => SystemFunctions::convertBytes($memoryUse),
@@ -149,20 +152,41 @@
 
         public static function test($a = null, $b = null, $c = null, $d = null)
         {
+            ddd($_SESSION);
             print_r([$a, $b, $c, $d]);
             self::render('test.twig');
         }
 
         public static function logout()
         {
+            Captcha::clearSession();
             User::logout();
             header('Location: /');
         }
 
         public static function loginAuthorize()
         {
-            if (User::securityAuthorize($_REQUEST['login'], $_REQUEST['password'], false)) {
-                header('Location: /');
+            $captchaCorrect = true;
+            if (USE_CAPTCHA) {
+                if (empty($_REQUEST['captchaCode'])) {
+                    $_SESSION['authErrorMessage'] = 'Не введен код с картинки';
+                    $captchaCorrect = false;
+                } else {
+                    $captchaCorrect = Captcha::isValidCaptcha($_REQUEST['captchaCode']);
+                    if ($captchaCorrect === false) {
+                        $_SESSION['authErrorMessage'] = 'Неверный код с картинки';
+                    }
+                }
+            }
+
+            if ($captchaCorrect) {
+                if (User::securityAuthorize($_REQUEST['login'], $_REQUEST['password'], false)) {
+                    unset($_SESSION['authErrorMessage']);
+                    header('Location: /');
+                } else {
+                    $_SESSION['authErrorMessage'] = 'Неверный логин или пароль';
+                    header('Location: /login/failed');
+                }
             } else {
                 header('Location: /login/failed');
             }
@@ -175,7 +199,7 @@
 
         public static function loginFailed()
         {
-            self::render('login.twig', ['failed' => true]);
+            self::render('login.twig', ['failed' => true, 'errorMessage' => $_SESSION['authErrorMessage']]);
         }
 
         public static function userProfile(int $id)

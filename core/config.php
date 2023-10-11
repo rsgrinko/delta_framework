@@ -222,3 +222,8 @@
     if (!defined('USE_DDOS_PROTECTION')) {
         define('USE_DDOS_PROTECTION', false);
     }
+
+    /**
+     * Формат даты/времени
+     */
+    const DATETIME_FORMAT = 'Y-m-d H:i:s';

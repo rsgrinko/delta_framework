@@ -720,12 +720,12 @@
          */
         public static function logout(): void
         {
-            $_SESSION['id']        = '';
-            $_SESSION['authorize'] = '';
-            $_SESSION['login']     = '';
-            $_SESSION['password']  = '';
-            $_SESSION['token']     = '';
-            $_SESSION['user']      = '';
+            unset($_SESSION['id']);
+            unset($_SESSION['authorize']);
+            unset($_SESSION['login']);
+            unset($_SESSION['password']);
+            unset($_SESSION['token']);
+            unset($_SESSION['user']);
 
             setcookie('userId', '', time() - 3600);
             setcookie('userLogin', '', time() - 3600);
