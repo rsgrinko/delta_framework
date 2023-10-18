@@ -25,39 +25,56 @@
 
     class Thumbs
     {
+        /** @var string $filename */
+        private string $filename;
+
+        /** @var int $width */
+        private $width;
+
+        /** @var int $height */
+        private $height;
+
+        /** @var int $type */
+        private $type;
+
+        /**
+         * @var false|\GdImage|resource
+         */
+        private $img;
+
         public function __construct(string $filename)
         {
             $this->filename = $filename;
             if (empty($this->filename)) {
                 throw new CoreException('Файл не найден');
-            } else {
-                $info = getimagesize($this->filename);
-                if (empty($info)) {
-                    throw new CoreException('Файл не найден');
-                } else {
-                    $this->width  = $info[0];
-                    $this->height = $info[1];
-                    $this->type   = $info[2];
-                    switch ($this->type) {
-                        case 1:
-                            $this->img = imageCreateFromGif($this->filename);
-                            break;
-                        case 2:
-                            $this->img = imageCreateFromJpeg($this->filename);
-                            break;
-                        case 3:
-                            $this->img = imageCreateFromPng($this->filename);
-                            imageAlphaBlending($this->img, true);
-                            imageSaveAlpha($this->img, true);
-                            break;
-                        case 18:
-                            $this->img = imageCreatefromWebp($this->filename);
-                            break;
-                        default:
-                            throw new CoreException('Формат файла не подерживается');
-                            break;
-                    }
-                }
+            }
+
+            $info = getimagesize($this->filename);
+            if (empty($info)) {
+                throw new CoreException('Файл не найден');
+            }
+
+            $this->width  = $info[0];
+            $this->height = $info[1];
+            $this->type   = $info[2];
+            switch ($this->type) {
+                case IMAGETYPE_GIF:
+                    $this->img = imagecreatefromgif($this->filename);
+                    break;
+                case IMAGETYPE_JPEG:
+                    $this->img = imagecreatefromjpeg($this->filename);
+                    break;
+                case IMAGETYPE_PNG:
+                    $this->img = imagecreatefrompng($this->filename);
+                    imagealphablending($this->img, true);
+                    imagesavealpha($this->img, true);
+                    break;
+                case IMAGETYPE_WEBP:
+                    $this->img = imagecreatefromwebp($this->filename);
+                    break;
+                default:
+                    throw new CoreException('Формат файла не поддерживается');
+                    break;
             }
         }
 
@@ -93,7 +110,7 @@
             }
 
             $tmp = imageCreateTrueColor($width, $height);
-            if ($this->type == 1 || $this->type == 3) {
+            if ($this->type === IMAGETYPE_GIF || $this->type === IMAGETYPE_PNG) {
                 imagealphablending($tmp, true);
                 imageSaveAlpha($tmp, true);
                 $transparent = imagecolorallocatealpha($tmp, 0, 0, 0, 127);
@@ -230,7 +247,7 @@
             }
 
             $tmp = imageCreateTrueColor($width, $height);
-            if ($this->type == 1 || $this->type == 3) {
+            if ($this->type === IMAGETYPE_GIF || $this->type === IMAGETYPE_PNG) {
                 imagealphablending($tmp, true);
                 imageSaveAlpha($tmp, true);
                 $transparent = imagecolorallocatealpha($tmp, 0, 0, 0, 127);
@@ -263,9 +280,9 @@
                 $tw = ceil($height / ($this->height / $this->width));
                 $th = ceil($width / ($this->width / $this->height));
 
-                if ($this->width == $this->height) {
+                if ($this->width === $this->height) {
                     // Источник - квадратная фотка
-                    if ($width == $height) {
+                    if ($width === $height) {
                         // Превью - квадратная.
                         $this->resize($width, $height);
                     } elseif ($width > $height) {
@@ -341,9 +358,9 @@
             $tw = ceil($height / ($this->height / $this->width));
             $th = ceil($width / ($this->width / $this->height));
 
-            if ($this->width != $width && $this->height != $height) {
+            if ($this->width !== $width && $this->height !== $height) {
                 $tmp = imageCreateTrueColor($width, $height);
-                if ($this->type == 1 || $this->type == 3) {
+                if ($this->type === IMAGETYPE_GIF || $this->type === IMAGETYPE_PNG) {
                     imagealphablending($tmp, true);
                     imageSaveAlpha($tmp, true);
                     $transparent = imagecolorallocatealpha($tmp, 0, 0, 0, 127);
@@ -563,9 +580,9 @@
                     unset($tmp);
 
                     return true;
-                } else {
-                    return $this->cut($width, $height);
                 }
+
+                return $this->cut($width, $height);
             }
         }
 
@@ -626,80 +643,80 @@
         {
             if (empty($file)) {
                 throw new CoreException('Файл маски не найден');
-            } else {
-                $info = getimagesize($file);
-                if (empty($info)) {
-                    throw new CoreException('Файл маски не найден');
-                } else {
-                    switch ($info[2]) {
-                        case 1:
-                            $dest = imageCreateFromGif($file);
-                            break;
-                        case 2:
-                            $dest = imageCreateFromJpeg($file);
-                            break;
-                        case 3:
-                            $dest        = imageCreateFromPng($file);
-                            $transparent = imagecolorallocatealpha($dest, 0, 0, 0, 127);
-                            imagefill($dest, 0, 0, $transparent);
-                            imagecolortransparent($dest, $transparent);
-
-                            imageAlphaBlending($dest, true);
-                            imageSaveAlpha($dest, true);
-
-
-                            break;
-                        case 18:
-                            $dest = imageCreatefromWebp($file);
-                            break;
-                        default:
-                            throw new CoreException('Формат файла маски не подерживается');
-                            break;
-                    }
-
-                    switch ($position) {
-                        case 'top':
-                            $x = ceil(($this->width - $info[0]) / 2);
-                            $y = 0;
-                            break;
-                        case 'top-left':
-                            $x = 0;
-                            $y = 0;
-                            break;
-                        case 'top-right':
-                            $x = ceil($this->width - $info[0]);
-                            $y = 0;
-                            break;
-                        case 'left':
-                            $x = 0;
-                            $y = ceil(($this->height - $info[1]) / 2);
-                            break;
-                        case 'right':
-                            $x = ceil($this->width - $info[0]);
-                            $y = ceil(($this->height - $info[1]) / 2);
-                            break;
-                        case 'bottom':
-                            $x = ceil(($this->width - $info[0]) / 2);
-                            $y = ceil($this->height - $info[1]);
-                            break;
-                        case 'bottom-left':
-                            $x = 0;
-                            $y = ceil($this->height - $info[1]);
-                            break;
-                        case 'bottom-right':
-                            $x = ceil($this->width - $info[0]);
-                            $y = ceil($this->height - $info[1]);
-                            break;
-                        default:
-                            $x = ceil(($this->width - $info[0]) / 2);
-                            $y = ceil(($this->height - $info[1]) / 2);
-                            break;
-                    }
-
-                    $dest = $this->opacity($dest, $transparency);
-                    imagecopy($this->img, $dest, $x, $y, 0, 0, $info[0], $info[1]);
-                }
             }
+
+            $info = getimagesize($file);
+            if (empty($info)) {
+                throw new CoreException('Файл маски не найден');
+            }
+
+            switch ($info[2]) {
+                case IMAGETYPE_GIF:
+                    $dest = imageCreateFromGif($file);
+                    break;
+                case IMAGETYPE_JPEG:
+                    $dest = imageCreateFromJpeg($file);
+                    break;
+                case IMAGETYPE_PNG:
+                    $dest        = imageCreateFromPng($file);
+                    $transparent = imagecolorallocatealpha($dest, 0, 0, 0, 127);
+                    imagefill($dest, 0, 0, $transparent);
+                    imagecolortransparent($dest, $transparent);
+
+                    imageAlphaBlending($dest, true);
+                    imageSaveAlpha($dest, true);
+
+
+                    break;
+                case IMAGETYPE_WEBP:
+                    $dest = imageCreatefromWebp($file);
+                    break;
+                default:
+                    throw new CoreException('Формат файла маски не подерживается');
+                    break;
+            }
+
+            switch ($position) {
+                case 'top':
+                    $x = ceil(($this->width - $info[0]) / 2);
+                    $y = 0;
+                    break;
+                case 'top-left':
+                    $x = 0;
+                    $y = 0;
+                    break;
+                case 'top-right':
+                    $x = ceil($this->width - $info[0]);
+                    $y = 0;
+                    break;
+                case 'left':
+                    $x = 0;
+                    $y = ceil(($this->height - $info[1]) / 2);
+                    break;
+                case 'right':
+                    $x = ceil($this->width - $info[0]);
+                    $y = ceil(($this->height - $info[1]) / 2);
+                    break;
+                case 'bottom':
+                    $x = ceil(($this->width - $info[0]) / 2);
+                    $y = ceil($this->height - $info[1]);
+                    break;
+                case 'bottom-left':
+                    $x = 0;
+                    $y = ceil($this->height - $info[1]);
+                    break;
+                case 'bottom-right':
+                    $x = ceil($this->width - $info[0]);
+                    $y = ceil($this->height - $info[1]);
+                    break;
+                default:
+                    $x = ceil(($this->width - $info[0]) / 2);
+                    $y = ceil(($this->height - $info[1]) / 2);
+                    break;
+            }
+
+            $dest = $this->opacity($dest, $transparency);
+            imagecopy($this->img, $dest, $x, $y, 0, 0, $info[0], $info[1]);
         }
 
         /**
@@ -736,13 +753,13 @@
             }
 
             switch ($this->type) {
-                case 1:
+                case IMAGETYPE_GIF:
                     return $this->saveGif($filename);
-                case 2:
+                case IMAGETYPE_JPEG:
                     return $this->saveJpg($filename, $quality);
-                case 3:
+                case IMAGETYPE_PNG:
                     return $this->savePng($filename);
-                case 18:
+                case IMAGETYPE_WEBP:
                     return $this->saveWebp($filename);
             }
         }
@@ -753,19 +770,19 @@
         public function output($quality = 100): void
         {
             switch ($this->type) {
-                case 1:
+                case IMAGETYPE_GIF:
                     header('Content-Type: image/gif');
                     imageGif($this->img);
                     break;
-                case 2:
+                case IMAGETYPE_JPEG:
                     header('Content-Type: image/jpeg');
                     imageJpeg($this->img, null, $quality);
                     break;
-                case 3:
+                case IMAGETYPE_PNG:
                     header('Content-Type: image/x-png');
                     imagePng($this->img);
                     break;
-                case 18:
+                case IMAGETYPE_WEBP:
                     header('Content-Type: image/webp');
                     imageWebp($this->img, $quality);
                     break;
@@ -782,15 +799,15 @@
             }
 
             switch ($this->type) {
-                case 1:
+                case IMAGETYPE_GIF:
                     header('Content-Type: image/gif');
                     imageGif($this->img, $filename);
                     break;
-                case 2:
+                case IMAGETYPE_JPEG:
                     header('Content-Type: image/jpeg');
                     imageJpeg($this->img, $filename, $quality);
                     break;
-                case 3:
+                case IMAGETYPE_PNG:
                     header('Content-Type: image/x-png');
                     imagePng($this->img, $filename);
                     break;
