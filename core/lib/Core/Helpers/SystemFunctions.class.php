@@ -24,6 +24,7 @@
 
     use Core\CoreException;
     use Core\DTO\System\Memory;
+    use Core\SystemConfig;
 
     /**
      * Класс вспомогательных методов
@@ -480,7 +481,9 @@
          */
         public static function sendTelegram(string $message): void
         {
-            (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))->setChat(TELEGRAM_NOTIFICATION_CHANNEL)->sendMessage($message);
+            (new \Core\ExternalServices\TelegramSender(SystemConfig::getValue('TELEGRAM_BOT_TOKEN')))
+                ->setChat(SystemConfig::getValue('TELEGRAM_NOTIFICATION_CHANNEL'))
+                ->sendMessage($message);
         }
 
         /**
@@ -488,6 +491,7 @@
          *
          * @param array|string|null $var   Массив
          * @param string            $title Заголовок
+         *                                 
          *
          * @return string|null
          */

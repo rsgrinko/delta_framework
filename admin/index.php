@@ -20,7 +20,9 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    use Core\Helpers\Cache;use Core\Helpers\Files;use Core\Models\{User, Roles};
+    use Core\Helpers\Cache;use Core\Helpers\Files;
+    use Core\SystemConfig;
+    use Core\Models\{User, Roles};
 
     require_once __DIR__ . '/inc/header.php';
 ?>
@@ -96,7 +98,7 @@
                         <h3 class="panel-title">Отладка</h3>
                     </div>
                     <div class="panel-body">
-                        <?= DEBUG ? 'Включена' : 'Отключена' ?>
+                        <?= SystemConfig::getValue('DEBUG') ? 'Включена' : 'Отключена' ?>
                     </div>
                 </div>
             </div>

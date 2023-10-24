@@ -21,6 +21,7 @@
 
     use Core\Helpers\Pagination;
     use Core\Helpers\SystemFunctions;
+    use Core\SystemConfig;
 
     require_once __DIR__ . '/inc/header.php';
 
@@ -66,7 +67,7 @@
                         <?php
                             $nginxLogFile = $_SERVER['DOCUMENT_ROOT'].'/../../log/it-stories.ru_access';
                             //$nginxLogFile = $_SERVER['DOCUMENT_ROOT'].'/../../log/test.log';
-                            Pagination::execute($_REQUEST['page'], SystemFunctions::getNginxLogData($nginxLogFile, true), PAGINATION_LIMIT);
+                            Pagination::execute($_REQUEST['page'], SystemFunctions::getNginxLogData($nginxLogFile, true), SystemConfig::getValue('PAGINATION_LIMIT'));
                             $limit = Pagination::getLimit();
 
                             $arLogs = SystemFunctions::getNginxLogData($nginxLogFile, false, $limit, true);

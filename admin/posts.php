@@ -23,6 +23,7 @@
     use Core\Models\File;
     use Core\Models\Posts;
     use Core\Models\User;
+    use Core\SystemConfig;
 
     require_once __DIR__ . '/inc/header.php';
 ?>
@@ -61,7 +62,7 @@
                         <tbody>
                         <?php
                             $objectPosts = new Posts();
-                            Pagination::execute($_REQUEST['page'], $objectPosts->getAllCount(), PAGINATION_LIMIT);
+                            Pagination::execute($_REQUEST['page'], $objectPosts->getAllCount(), SystemConfig::getValue('PAGINATION_LIMIT'));
                             $limit = Pagination::getLimit();
 
                             $arPosts = $objectPosts->getPosts($limit);

@@ -26,6 +26,7 @@
     use Core\Models\Router;
     use Core\Models\User;
     use Core\Models\UTM;
+    use Core\SystemConfig;
 
     error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
     //error_reporting(E_ALL);
@@ -170,10 +171,10 @@
     // debug
     function sendTelegram(?string $message, ?string $file = null): void
     {
-        (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))->setChat(TELEGRAM_NOTIFICATION_CHANNEL)->sendMessage($message);
+        (new \Core\ExternalServices\TelegramSender(SystemConfig::getValue('TELEGRAM_BOT_TOKEN')))->setChat(SystemConfig::getValue('TELEGRAM_NOTIFICATION_CHANNEL'))->sendMessage($message);
 
         if (!empty($file)) {
-            (new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN))->setChat(TELEGRAM_NOTIFICATION_CHANNEL)->sendDocument($file);
+            (new \Core\ExternalServices\TelegramSender(SystemConfig::getValue('TELEGRAM_BOT_TOKEN')))->setChat(SystemConfig::getValue('TELEGRAM_NOTIFICATION_CHANNEL'))->sendDocument($file);
         }
     }
 

@@ -21,6 +21,7 @@
 
     use Core\Helpers\Pagination;
     use Core\ExternalServices\RemoteHosts;
+    use Core\SystemConfig;
 
     require_once __DIR__ . '/inc/header.php';
 
@@ -66,7 +67,7 @@
                         </thead>
                         <tbody>
                         <?php
-                            Pagination::execute($_REQUEST['page'], RemoteHosts::getAllCount(), PAGINATION_LIMIT);
+                            Pagination::execute($_REQUEST['page'], RemoteHosts::getAllCount(), SystemConfig::getValue('PAGINATION_LIMIT'));
                             $limit = Pagination::getLimit();
 
                             $arHosts = RemoteHosts::getHosts($limit);

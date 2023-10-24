@@ -3,6 +3,7 @@
     use Core\CoreException;
     use Core\ExternalServices\Telegram2;
     use Core\ExternalServices\ChatGPT;
+    use Core\SystemConfig;
 
     require_once __DIR__ . '/core/bootstrap.php';
 
@@ -13,7 +14,7 @@
     $data = json_decode($data, true);
 
 
-    $tg = new Telegram2(TELEGRAM_BOT_TOKEN);
+    $tg = new Telegram2(SystemConfig::getValue('TELEGRAM_BOT_TOKEN'));
     $tg->setRemoteRequest($data);
 
     $gptObject = new ChatGPT();

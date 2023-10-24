@@ -272,7 +272,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             if (date('H') > 21 || date('H') < 9) {
                 return 'Нерабочее время :(';
             }
-            $telegram = new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN);
+            $telegram = new \Core\ExternalServices\TelegramSender(SystemConfig::getValue('TELEGRAM_BOT_TOKEN'));
             $telegram->setChat(' -1001610334197');
 
             /** @var DB $DB */
@@ -338,7 +338,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 $post .= PHP_EOL . '<a href="' . $link . '">Подробнее</a>';
 
 
-                $telegram = new \Core\ExternalServices\TelegramSender(TELEGRAM_BOT_TOKEN);
+                $telegram = new \Core\ExternalServices\TelegramSender(SystemConfig::getValue('TELEGRAM_BOT_TOKEN'));
                 $telegram->setChat('-1001789206618');
                 $res = $telegram->sendPhoto($tmpFile, $post);
                 sendTelegram($post);

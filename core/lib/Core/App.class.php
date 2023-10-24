@@ -89,7 +89,7 @@
         {
             $buildInfo = [
                 'Версия ядра'               => CORE_VERSION,
-                'Лимит пагинации'           => PAGINATION_LIMIT,
+                'Лимит пагинации'           => SystemConfig::getValue('PAGINATION_LIMIT'),
                 'Время для расчета онлайна' => USER_ONLINE_TIME,
                 'Время жизни кеша'          => CACHE_TTL,
                 'E-Mail сайта'              => SERVER_EMAIL,
@@ -139,7 +139,7 @@
 
         public static function users()
         {
-            Pagination::execute($_REQUEST['page'], User::getAllCount(), PAGINATION_LIMIT);
+            Pagination::execute($_REQUEST['page'], User::getAllCount(), SystemConfig::getValue('PAGINATION_LIMIT'));
             $limit = Pagination::getLimit();
             $limit= '0, 10';
             $arUsers = User::getUsers($limit);

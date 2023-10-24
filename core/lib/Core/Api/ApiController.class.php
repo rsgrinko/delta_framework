@@ -25,6 +25,7 @@
     use Core\Models\File;
     use Core\Models\MQ;
     use Core\Models\User;
+    use Core\SystemConfig;
 
     /**
      * Класс API контроллера
@@ -69,7 +70,7 @@
             if ($to !== null) {
                 $this->to = (int)$to;
             } else {
-                $this->to = PAGINATION_LIMIT;
+                $this->to = SystemConfig::getValue('PAGINATION_LIMIT');
             }
         }
 
@@ -289,7 +290,7 @@
                                               null,
                                               $this->request->getProperty('subject'),
                                               $this->request->getProperty('body'),
-                                              MAIL_TEMPLATE_DEFAULT,
+                                              SystemConfig::getValue('MAIL_TEMPLATE_DEFAULT'),
                                               ['TITLE' => $this->request->getProperty('subject')],
                                           ]
                              );

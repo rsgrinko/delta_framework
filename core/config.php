@@ -28,7 +28,7 @@
      * Флаг отладки
      */
     if (!defined('DEBUG')) {
-        define('DEBUG', true);
+        define('DEBUG', true); //SystemConfig
     }
 
 

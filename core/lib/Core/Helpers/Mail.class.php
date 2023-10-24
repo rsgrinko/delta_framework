@@ -24,6 +24,7 @@
     use Core\CoreException;
     use Core\DataBases\DB;
     use Core\Models\User;
+    use Core\SystemConfig;
     use Throwable;
 
     /**
@@ -86,7 +87,7 @@
                 $this->user = $user;
                 $this->setFrom(SERVER_EMAIL, SERVER_EMAIL_NAME)
                      ->setTo($user->getEmail(), $user->getName())
-                     ->setTemplate(MAIL_TEMPLATE_DEFAULT);
+                     ->setTemplate(SystemConfig::getValue('MAIL_TEMPLATE_DEFAULT'));
             }
         }
 

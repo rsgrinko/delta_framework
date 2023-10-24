@@ -21,6 +21,7 @@
 
     use Core\Helpers\Pagination;
     use Core\Models\User;
+    use Core\SystemConfig;
 
     require_once __DIR__ . '/inc/header.php';
 
@@ -69,7 +70,7 @@
                         </thead>
                         <tbody>
                         <?php
-                            Pagination::execute($_REQUEST['page'], User::getAllCount(), PAGINATION_LIMIT);
+                            Pagination::execute($_REQUEST['page'], User::getAllCount(), SystemConfig::getValue('PAGINATION_LIMIT'));
                             $limit = Pagination::getLimit();
 
                             $arUsers = User::getUsers($limit);
