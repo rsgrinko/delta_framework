@@ -19,7 +19,7 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    use Core\Models\{User, MQ};
+    use Core\Models\{User, UserMeta};
 
     require_once __DIR__ . '/inc/header.php';
 
@@ -133,6 +133,20 @@
                                            disabled>
                                 </div>
                             </div><!-- form-group -->
+
+                            <?php
+                                $telegramMetaParam = UserMeta::getListByParams(['user_id' => $objectUser->getId(), 'name' => 'telegramId']);
+                                if (!empty($telegramMetaParam)) {
+                                    $telegramId = array_shift($telegramMetaParam)['value'];
+                            ?>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Telegram ID</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" name="token" value="<?= $telegramId; ?>" class="form-control" disabled>
+                                        </div>
+                                    </div><!-- form-group -->
+                               <?php } ?>
+
 
                             <div class="panel-footer">
                                 <input type="submit" name="save" value="Сохранить" class="btn btn-primary">
