@@ -20,7 +20,7 @@
      */
 
     /**
-     * Класс для работы с пользователями
+     * Модель пользователя
      */
 
     namespace Core\Models;
@@ -35,6 +35,15 @@
 
         /** @var string Имя */
         protected $name;
+
+        /** @var string $login Логин */
+        protected $login;
+
+        /** @var int $image_id Идентификатор картинки */
+        protected $image_id;
+
+        /** @var string $token Токен */
+        protected $token;
 
         /**
          * Получить имя
@@ -56,6 +65,30 @@
         public function setName(string $name): self
         {
             $this->name = $name;
+            return $this;
+        }
+
+
+        /**
+         * Получить идентификатор изображения
+         *
+         * @return int|null
+         */
+        public function getImageId(): ?int
+        {
+            return $this->image_id;
+        }
+
+        /**
+         * Установить идентификатор изображения
+         *
+         * @param int $id Идентификатор изображения
+         *
+         * @return $this
+         */
+        public function setImageId(int $id): self
+        {
+            $this->image_id = $id;
             return $this;
         }
 

@@ -41,6 +41,12 @@ final class Roles extends AbstractMigration
                 'date_created' => date('Y-m-d H:i:s'),
                 'date_updated' => null,
             ],
+            [
+                'name'         => 'Уведомления о событиях',
+                'description'  => 'Роль для рассылок уведомлений о сбоях в работе проекта',
+                'date_created' => date('Y-m-d H:i:s'),
+                'date_updated' => null,
+            ],
         ];
     }
 

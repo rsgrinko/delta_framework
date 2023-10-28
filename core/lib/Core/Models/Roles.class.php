@@ -63,6 +63,11 @@
         const USER_ROLE_ID = 5;
 
         /**
+         * Роль "уведомления о событиях"
+         */
+        const ALARM_ROLE_ID = 6;
+
+        /**
          * @var User $user
          */
         private User $user;
@@ -125,7 +130,7 @@
          * @return int|null
          * @throws CoreException
          */
-        public function deleteRole(int $roleId): ?int
+        public function delete(int $roleId): ?int
         {
             $cacheId = md5(__CLASS__ . '::' . __FUNCTION__);
             Cache::delete($cacheId);
@@ -133,21 +138,6 @@
             /** @var  $DB DB */
             $DB = DB::getInstance();
             return $DB->query('DELETE FROM ' . self::USER_ROLES_TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND role_id=' . $roleId);
-        }
-
-        /**
-         * Получение полной информации о ролях пользователя
-         *
-         * @deprecated Реализован новый метод для получения этих данных
-         * @return array|null
-         * @throws CoreException
-         */
-        public function getFullRolesOld(): ?array
-        {
-            return array_map(function ($element) {
-                return static::getAllRoles()[$element];
-            },
-                $this->getRoles());
         }
 
         /**

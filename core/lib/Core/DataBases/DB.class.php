@@ -22,6 +22,7 @@
     namespace Core\DataBases;
 
     use Core\CoreException;
+    use Core\Helpers\SystemFunctions;
     use Core\SystemConfig;
     use PDO;
     use Throwable;
@@ -111,22 +112,6 @@
         public function __destruct()
         {
             // TODO: на случай чего то стоящего...
-        }
-
-        /**
-         * Отправка уведомления о критическом событии
-         * // TODO: метод-заглушка для возможности оповещения о критических событиях
-         *
-         * @param string $text Текст
-         *
-         * @return void
-         * @deprecated Вероятно, будет выпилено в дальнейшем
-         */
-        public static function sendAlarm(string $text): void
-        {
-            if (function_exists('sendTelegram')) {
-                sendTelegram($text);
-            }
         }
 
         /**
@@ -232,8 +217,14 @@
                 return $set;
             }
             $set_string = '';
-            foreach ($set as $set_key => $set_item) {
-                $set_string .= ' ' . $set_key . '=\'' . $set_item . '\',';
+            foreach ($set as $setKey => $setValue) {
+                $set_string .= ' ' . $setKey . '=';
+                if (is_null($setValue)) {
+                    $set_string .= ' ' . $setKey . '=null,';
+                } else {
+                    $set_string .= '\'' . $setValue . '\',';
+                }
+
             }
             return substr($set_string, 0, -1);
         }
@@ -302,9 +293,12 @@
             try {
                 $stmt = $this->db->query($sql);
             } catch (\Throwable $t) {
-                self::sendAlarm(
-                    '<b><u>' . date('d.m.Y H:i:s') . '</u></b>' . PHP_EOL . '</b><b>SQL ERROR:</b> ' . PHP_EOL . $this->db->errorInfo()[2] . PHP_EOL
-                    . '<b>QUERY:</b> ' . PHP_EOL . $sql
+                SystemFunctions::sendAlarm('DataBase',
+                    '<b><u>' . date('d.m.Y H:i:s') . '</u></b>' . PHP_EOL
+                       . '</b><b>SQL ERROR:</b> ' . PHP_EOL
+                       . $this->db->errorInfo()[2] . PHP_EOL
+                       . '<b>QUERY:</b> ' . PHP_EOL
+                       . $sql
                 );
                 if(SystemConfig::getValue('DEBUG')) {
                     throw new CoreException(

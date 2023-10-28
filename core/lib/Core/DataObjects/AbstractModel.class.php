@@ -146,6 +146,7 @@
          * @param string $table Таблица
          *
          * @return array|null Имена колонок
+         * @throws Throwable
          */
         private static function getColumnsInfo(string $table): array
         {
@@ -166,16 +167,16 @@
         private function setData(array $data): void
         {
             $this->sourceData = $data;
+            $columnsInfo      = self::getColumnsInfo(static::TABLE);
             foreach ($data as $prop => $value) {
                 $key = $prop;
-                if (empty($this->renameProps[$prop]) === false) {
+                if (!empty($this->renameProps[$prop])) {
                     $key = $this->renameProps[$prop];
                 }
                 if (property_exists($this, $key)) {
                     $this->$key = $value;
                 }
-                $columnsInfo = self::getColumnsInfo(static::TABLE);
-                if (empty($columnsInfo[$key]) === false) {
+                if (!empty($columnsInfo[$key])) {
                     switch ($columnsInfo[$key]['type']) {
                         case self::COLUMN_TYPE_BOOL:
                             $this->$key = (bool)$this->$key;
@@ -188,23 +189,27 @@
         /**
          * Сохранить элемент
          *
-         * @return $this
-         * @throws CoreException
+         * @return self
+         * @throws DataObjectsException
          */
         public function save(): self
         {
             /** @var DB $db */
             $db = DB::getInstance();
             $id = static::ID_NAME;
-            if (empty($this->$id) === false) {
-                $diff = $this->getDataDifference();
-                if (empty($diff) === false) {
-                    $db->update(static::TABLE, [$id => $this->$id], $this->sanitizeFields($diff));
+            try {
+                if (!empty($this->$id)) {
+                    $diff = $this->getDataDifference();
+                    if (!empty($diff)) {
+                        $db->update(static::TABLE, [$id => $this->$id], $this->sanitizeFields($diff));
+                    }
+                } else {
+                    $this->$id = $db->addItem(static::TABLE, $this->sanitizeFields($this->getDataDifference(true)));
                 }
-            } else {
-                $this->$id = $db->addItem(static::TABLE, $this->sanitizeFields($this->getDataDifference(true)));
+                $this->setData($db->getItem(static::TABLE, [$id => $this->$id]));
+            } catch (Throwable $e) {
+                throw new DataObjectsException('Произошла ошибка при сохранении данных: ' . $e->getMessage());
             }
-            $this->setData($db->getItem(static::TABLE, [$id => $this->$id]));
             return $this;
         }
 
@@ -270,7 +275,7 @@
                 $renameList = array_flip($this->renameProps);
             }
             $columnList = self::getColumnsInfo(static::TABLE);
-            foreach (self::getColumnsInfo(static::TABLE) as $prop => $info) {
+            foreach ($columnList as $prop => $info) {
                 if (!$includeWriteProtected && in_array($prop, static::WRITE_PROTECTION, true)) {
                     continue;
                 }
@@ -315,7 +320,7 @@
         public static function select(array $filter): ModelCollection
         {
             /** @var DB $db */
-            $db   = DB::getInstance();
+            $db              = DB::getInstance();
             $result          = $db->getItems(static::TABLE, $filter);
             $collectionClass = static::COLLECTION;
             $collection      = new $collectionClass();
@@ -362,7 +367,7 @@
          * @param array $array Входные данные
          *
          * @return array Результат
-         * @throws CoreException
+         * @throws DataObjectsException
          */
         private function sanitizeFields(array $array): array
         {

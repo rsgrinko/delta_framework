@@ -96,14 +96,15 @@
          *
          * @param string $templateName Имя шаблона
          *
-         * @return $this
+         * @return self
          */
         public function setTemplate(string $templateName): self
         {
-            if(!file_exists(MAIL_TEMPLATES_PATH . '/' . $templateName . '.html')) {
-                throw new CoreException('Шаблон "' . $templateName . '" не найден');
-            }
             $this->templateName = $templateName;
+            if (!file_exists(MAIL_TEMPLATES_PATH . '/' . $templateName . '.html')) {
+                $this->templateName = 'default';
+            }
+
             return $this;
         }
 
@@ -112,7 +113,7 @@
          *
          * @param array $templateVars Массив переменных шаблона
          *
-         * @return $this
+         * @return self
          */
         public function setTemplateVars(array $templateVars): self
         {
@@ -137,7 +138,7 @@
         /**
          * От кого
          *
-         * @return $this
+         * @return self
          */
         public function setFrom($email, $name = null): self
         {
@@ -149,7 +150,7 @@
         /**
          * Кому
          *
-         * @return $this
+         * @return self
          */
         public function setTo($email, $name = null): self
         {
@@ -161,7 +162,7 @@
         /**
          * Тема
          *
-         * @return $this
+         * @return self
          */
         public function setSubject($subject = null): self
         {
@@ -172,7 +173,7 @@
         /**
          * Тело письма
          *
-         * @return $this
+         * @return self
          */
         public function setBody($body = null): self
         {
@@ -183,7 +184,7 @@
         /**
          * Добавление файла к письму
          *
-         * @return $this
+         * @return self
          */
         public function addFile($filename): self
         {

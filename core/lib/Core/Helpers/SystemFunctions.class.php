@@ -24,6 +24,8 @@
 
     use Core\CoreException;
     use Core\DTO\System\Memory;
+    use Core\Models\Roles;
+    use Core\Models\User;
     use Core\SystemConfig;
 
     /**
@@ -920,5 +922,29 @@
             $memoryObject->usedPercent = 100 - ($memoryFree * 100 / $memoryTotal);
 
             return $memoryObject;
+        }
+
+        /**
+         * Отправка уведомления о критическом событии
+         *
+         * @param string $text Текст алярма
+         *
+         * @return void
+         */
+        public static function sendAlarm(string $title, string $text): void
+        {
+            $userList = User::getListByRole(Roles::ALARM_ROLE_ID);
+
+            foreach($userList as $userObject) {
+                (new Mail())->setFrom(SERVER_EMAIL, SERVER_EMAIL_NAME)
+                            ->setTemplate(MAIL_TEMPLATE_DEFAULT)
+                            ->setTo($userObject->getEmail(), $userObject->getName())
+                            ->setSubject('Alarm: ' . $title)
+                            ->setBody($text)
+                            ->send();
+            }
+            if (function_exists('sendTelegram')) {
+                sendTelegram('<b>' . $title . '</b>' . PHP_EOL. $text);
+            }
         }
     }

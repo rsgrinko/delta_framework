@@ -28,6 +28,7 @@
     use Core\CoreException;
     use Core\Helpers\{Cache, Log, Mail, Sanitize, SystemFunctions};
     use Core\DataBases\DB;
+    use Core\DTO\User\FilterUser;
     use Throwable;
 
     class User
@@ -799,6 +800,26 @@
                 $res[$key]['roles'] = (new self($element['id']))->getRolesObject()->getRoles();
             }
             return SystemFunctions::arrayToXml($res, self::TABLE);
+        }
+
+        /**
+         * Выборка пользователей по роли
+         *
+         * @param int $roleId Идентификатор роли
+         *
+         * @return self[]
+         * @throws CoreException
+         */
+        public static function getListByRole(int $roleId): array
+        {
+            $result = [];
+            /** @var $DB DB Объект базы данных */
+            $DB  = DB::getInstance();
+            $res = $DB->getItems(Roles::USER_ROLES_TABLE, ['id' => $roleId]);
+            foreach ($res as $element) {
+                $result[] = new self((int)$element['user_id']);
+            }
+            return $result;
         }
 
         /**
