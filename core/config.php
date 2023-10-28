@@ -125,6 +125,13 @@
     }
 
     /**
+     * Имя телеграм бота
+     */
+    if (!defined('TELEGRAM_BOT_USERNAME')) {
+        define('TELEGRAM_BOT_USERNAME', 'deltacore_bot');
+    }
+
+    /**
      * Токен телеграм бота
      */
     if (!defined('TELEGRAM_BOT_TOKEN')) {
@@ -213,7 +220,7 @@
      * Флаг использования Captcha
      */
     if (!defined('USE_CAPTCHA')) {
-        define('USE_CAPTCHA', true);
+        define('USE_CAPTCHA', false);
     }
 
     /**

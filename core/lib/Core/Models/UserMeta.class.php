@@ -2,6 +2,7 @@
 
     namespace Core\Models;
 
+    use Core\CoreException;
     use Core\DataBases\DB;
     use Core\Helpers\Cache;
 
@@ -122,5 +123,19 @@
             /** @var  $DB DB */
             $DB = DB::getInstance();
             $DB->query('DELETE FROM ' . self::TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND id="' . $id . '"');
+        }
+
+        /**
+         * Получить список мета данных по фильтру
+         *
+         * @param array $params Параметры
+         *
+         * @return array|null
+         * @throws CoreException
+         */
+        public static function getListByParams(array $params = []): ?array {
+            /** @var  $DB DB */
+            $DB = DB::getInstance();
+            return $DB->getItems(self::TABLE, $params);
         }
     }

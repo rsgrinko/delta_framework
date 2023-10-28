@@ -42,7 +42,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Delta - CPanel</title>
+    <title>Delta - CPanel<?= isset($pageTitle) ? ' | ' . $pageTitle : '' ?></title>
 
     <link href="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/css/style.default.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -59,11 +59,14 @@
             width: 100%;
             height: 70px;
         }
+        .telegramAuthButtonBox {
+            margin-top: 20px;
+            float: right;
+        }
     </style>
 </head>
 
 <body>
-
 <header>
     <div class="headerwrapper">
         <div class="header-left">

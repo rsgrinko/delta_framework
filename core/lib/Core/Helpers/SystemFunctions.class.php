@@ -947,4 +947,37 @@
                 sendTelegram('<b>' . $title . '</b>' . PHP_EOL. $text);
             }
         }
+
+        /**
+         * Проверка авторизации через Telegram
+         *
+         * @param array $authData Данные для проверки
+         *
+         * @return bool Результат проверки
+         */
+        public static function checkTelegramAuthorization(array $authData): bool
+        {
+            if (empty($authData['hash']) || empty($authData['auth_date'])) {
+                return false;
+            }
+            $checkHash = $authData['hash'];
+            unset($authData['hash']);
+            $dataCheckArr = [];
+            foreach ($authData as $key => $value) {
+                $dataCheckArr[] = $key . '=' . $value;
+            }
+            sort($dataCheckArr);
+            $dataCheckString = implode("\n", $dataCheckArr);
+            $secretKey       = hash('sha256', SystemConfig::getValue('TELEGRAM_BOT_TOKEN'), true);
+            $hash            = hash_hmac('sha256', $dataCheckString, $secretKey);
+            if (strcmp($hash, $checkHash) !== 0) {
+                //Data is NOT from Telegram
+                return false;
+            }
+            if ((time() - (int)$authData['auth_date']) > 86400) {
+                //Data is outdated
+                return false;
+            }
+            return true;
+        }
     }

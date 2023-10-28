@@ -20,35 +20,82 @@
      */
 
     use Core\Helpers\Captcha;
-    use Core\Models\User;
+    use Core\Helpers\SystemFunctions;
+    use Core\SystemConfig;
+    use Core\Models\{User, UserMeta};
     use Core\CoreException;
 
     require_once __DIR__ . '/inc/bootstrap.php';
 
-    $captchaCorrect = true;
-    if (USE_CAPTCHA) {
-        $captchaCorrect = isset($_REQUEST['captchaCode']) && Captcha::isValidCaptcha($_REQUEST['captchaCode']);
+    // Определяем тип авторизации
+    $authType = isset($_REQUEST['authType']) && !empty($_REQUEST['authType']) ? $_REQUEST['authType'] : 'default';
+
+
+    /**
+     * array(7) {
+    ["id"]=> string(7) "1831337"
+    ["first_name"]=> string(18) "Александр"
+    ["last_name"]=> string(16) "Менщиков"
+    ["username"]=> string(5) "n0str"
+    ["photo_url"]=> string(36) "https://t.me/i/userpic/100/n0str.jpg"
+    ["auth_date"]=> string(10) "1518168109"
+    ["hash"]=> string(64) "abba<..>1345"
+    }
+     */
+    switch ($authType) {
+        case 'telegram':
+            $data = [
+                'id'         => $_REQUEST['id'],
+                'first_name' => $_REQUEST['first_name'],
+                'last_name'  => $_REQUEST['last_name'],
+                'username'   => $_REQUEST['username'],
+                'photo_url'  => $_REQUEST['photo_url'],
+                'auth_date'  => $_REQUEST['auth_date'],
+                'hash'       => $_REQUEST['hash'],
+            ];
+            $isCorrectTelegramAuth = SystemFunctions::checkTelegramAuthorization($data);
+            if ($isCorrectTelegramAuth) {
+                $res = UserMeta::getListByParams(['name' => 'telegramId', 'value' => $data['id']]);
+                if (!empty($res)) {
+                    $userId = array_shift($res)['user_id'];
+                    User::authorize($userId);
+                    header('Location: index.php');
+                    die();
+                }
+            }
+            $auth = false;
+            $err_mess = true;
+            break;
+        case 'default':
+            $captchaCorrect = true;
+            if (USE_CAPTCHA) {
+                $captchaCorrect = isset($_REQUEST['captchaCode']) && Captcha::isValidCaptcha($_REQUEST['captchaCode']);
+            }
+
+            if (User::isAuthorized()) {
+                $auth = true;
+            } else {
+                $auth = false;
+                if ($captchaCorrect && !empty($_REQUEST['login'] && !empty($_REQUEST['pass']))) {
+                    if (User::securityAuthorize(
+                        $_REQUEST['login'],
+                        $_REQUEST['pass'],
+                        isset($_REQUEST['remember']) && $_REQUEST['remember'] === 'on'
+                    )) {
+                        $auth = true;
+                    }
+                }
+            }
+            if ($auth === false && isset($_REQUEST['login']) && $_REQUEST['login'] !== '') {
+                $err_mess = true;
+            } else {
+                $err_mess = false;
+            }
+            break;
+
     }
 
-    if (User::isAuthorized()) {
-        $auth = true;
-    } else {
-        $auth = false;
-        if ($captchaCorrect && !empty($_REQUEST['login'] && !empty($_REQUEST['pass']))) {
-            if (User::securityAuthorize(
-                $_REQUEST['login'],
-                $_REQUEST['pass'],
-                isset($_REQUEST['remember']) && $_REQUEST['remember'] === 'on'
-            )) {
-                $auth = true;
-            }
-        }
-    }
-    if ($auth === false && isset($_REQUEST['login']) && $_REQUEST['login'] !== '') {
-        $err_mess = true;
-    } else {
-        $err_mess = false;
-    }
+
 
     if ($auth === true) {
         global $USER;
@@ -56,6 +103,7 @@
             try {
                 User::logout();
                 User::authorize($_REQUEST['loginAs']);
+                die();
             } catch (CoreException $e) {
                 die('Авторизация не удалась');
             }
@@ -70,23 +118,23 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
             <meta name="description" content="">
             <meta name="author" content="">
-
             <title>Delta Framework - Авторизация</title>
-
             <link href="//<?php echo $_SERVER['SERVER_NAME']; ?>/admin/styles/css/style.default.css" rel="stylesheet">
-
             <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
             <!--[if lt IE 9]>
             <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/html5shiv.js"></script>
             <script src="//<?= $_SERVER['SERVER_NAME']; ?>/admin/styles/js/respond.min.js"></script>
             <![endif]-->
+            <style>
+                .telegramAuthButtonBox {
+                    margin-top: 20px;
+                    float: right;
+                }
+            </style>
         </head>
 
         <body class="signin">
-
-
         <section>
-
             <div class="panel panel-signin">
                 <div class="panel-body">
                     <div class="logo text-center">
@@ -105,6 +153,7 @@
                     <?php } ?>
 
                     <form action="login.php" method="post">
+                        <input type="hidden" name="authType" value="default">
                         <div class="input-group mb15">
                             <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                             <input type="text" class="form-control" name="login" placeholder="Имя пользователя">
@@ -141,6 +190,24 @@
                             </div>
                         </div>
                     </form>
+
+                    <h4 class="text-center mb5">Вход через сторонний сервис</h4>
+                    <p class="text-center">Вы можете использовать для авторизации один из вариантов ниже</p>
+
+                    <div class="telegramAuthButtonBox">
+                    <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="<?= SystemConfig::getValue('TELEGRAM_BOT_USERNAME') ?>" data-size="large" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>
+                    <script type="text/javascript">
+                        function onTelegramAuth(user) {
+                            document.location.href = 'login.php?authType=telegram&hash='+ user.hash
+                                                    + '&id=' + user.id
+                                                    + '&auth_date=' + user.auth_date
+                                                    + '&first_name=' + user.first_name
+                                                    + '&last_name=' + user.last_name
+                                                    + '&photo_url=' + user.photo_url
+                                                    + '&username=' + user.username
+                        }
+                    </script>
+                    </div>
 
                 </div><!-- panel-body -->
                 <div class="panel-footer">
