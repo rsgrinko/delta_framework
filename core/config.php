@@ -22,7 +22,7 @@
     /**
      * Версия сервиса
      */
-    const CORE_VERSION = '1.0.1_dev';
+    const CORE_VERSION = '1.0.2';
 
     /**
      * Флаг отладки
