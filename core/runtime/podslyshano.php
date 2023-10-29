@@ -30,6 +30,11 @@
 
     use Core\Models\MQ;
     $fromPostId = $argv[1];
-    //sleep(5);
 
-    (new MQ())->setPriority(9)->setAttempts(3)->createTask('Core\MQTasks', 'getStory', [$fromPostId]);
+    (new MQ())->setPriority(9)
+              ->setAttempts(2)
+              ->createTask(
+                  'Core\MQTasks',
+                  'getStory',
+                  [$fromPostId]
+              );

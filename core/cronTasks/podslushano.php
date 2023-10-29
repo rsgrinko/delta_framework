@@ -19,24 +19,14 @@
      * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
-    @ignore_user_abort(true);
-    set_time_limit(0);
+    require_once 'init.php';
 
-    use Core\Helpers\Log;
+    use Core\Models\MQ;
 
-    if (empty($_SERVER['DOCUMENT_ROOT'])) {
-        $_SERVER['DOCUMENT_ROOT'] = __DIR__ . '/..';
-    }
-    require_once __DIR__ . '/bootstrap.php';
-
-    $tasksDir    = __DIR__ . '/cronTasks/';
-    $list        = scandir($tasksDir);
-    $logFileName = 'cron.log';
-    foreach ($list as $file) {
-        if (in_array($file, ['.', '..', 'init.php'], true)) {
-            continue;
-        }
-        $command = '(php -f ' . $tasksDir . $file . ' & ) >> /dev/null 2>&1';
-        Log::logToFile($command, $logFileName);
-        exec($command);
-    }
+    (new MQ())->setCheckDuplicates(false)->setPriority(9)
+              ->setAttempts(2)
+              ->createTask(
+                  'Core\MQTasks',
+                  'getStory',
+                  []
+              );
