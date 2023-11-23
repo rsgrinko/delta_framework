@@ -515,7 +515,8 @@
                     if (is_array($v)) {
                         $table .= self::arrayToTable($v);
                     } else {
-                        $table .= '<pre>' . htmlspecialchars($v) . '</pre>';
+                        $v = $v === null ? '<i>NULL</i>' : htmlspecialchars($v);
+                        $table .= '<pre>' . $v . '</pre>';
                     }
                     $table .= '</td>';
                     $table .= '</tr>';
