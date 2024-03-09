@@ -19,5 +19,6 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
+    /** Использование роутера маршрутов */
     const USE_ROUTER = true;
     require_once $_SERVER['DOCUMENT_ROOT'] . '/core/bootstrap.php';
