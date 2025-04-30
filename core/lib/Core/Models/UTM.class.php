@@ -236,7 +236,8 @@
          */
         private function getCurrentPage(): string
         {
-            return explode('?', $_SERVER['REQUEST_URI'])[0];
+            $params = explode('?', $_SERVER['REQUEST_URI'] ?? '');
+            return $params[0] ?? '';
         }
 
         /**

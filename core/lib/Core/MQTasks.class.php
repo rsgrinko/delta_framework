@@ -25,6 +25,9 @@
     use Core\Helpers\Mail;
     use Core\Helpers\SystemFunctions;
     use Core\Helpers\Thumbs;
+    use Core\Models\MQ;
+    use PHPUnit\Util\Exception;
+    use Throwable;
 
     class MQTasks
     {
@@ -496,4 +499,114 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             return $mailObject->send();
         }
 
+        /**
+         * Запуск механизма поисковой индексации
+         *
+         * @param  string  $url Начальный URL
+         *
+         * @return string
+         * @throws CoreException
+         */
+        public static function spider(string $url): string
+        {
+            $DB = DB::getInstance();
+
+            if (empty($url)) {
+                throw new Exception('Передан пустой url');
+            }
+
+            if ($DB->getItem('spider',['url' => $url]) !== null) {
+                throw new Exception('Данный url ' . $url . ' уже присутствует в базе');
+            }
+            $defaultSocketTimeout = ini_get('default_socket_timeout');
+            ini_set('default_socket_timeout', 5);
+            $data = file_get_contents($url);
+            ini_set('default_socket_timeout', $defaultSocketTimeout);
+
+            if (!is_array($http_response_header)) {
+                $http_response_header = [];
+            }
+
+            $headers = implode("\n", $http_response_header);
+            preg_match_all("/^content-type\s*:\s*(.*)$/mi", $headers, $matchesContentType);
+            $contentType = trim(end($matchesContentType[1]));
+
+            $posTypeText = strpos($contentType, 'text/html');
+
+            if (empty($data)) {
+                throw new Exception('Данных по url ' . $url . ' не найдено');
+            }
+
+            if ($posTypeText === false || $posTypeText !== 0)
+            {
+                throw new Exception('Данный url ' . $url . ' не содержит текстовых данных (' . $contentType . ')');
+            }
+
+            preg_match('~<body.*?>(.*?)</body>~is', $data, $matchesBody, PREG_OFFSET_CAPTURE, 0);
+
+            if (!empty($matchesBody)) {
+                $data = $matchesBody[0][0];
+            }
+
+            $data = preg_replace('/\s?<script[^>]*?>.*?<\/script>\s?/si', ' ', $data);
+            $data = preg_replace('/\s?<style[^>]*?>.*?<\/style>\s?/si', ' ', $data);
+            $data = preg_replace('/\s+/', ' ', $data);
+            $dataText = preg_replace('/<[^>]+>/', '', $data);
+
+            try {
+                $DB->addItem(
+                    'spider',
+                    [
+                        'url'  => $url,
+                        'text' => $dataText,
+                    ]
+                );
+            } catch (Throwable $t) {
+                echo $t->getMessage();
+
+            }
+
+            preg_match_all('/href=["\']?([^"\'>]+)["\']?/m', $data, $matches, PREG_SET_ORDER, 0);
+
+            $counter = 0;
+            $counterBreak = 0;
+            foreach ($matches as $match) {
+                [$href, $link, $name] = $match;
+                $link = trim($link);
+
+                $posHttp    = strpos($link, 'http://');
+                $posHttps   = strpos($link, 'https://');
+                $posSlashes = strpos($link, '//');
+                $posLocal   = strpos($link, '#');
+
+                if ($posHttp === false && $posHttps === false && $posSlashes === false) {
+                    $parsedData = parse_url($url);
+                    $link = $parsedData['scheme'] . '://' . $parsedData['host'] . $link;
+                } elseif ($posSlashes === 0) {
+                    $link = 'https:' . $url;
+                } elseif ($posLocal === 0) {
+                    continue;
+                } elseif ($url === '/') {
+                    $parsedData = parse_url($url);
+                    $link = $parsedData['scheme'] . '://' . $parsedData['host'] . '/';
+                }
+
+
+
+                if ($DB->getItem('spider',['url' => $link]) !== null) {
+                    $counterBreak++;
+                    continue;
+                }
+
+                try {
+                    (new MQ())->setPriority(5)->setAttempts(1)->createTask('Core\MQTasks', 'spider', [$link]);
+                } catch (Throwable $t) {
+                    $counterBreak++;
+                    continue;
+                }
+                $counter++;
+            }
+
+            return 'Добавлено ' . $counter . ' заданий, пропущено ' . $counterBreak;
+        }
     }

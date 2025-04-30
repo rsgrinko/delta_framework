@@ -293,13 +293,6 @@
             try {
                 $stmt = $this->db->query($sql);
             } catch (\Throwable $t) {
-                SystemFunctions::sendAlarm('DataBase',
-                    '<b><u>' . date('d.m.Y H:i:s') . '</u></b>' . PHP_EOL
-                       . '</b><b>SQL ERROR:</b> ' . PHP_EOL
-                       . $this->db->errorInfo()[2] . PHP_EOL
-                       . '<b>QUERY:</b> ' . PHP_EOL
-                       . $sql
-                );
                 if(SystemConfig::getValue('DEBUG')) {
                     throw new CoreException(
                         'В SQL запросе произошла ошибка: ' . $this->db->errorInfo()[2]

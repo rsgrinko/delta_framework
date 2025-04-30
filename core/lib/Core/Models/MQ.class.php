@@ -55,7 +55,7 @@
         public const VALUE_N = 'N';
 
         /** Количество задач для обработки */
-        public const EXECUTION_TASKS_LIMIT = 100;
+        public const EXECUTION_TASKS_LIMIT = 5;
 
         /** Лимит количества запущенных воркеров */
         public const WORKERS_LIMIT = 1;
@@ -251,16 +251,6 @@
          */
         public function run(bool $childProcess = false): void
         {
-            /*if (!$childProcess) {
-                Log::logToFile(
-                    $this->getWorkerId() . ': Запущен новый воркер ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
-                    self::LOG_FILE,
-                    [],
-                    LOG_INFO,
-                    null,
-                    false
-                );
-            }*/
             // Поиск и исправление зависших заданий
             $this->searchAndFixStuckTasks();
 
@@ -268,16 +258,6 @@
             $this->setTasksActiveStatus();
 
             if ($this->hasMaxWorkers() && !$childProcess) {
-                /*
-                Log::logToFile(
-                    $this->getWorkerId() . ': Достигнуто максимальное количество воркеров. Работает ' . $this->getCountWorkers() . '/' . self::WORKERS_LIMIT,
-                    self::LOG_FILE,
-                    [],
-                    LOG_NOTICE,
-                    null,
-                    false
-                );
-                */
                 return;
             }
             $arTasks = $this->getActiveTasks();
@@ -295,16 +275,6 @@
                     $this->execute($task['id']);
                 }
             } else {
-                /*
-                Log::logToFile(
-                    $this->getWorkerId() . ': Нечего выполнять - завершаем работу',
-                    self::LOG_FILE,
-                    [],
-                    LOG_INFO,
-                    null,
-                    false
-                );
-                */
                 return;
             }
             $this->runNewWorker($this->getWorkerId()); // Запускаем дочерний воркер с тем же идентификатором
@@ -563,7 +533,6 @@
                     null,
                     false
                 );
-                //Log::logToSentry($this->getWorkerId() . ': Задания ' . $taskId . ' не найдено', 'DEBUG', ['taskId' => $taskId]);
 
                 return $response;
             }
@@ -678,7 +647,6 @@
                     null,
                     false
                 );
-                //Log::logToSentry($this->getWorkerId() . ': Ошибка выполнения задания с ID ' . $taskId . ', попытка ' . $arTask['attempts'] . ' из ' . $arTask['attempts_limit'], 'DEBUG', ['response' => $t->getMessage()]);
             }
 
             return $response;

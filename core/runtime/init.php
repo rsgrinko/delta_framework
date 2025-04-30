@@ -29,4 +29,5 @@
         $_SERVER['DOCUMENT_ROOT'] = __DIR__ . '/../..';
     }
 
+    const IS_CRON_PROCESS = true;
     require_once __DIR__ . '/../bootstrap.php';

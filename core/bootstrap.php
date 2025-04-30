@@ -29,40 +29,25 @@
     use Core\SystemConfig;
 
     error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-    //error_reporting(E_ALL);
-
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
     date_default_timezone_set('Europe/Moscow');
 
-    define('START_MEMORY', memory_get_usage());
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
     require_once __DIR__ . '/../vendor/autoload.php';
-    \Sentry\init(
-        [
-            'dsn'         => 'https://8657ac1a900c44e5bc51714bb4c00dbb@o1303100.ingest.sentry.io/6541634',
-            'error_types' => E_ALL & ~E_NOTICE,
-        ]
-    );
 
-    Sentry\configureScope(function (Sentry\State\Scope $sentryScope) {
-        $sentryScope->setExtra('user_id', $_SESSION['id'] ?? '');
-        $sentryScope->setExtra('user_login', $_SESSION['login'] ?? '');
-        $sentryScope->setExtra('user_token', $_SESSION['token'] ?? '');
-    });
-
-
+    define('START_MEMORY', memory_get_usage());
     define('START_TIME', microtime(true)); // засекаем время старта скрипта
     const CORE_LOADED = true; // флаг корректного запуска
 
     if (empty($_SERVER['SERVER_NAME'])) {
         $_SERVER['SERVER_NAME'] = 'localhost';
     }
+
     if (empty($_SERVER['DOCUMENT_ROOT'])) {
         $_SERVER['DOCUMENT_ROOT'] = __DIR__. '/../';
     }
-
 
     // Если имеется файл локальной конфигурации - подключаем его
     if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/config.local.php')) {
@@ -71,6 +56,12 @@
 
     // Подключим основной файл конфигурации
     require_once __DIR__ . '/config.php';
+
+    $isCronProcess = false;
+    if (defined('IS_CRON_PROCESS') && IS_CRON_PROCESS === true) {
+        $isCronProcess = true;
+    }
+    define('CORE_FULL_LOAD', !$isCronProcess);
 
     /**
      * Отладочная функция: вывести данные
@@ -115,58 +106,38 @@
     // Инициализация кеша
     Cache::init(CACHE_DIR, USE_CACHE);
 
-    // Обработка UTM меток
-    (new UTM())->save();
+    if (CORE_FULL_LOAD) {
+        // Обработка UTM меток
+        (new UTM())->save();
 
-    // очистка кэша
-    if (isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
-        Cache::flush();
-    }
-
-    // выход из системы
-    if (isset($_REQUEST['logout']) && $_REQUEST['logout'] === CODE_VALUE_Y) {
-        User::logout();
-    }
-
-    /**
-     * Для сбора статистики запусков
-     *
-     * git clone присутствуют, а обратной связи нет. Грустненько...
-     */
-    if (gethostname() !== 'sun.local') {
-        $array = [
-            'SERVER_NAME'   => $_SERVER['SERVER_NAME'],
-            'HOST'          => $_SERVER['HTTP_HOST'],
-            'REQUEST_URI'   => $_SERVER['REQUEST_URI'],
-            'HOSTNAME'      => gethostname(),
-            'PHP'           => phpversion(),
-            'DELTA_VERSION' => CORE_VERSION,
-        ];
-
-        $requestObject = new Request('https://it-stories.ru/custom/delta.php');
-        try {
-            $requestObject->post($array);
-        } catch (Throwable $e) {
+        // очистка кэша
+        if (isset($_REQUEST['clear_cache']) && $_REQUEST['clear_cache'] === CODE_VALUE_Y) {
+            Cache::flush();
         }
-    }
 
-    $ddosProtectObject = new DDosProtection(basename(__FILE__));
-    try {
-        $userId = User::getCurrentUserId();
-    } catch (CoreException $e) {
-        $userId = null;
-    }
-    if (!empty($userId)) {
+        // выход из системы
+        if (isset($_REQUEST['logout']) && $_REQUEST['logout'] === CODE_VALUE_Y) {
+            User::logout();
+        }
+
+        $ddosProtectObject = new DDosProtection(basename(__FILE__));
         try {
-            $USER = new User($userId);
-            $ddosProtectObject->setUserId($userId);
+            $userId = User::getCurrentUserId();
         } catch (CoreException $e) {
+            $userId = null;
+        }
+        if (!empty($userId)) {
+            try {
+                $USER = new User($userId);
+                $ddosProtectObject->setUserId($userId);
+            } catch (CoreException $e) {
+                $USER = null;
+            }
+        } else {
             $USER = null;
         }
-    } else {
-        $USER = null;
+        $ddosProtectObject->checkDDos();
     }
-    $ddosProtectObject->checkDDos();
 
     // debug
     function sendTelegram(?string $message, ?string $file = null): void
@@ -183,7 +154,7 @@
     /**
      * Запускаем маршрутизатор если не сказано иного
      */
-    if (defined('USE_ROUTER') && USE_ROUTER === true) {
+    if (CORE_FULL_LOAD && defined('USE_ROUTER') && USE_ROUTER === true) {
         /**
          * Инициализация шаблонизатора
          */

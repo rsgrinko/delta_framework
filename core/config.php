@@ -105,13 +105,13 @@
         define('DB_HOST', 'localhost');
     }
     if (!defined('DB_USER')) {
-        define('DB_USER', 'rsgrinko_delta');
+        define('DB_USER', 'delta');
     }
     if (!defined('DB_PASSWORD')) {
         define('DB_PASSWORD', '2670135');
     }
     if (!defined('DB_NAME')) {
-        define('DB_NAME', 'rsgrinko_delta');
+        define('DB_NAME', 'delta');
     }
     if (!defined('DB_TABLE_PREFIX')) {
         define('DB_TABLE_PREFIX', 'd_');
