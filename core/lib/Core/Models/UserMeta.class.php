@@ -3,7 +3,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Helpers\Cache;
 
     class UserMeta
@@ -35,8 +35,8 @@
             if (Cache::check($cacheId)) {
                 $userMeta = Cache::get($cacheId);
             } else {
-                /** @var  $DB DB */
-                $DB = DB::getInstance();
+                /** @var  $DB DataBase */
+                $DB = DataBase::getInstance();
 
                 $res      = $DB->query('SELECT * FROM `' . self::TABLE . '` WHERE user_id=' . $this->user->getId());
                 $userMeta = [];
@@ -68,8 +68,8 @@
             if (Cache::check($cacheId)) {
                 $userMeta = Cache::get($cacheId);
             } else {
-                /** @var  $DB DB */
-                $DB  = DB::getInstance();
+                /** @var  $DB DataBase */
+                $DB  = DataBase::getInstance();
                 $res = $DB->query('SELECT * FROM `' . self::TABLE . '` WHERE user_id=' . $this->user->getId() . ' AND name="' . $name . '"');
                 if (!empty($res)) {
                     $userMeta = [];
@@ -101,9 +101,9 @@
             $cacheId = md5('Meta_' . $this->user->getId() . '_getAllMeta');
             Cache::delete($cacheId);
 
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
-            return $DB->addItem(self::TABLE, ['user_id' => $this->user->getId(), 'name' => $name, 'value' => $value]);
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
+            return $DB->add(self::TABLE, ['user_id' => $this->user->getId(), 'name' => $name, 'value' => $value]);
         }
 
 
@@ -120,8 +120,8 @@
             $cacheId = md5('Roles_' . $this->user->getId() . '_getRoles');
             Cache::delete($cacheId);
 
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
             $DB->query('DELETE FROM ' . self::TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND id="' . $id . '"');
         }
 
@@ -134,8 +134,8 @@
          * @throws CoreException
          */
         public static function getListByParams(array $params = []): ?array {
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
-            return $DB->getItems(self::TABLE, $params);
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
+            return $DB->getList(self::TABLE, $params);
         }
     }

@@ -26,7 +26,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Helpers\Sanitize;
 
     class Posts
@@ -64,16 +64,16 @@
             foreach($fields as $key => $value) {
                 $fields[$key] = Sanitize::sanitizeString($value);
             }
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
 
             return $DB->update(self::TABLE, ['id' => $this->id], $fields);
         }
 
         public function getPosts(string $limit = '10', string $sort = 'DESC'): array
         {
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
 
             $sql = 'SELECT * FROM ' . self::TABLE;
             if (!empty($this->sectionId)) {
@@ -86,7 +86,7 @@
 
         public function getAllPostData(): ?array
         {
-            $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
+            $result = (DataBase::getInstance())->get(self::TABLE, ['id' => $this->id]);
 
             if (!empty($result)) {
                 return $result;
@@ -112,8 +112,8 @@
 
         public function getAllCount(): int
         {
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
 
             $sql = 'SELECT count(*) as count FROM ' . self::TABLE;
             if (!empty($this->sectionId)) {
@@ -125,8 +125,8 @@
 
         public function getMainSections(): array
         {
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
 
             $res = $DB->query('SELECT id, name, description, image_id FROM ' . self::TABLE_SECTIONS .' WHERE parrent_id = 0');
             return  $res ?: [];

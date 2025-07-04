@@ -84,21 +84,25 @@
      */
     function ddd($data): void
     {
-        echo '<pre>';
-        print_r($data);
-        echo '</pre>';
+        echo '<pre>' . print_r($data, true) . '</pre>';
         die();
     }
 
     /**
      * Реализация механизма автозагрузки классов
      */
-    spl_autoload_register(function ($class) {
-        if (strpos($class, 'Core') === 0) {
-            $class     = str_replace('\\', '/', $class);
-            $classPath = ROOT_PATH . '/core/lib/' . $class . '.class.php';
+    spl_autoload_register(static function ($class) {
+        if (str_starts_with($class, 'Core')) {
+            $class        = str_replace('\\', '/', $class);
+            $classPath    = ROOT_PATH . '/core/lib/' . $class . '.class.php';
+            $classPathTwo = ROOT_PATH . '/core/lib/' . $class . '.php';
+
             if (file_exists($classPath)) {
                 require_once $classPath;
+            }
+
+            if (file_exists($classPathTwo)) {
+                require_once $classPathTwo;
             }
         }
     });

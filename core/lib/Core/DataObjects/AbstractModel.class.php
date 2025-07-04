@@ -21,7 +21,7 @@
 
     namespace Core\DataObjects;
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Helpers\SystemFunctions;
     use DateTime;
     use JsonSerializable;
@@ -152,9 +152,33 @@
         {
             // Получаем свойства таблицы
             if (empty(self::$columnList[$table])) {
-                /** @var DB $db */
-                $db = DB::getInstance();
-                self::$columnList[$table] = $db->getColumnsList($table);
+                /** @var DataBase $db */
+                $db      = DataBase::getInstance();
+                $columns = $db->query('SHOW COLUMNS FROM `' . $table . '`');
+                $result  = [];
+                foreach ($columns as $info) {
+                    $result[$info['Field']]['field'] = $info['Field'];
+                    $typeData            = [];
+                    preg_match_all('/^(\w+)(\(([\w,\']+)\))?(\s\w+)?$/m', $info['Type'], $typeData, PREG_SET_ORDER);
+
+                    // Задаём тип колонки
+                    if(empty($typeData[0][1]) === false) {
+                        $result[$info['Field']]['type'] = $typeData[0][1];
+                    }
+
+                    // Если это enum, то в скобках идут возможные значения, иначе там указана длинна указанного значения
+                    if (empty($typeData[0][3]) === false) {
+                        if ($result[$info['Field']]['type'] === 'enum') {
+                            // Заменяем кавычки в начале и конце строки
+                            $typeData[0][3] = preg_replace('/^\'|\'$/m', '', $typeData[0][3]);
+                            // Разбиваем значения
+                            $result[$info['Field']]['enumValues'] = explode('\',\'', $typeData[0][3]);
+                        } else {
+                            $result[$info['Field']]['length'] = (int)$typeData[0][3];
+                        }
+                    }
+                }
+                self::$columnList[$table] = $result;
             }
             return self::$columnList[$table];
         }
@@ -194,8 +218,8 @@
          */
         public function save(): self
         {
-            /** @var DB $db */
-            $db = DB::getInstance();
+            /** @var DataBase $db */
+            $db = DataBase::getInstance();
             $id = static::ID_NAME;
             try {
                 if (!empty($this->$id)) {
@@ -204,9 +228,9 @@
                         $db->update(static::TABLE, [$id => $this->$id], $this->sanitizeFields($diff));
                     }
                 } else {
-                    $this->$id = $db->addItem(static::TABLE, $this->sanitizeFields($this->getDataDifference(true)));
+                    $this->$id = $db->add(static::TABLE, $this->sanitizeFields($this->getDataDifference(true)));
                 }
-                $this->setData($db->getItem(static::TABLE, [$id => $this->$id]));
+                $this->setData($db->get(static::TABLE, [$id => $this->$id]));
             } catch (Throwable $e) {
                 throw new DataObjectsException('Произошла ошибка при сохранении данных: ' . $e->getMessage());
             }
@@ -221,10 +245,10 @@
          */
         public function delete(): bool
         {
-            /** @var DB $db */
-            $db     = DB::getInstance();
+            /** @var DataBase $db */
+            $db     = DataBase::getInstance();
             $id     = static::ID_NAME;
-            $result = $db->remove(static::TABLE, [$id => $this->$id]);
+            $result = $db->delete(static::TABLE, [$id => $this->$id]);
             if ($result) {
                 $this->$id = null;
             }
@@ -319,9 +343,9 @@
          */
         public static function select(array $filter): ModelCollection
         {
-            /** @var DB $db */
-            $db              = DB::getInstance();
-            $result          = $db->getItems(static::TABLE, $filter);
+            /** @var DataBase $db */
+            $db              = DataBase::getInstance();
+            $result          = $db->getList(static::TABLE, $filter);
             $collectionClass = static::COLLECTION;
             $collection      = new $collectionClass();
             foreach ($result as $element) {
@@ -341,9 +365,9 @@
          */
         public static function getItem(int $id): ?self
         {
-            /** @var DB $db */
-            $db   = DB::getInstance();
-            $data = $db->getItem(static::TABLE, [static::ID_NAME => $id]);
+            /** @var DataBase $db */
+            $db   = DataBase::getInstance();
+            $data = $db->get(static::TABLE, [static::ID_NAME => $id]);
             if (empty($data)) {
                 return null;
             }

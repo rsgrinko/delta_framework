@@ -27,7 +27,7 @@
 
     use Core\CoreException;
     use Core\Helpers\{Cache, Log, Mail, Sanitize, SystemFunctions};
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\DTO\User\FilterUser;
     use Throwable;
 
@@ -134,7 +134,7 @@
             if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
-                $result = (DB::getInstance())->getItem(self::TABLE, ['id' => $this->id]);
+                $result = (DataBase::getInstance())->get(self::TABLE, ['id' => $this->id]);
                 $result = array_merge($result, ['roles' => $this->getRolesObject()->getRoles()]);
                 $result['nameForDisplay'] = '[' . $result['id'] . '] (' . $result['login'] . ') ' . $result['name'];
 
@@ -248,7 +248,7 @@
             if (Cache::check($cacheId)) {
                 $res = Cache::get($cacheId);
             } else {
-                $res = (DB::getInstance())->query('SELECT * FROM `' . self::TABLE . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
+                $res = (DataBase::getInstance())->query('SELECT * FROM `'.self::TABLE.'` ORDER BY `id` '.$sort.' LIMIT '.$limit);
                 Cache::set($cacheId, $res);
             }
             return $res;
@@ -263,7 +263,7 @@
         public function createToken(): string
         {
             $newToken = self::generateGUID();
-            (DB::getInstance())->update(self::TABLE, ['id' => $this->id], ['token' => $newToken]);
+            (DataBase::getInstance())->update(self::TABLE, ['id' => $this->id], ['token' => $newToken]);
             Log::logToFile('Создан токен', 'User.log', ['userId' => $this->id, 'token' => $newToken]);
             return $newToken;
         }
@@ -292,7 +292,7 @@
          */
         public static function isTokenExists(string $token): bool
         {
-            $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
+            $result = (DataBase::getInstance())->get(self::TABLE, ['token' => $token]);
             if ($result) {
                 return true;
             }
@@ -310,7 +310,7 @@
          */
         public static function getByToken(string $token): ?self
         {
-            $result = (DB::getInstance())->getItem(self::TABLE, ['token' => $token]);
+            $result = (DataBase::getInstance())->get(self::TABLE, ['token' => $token]);
             if ($result) {
                 return (new self((int)$result['id']));
             }
@@ -327,7 +327,7 @@
          */
         public static function isUserExistsByParams(array $where): bool
         {
-            $result = (DB::getInstance())->getItem(self::TABLE, $where);
+            $result = (DataBase::getInstance())->get(self::TABLE, $where);
             if (!empty($result)) {
                 return true;
             }
@@ -345,7 +345,7 @@
          */
         public static function getByParams(array $where): ?self
         {
-            $result = (DB::getInstance())->getItem(self::TABLE, $where);
+            $result = (DataBase::getInstance())->get(self::TABLE, $where);
             if (!empty($result)) {
                 return (new self((int)$result['id']));
             }
@@ -390,7 +390,7 @@
          */
         public static function isOnline(int $id): bool
         {
-            $res         = (DB::getInstance())->query('SELECT last_active FROM `' . self::TABLE . '` WHERE id=' . $id);
+            $res         = (DataBase::getInstance())->query('SELECT last_active FROM `'.self::TABLE.'` WHERE id='.$id);
             $last_active = $res[0]['last_active'];
             $timeNow     = time();
             if ($last_active > ($timeNow - USER_ONLINE_TIME)) {
@@ -441,9 +441,9 @@
             Log::logToFile('Создание нового пользователя', 'User.log', func_get_args());
             $verificationCode = md5(self::$cryptoSalt . $email . $login . time());
 
-            /** @var $DB DB Объект базы данных */
-            $DB         = DB::getInstance();
-            $userId     = $DB->addItem(self::TABLE, [
+            /** @var $DB DataBase Объект базы данных */
+            $DB         = DataBase::getInstance();
+            $userId     = $DB->add(self::TABLE, [
                 'login'             => $login,
                 'password'          => self::passwordEncryption($password),
                 'name'              => $name,
@@ -503,8 +503,8 @@
             foreach($fields as $key => $value) {
                 $beforeData[$key] = $this->getAllUserData()[$key];
             }
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
             Log::logToFile(
                 'Данные пользователя изменены', 'User.log', ['userId' => $this->id, 'before' => $beforeData, 'after' => $fields]
             );
@@ -525,9 +525,9 @@
             if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
-                /** @var $DB DB Объект базы данных */
-                $DB     = DB::getInstance();
-                $result = $DB->getItem(self::TABLE, ['login' => $login]);
+                /** @var $DB DataBase Объект базы данных */
+                $DB     = DataBase::getInstance();
+                $result = $DB->get(self::TABLE, ['login' => $login]);
                 Cache::set($cacheId, $result);
             }
 
@@ -549,9 +549,9 @@
             if (Cache::check($cacheId) && Cache::getAge($cacheId) < 300) {
                 $result = Cache::get($cacheId);
             } else {
-                /** @var $DB DB Объект базы данных */
-                $DB     = DB::getInstance();
-                $result = $DB->getItems(self::TABLE, ['id' => '>0']);
+                /** @var $DB DataBase Объект базы данных */
+                $DB     = DataBase::getInstance();
+                $result = $DB->getList(self::TABLE, ['id' => '>0']);
                 Cache::set($cacheId, $result);
             }
 
@@ -577,9 +577,9 @@
                 throw new CoreException('Передан некорректный идентификатор пользователя');
             }
             self::logout();
-            /** @var $DB DB Объект базы данных */
-            $DB     = DB::getInstance();
-            $result = $DB->getItem(self::TABLE, ['id' => $id], true);
+            /** @var $DB DataBase Объект базы данных */
+            $DB     = DataBase::getInstance();
+            $result = $DB->get(self::TABLE, ['id' => $id], true);
 
             if ($result) {
                 $_SESSION['id']        = $result['id'];
@@ -610,9 +610,9 @@
          */
         public static function securityAuthorize(string $login, string $password, bool $remember = false): bool
         {
-            /** @var $DB DB Объект базы данных */
-            $DB     = DB::getInstance();
-            $result = $DB->getItem(self::TABLE, ['login' => $login, 'password' => self::passwordEncryption($password)], true);
+            /** @var $DB DataBase Объект базы данных */
+            $DB     = DataBase::getInstance();
+            $result = $DB->get(self::TABLE, ['login' => $login, 'password' => self::passwordEncryption($password)], true);
             if ($result) {
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = 'Y';
@@ -654,13 +654,13 @@
          */
         public static function isAuthorized(): bool
         {
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
 
             if (!empty($_COOKIE['userId'])
                 && !empty($_COOKIE['userLogin'])
                 && self::isUserExists($_COOKIE['userLogin'])) {
-                $arUser = $DB->getItem(self::TABLE, ['id' => $_COOKIE['userId']]);
+                $arUser = $DB->get(self::TABLE, ['id' => $_COOKIE['userId']]);
                 if ($_COOKIE['token'] == md5(self::$cryptoSalt . $arUser['id'] . $arUser['login'] . $arUser['password'])) {
                     if (empty($_SESSION['authorize'])) {
                         self::authorize($arUser['id']);
@@ -671,7 +671,7 @@
             if (empty($_SESSION['authorize']) || $_SESSION['authorize'] !== 'Y') {
                 return false;
             }
-            $result = $DB->getItem(self::TABLE, ['login' => $_SESSION['login']]);
+            $result = $DB->get(self::TABLE, ['login' => $_SESSION['login']]);
             if ($result) {
                 if (self::passwordEncryption($result['password']) == $_SESSION['password']) {
                     $DB->update(self::TABLE, ['id' => $result['id']], ['last_active' => time()]);
@@ -793,8 +793,8 @@
          */
         public static function exportUsers(): string
         {
-            /** @var $DB DB Объект базы данных */
-            $DB  = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB  = DataBase::getInstance();
             $res = $DB->query('SELECT * FROM ' . self::TABLE);
             foreach ($res as $key => $element) {
                 $res[$key]['roles'] = (new self($element['id']))->getRolesObject()->getRoles();
@@ -813,9 +813,9 @@
         public static function getListByRole(int $roleId): array
         {
             $result = [];
-            /** @var $DB DB Объект базы данных */
-            $DB  = DB::getInstance();
-            $res = $DB->getItems(Roles::USER_ROLES_TABLE, ['id' => $roleId]);
+            /** @var $DB DataBase Объект базы данных */
+            $DB  = DataBase::getInstance();
+            $res = $DB->getList(Roles::USER_ROLES_TABLE, ['id' => $roleId]);
             foreach ($res as $element) {
                 $result[] = new self((int)$element['user_id']);
             }
@@ -842,9 +842,9 @@
         {
             $verificationCode = Sanitize::sanitizeString($verificationCode);
 
-            /** @var $DB DB Объект базы данных */
-            $DB  = DB::getInstance();
-            $res = $DB->getItem(self::TABLE, ['verification_code' => $verificationCode]);
+            /** @var $DB DataBase Объект базы данных */
+            $DB  = DataBase::getInstance();
+            $res = $DB->get(self::TABLE, ['verification_code' => $verificationCode]);
             if ($res) {
                 if ($res['email_confirmed'] === CODE_VALUE_Y) {
                     Log::logToFile('E-Mail уже верифицирован', 'User.log', ['userId' => $res['id'], 'code' => $verificationCode]);
@@ -904,8 +904,8 @@
          */
         public static function getUsersCount($onlyConfirmed = false): int
         {
-            /** @var $DB DB Объект базы данных */
-            $DB  = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB  = DataBase::getInstance();
             $sql = 'SELECT COUNT(*) as count FROM ' . self::TABLE;
             if ($onlyConfirmed) {
                 $sql .= ' WHERE email_confirmed="' . CODE_VALUE_Y . '"';

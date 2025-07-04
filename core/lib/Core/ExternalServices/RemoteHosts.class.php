@@ -29,7 +29,7 @@
     namespace Core\ExternalServices;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
 
     class RemoteHosts
     {
@@ -61,16 +61,16 @@
          */
         public static function getHosts(string $limit = '10', string $sort = 'ASC'): array
         {
-            /** @var DB $DB Объект БД */
-            $DB  = DB::getInstance();
+            /** @var DataBase $DB Объект БД */
+            $DB  = DataBase::getInstance();
             $res = $DB->query('SELECT * FROM `' . self::TABLE . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
             return $res ?? [];
         }
 
         public static function getAllCount(): int
         {
-            /** @var DB $DB Объект БД */
-            $DB  = DB::getInstance();
+            /** @var DataBase $DB Объект БД */
+            $DB  = DataBase::getInstance();
             $res = $DB->query('SELECT count(id) as count FROM ' . self::TABLE);
             if ($res !== null) {
                 return (int)$res[0]['count'];
@@ -80,9 +80,9 @@
 
         public function getHostData(): array
         {
-            /** @var DB $DB Объект БД */
-            $DB  = DB::getInstance();
-            $res = $DB->getItem(self::TABLE, ['id' => $this->selectedHostId]);
+            /** @var DataBase $DB Объект БД */
+            $DB  = DataBase::getInstance();
+            $res = $DB->get(self::TABLE, ['id' => $this->selectedHostId]);
             if ($res !== null) {
                 return $res;
             }
@@ -91,9 +91,9 @@
 
         public function selectHost(int $id): self
         {
-            /** @var DB $DB Объект БД */
-            $DB                       = DB::getInstance();
-            $this->selectedHostParams = $DB->getItem(self::TABLE, ['id' => $id]);
+            /** @var DataBase $DB Объект БД */
+            $DB                       = DataBase::getInstance();
+            $this->selectedHostParams = $DB->get(self::TABLE, ['id' => $id]);
             $this->selectedHostId     = $id;
             return $this;
         }

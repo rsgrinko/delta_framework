@@ -1,5 +1,5 @@
 <!DOCTUPE html>
-<html>
+<html lang="ru">
 <head>
     <title>{% block title %}Delta Framework{% endblock %}</title>
     <link href="/assets/css/style.css?{{ salt }}" rel="stylesheet">
@@ -8,13 +8,10 @@
     <script src="/assets/js/script.js?{{ salt }}"></script>
 </head>
 <body>
-
-
 <div class="main">
     <div class="logo">
         <div class="logoText">DeltaFramework</div>
     </div>
-
     <div class="header">
         <div class="mainMenu">
             <div class="menuItem {% if currentPage == 'index' %}active{% endif %}"><a href="/">Главная</a></div>
@@ -34,14 +31,11 @@
                 {% endif %}
             </div>
         </div>
-
-
     </div>
     <div class="content">
         <div class="breadcrumbs"><a href="/">Главная</a> &raquo; Раздел &raquo; Тестовая</div>
         {% block main %}{% endblock %}
     </div>
-
     <div class="footer">
         <a href="https://github.com/rsgrinko/delta_framework" target="_blank">DeltaFramework</a> by <a href="https://it-stories.ru/about" target="_blank">Roman S Grinko</a>, {{ currentYear }} | Generation time: {{ executionTime }} | Memory use: {{ memoryUse }}
     </div>

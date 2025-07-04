@@ -3,7 +3,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Helpers\Cache;
 
     class Dialog
@@ -44,7 +44,7 @@
          */
         public static function getDialogId(int $userOne, int $userTwo): ?int
         {
-            $DB       = DB::getInstance();
+            $DB       = DataBase::getInstance();
             $dialogId = $DB->query(
                 'SELECT `id` FROM ' . self::TABLE_DIALOGS
                     . ' WHERE (`send`="' . $userOne . '" and `receive`="' . $userTwo
@@ -64,9 +64,9 @@
          */
         private function markDialogViewed(int $dialogId): void
         {
-            /** @var $DB DB Объект базы данных */
-            $DB       = DB::getInstance();
-            $dialogData = $DB->getItem(self::TABLE_DIALOGS, ['id' => $dialogId]);
+            /** @var $DB DataBase Объект базы данных */
+            $DB       = DataBase::getInstance();
+            $dialogData = $DB->get(self::TABLE_DIALOGS, ['id' => $dialogId]);
             if ($this->user->getId() === (int)$dialogData['receive']) {
                 $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed' => CODE_VALUE_Y]);
                 $DB->update(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'user_to' => $this->user->getId(), 'viewed' => CODE_VALUE_N], ['viewed' => CODE_VALUE_Y]);
@@ -75,9 +75,9 @@
 
         public function createDialog(int $userId): ?int
         {
-            /** @var $DB DB Объект базы данных */
-            $DB       = DB::getInstance();
-            return $DB->addItem(self::TABLE_DIALOGS, ['viewed' => CODE_VALUE_N, 'send' => $this->user->getId(), 'receive' => $userId]);
+            /** @var $DB DataBase Объект базы данных */
+            $DB       = DataBase::getInstance();
+            return $DB->add(self::TABLE_DIALOGS, ['viewed' => CODE_VALUE_N, 'send' => $this->user->getId(), 'receive' => $userId]);
         }
         /**
          * Получение диалогов
@@ -87,8 +87,8 @@
          */
         public function getDialogs(): array
         {
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
             $dialogs = $DB->query(
                 'SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `send`="' . $this->user->getId() . '" OR `receive`="' . $this->user->getId() . '" ORDER BY `date_updated` DESC'
             );
@@ -108,8 +108,8 @@
          */
         public function getDialogCompanionId(int $dialogId): ?int
         {
-            /** @var $DB DB Объект базы данных */
-            $DB     = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB     = DataBase::getInstance();
             $dialog = $DB->query('SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `id`="' . $dialogId . '"');
             if (empty($dialog)) {
                 return null;
@@ -135,8 +135,8 @@
          */
         public function getMessages(int $dialogId, bool $markDialogViewed = false, ?array $paginationData = null): array
         {
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
             $paginationSqlString = '';
             if ($paginationData !== null) {
                 $paginationSqlString = ' LIMIT ' . $paginationData['from'] . ', ' . $paginationData['to'];
@@ -161,8 +161,8 @@
             if (!User::isUserExistsByParams(['id' => $to])) {
                 throw new CoreException('Пользователь с идентификатором ' . $to . ' отсутствует в базе', CoreException::ERROR_USER_NOT_FOUND);
             }
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
             $dialogId = self::getDialogId($this->user->getId(), $to);
             if (empty($dialogId)) {
                 $dialogId = $this->createDialog($to);
@@ -170,7 +170,7 @@
                 $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed'=> CODE_VALUE_N, 'send' => $this->user->getId(), 'receive' => $to]);
             }
 
-            $result = $DB->addItem(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => self::MESSAGE_TYPE_TEXT, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $message]);
+            $result = $DB->add(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => self::MESSAGE_TYPE_TEXT, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $message]);
             return (int)$result > 0;
         }
 
@@ -189,8 +189,8 @@
             if (!User::isUserExistsByParams(['id' => $to])) {
                 throw new CoreException('Пользователь с идентификатором ' . $to . ' отсутствует в базе', CoreException::ERROR_USER_NOT_FOUND);
             }
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
             $dialogId = self::getDialogId($this->user->getId(), $to);
             if (empty($dialogId)) {
                 $dialogId = $this->createDialog($to);
@@ -198,7 +198,7 @@
                 $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed'=> CODE_VALUE_N, 'send' => $this->user->getId(), 'receive' => $to]);
             }
 
-            $result = $DB->addItem(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => $sendAsImage ? self::MESSAGE_TYPE_IMAGE : self::MESSAGE_TYPE_FILE, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $fileId]);
+            $result = $DB->add(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'type' => $sendAsImage ? self::MESSAGE_TYPE_IMAGE : self::MESSAGE_TYPE_FILE, 'user_from' => $this->user->getId(), 'user_to' => $to, 'text' => $fileId]);
             return (int)$result > 0;
         }
 
@@ -211,9 +211,9 @@
          */
         public function getDialogUnviewedMessagesCount(int $dialogId): int
         {
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
-            return $DB->getCountItems(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'viewed' => CODE_VALUE_N, 'user_to' => $this->user->getId()]);
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
+            return $DB->getCount(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'viewed' => CODE_VALUE_N, 'user_to' => $this->user->getId()]);
         }
 
         /**
@@ -223,9 +223,9 @@
          */
         public function getUnviewedMessagesCount(): int
         {
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
-            return $DB->getCountItems(self::TABLE_MESSAGES, ['viewed' => CODE_VALUE_N, 'user_to' => $this->user->getId()]);
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
+            return $DB->getCount(self::TABLE_MESSAGES, ['viewed' => CODE_VALUE_N, 'user_to' => $this->user->getId()]);
         }
 
         /**
@@ -237,9 +237,9 @@
          */
         public function getDialogMessagesCount(int $dialogId): int
         {
-            /** @var $DB DB Объект базы данных */
-            $DB = DB::getInstance();
-            return $DB->getCountItems(self::TABLE_MESSAGES, ['dialog_id' => $dialogId]);
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
+            return $DB->getCount(self::TABLE_MESSAGES, ['dialog_id' => $dialogId]);
         }
 
 

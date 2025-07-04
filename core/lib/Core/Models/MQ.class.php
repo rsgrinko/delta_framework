@@ -22,7 +22,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Helpers\{Log};
 
     class MQ
@@ -60,8 +60,8 @@
         /** Лимит количества запущенных воркеров */
         public const WORKERS_LIMIT = 1;
 
-        /** @var DB|null $DB Объект базы */
-        private ?DB $DB;
+        /** @var DataBase|null $DB Объект базы */
+        private ?DataBase $DB;
 
         /** Приоритет по умолчанию */
         public const DEFAULT_PRIORITY = 5;
@@ -92,7 +92,7 @@
          */
         public function __construct(?string $workerId = null)
         {
-            $this->DB       = DB::getInstance();
+            $this->DB       = DataBase::getInstance();
             $this->workerId = $workerId ?: explode('.', uniqid('MQ_', true))[0];
         }
 
@@ -195,7 +195,7 @@
          */
         private function getActiveTasks(): ?array
         {
-            return $this->DB->getItems(
+            return $this->DB->getList(
                 self::TABLE, [
                 'active'      => self::VALUE_Y,
                 'in_progress' => self::VALUE_N,
@@ -361,9 +361,8 @@
                 false
             );
 
-            $arData = [];
             for ($i = 0; $i < $count; $i++) {
-                $arData[] = [
+                $this->DB->add(self::TABLE, [
                     'active'         => self::VALUE_N,
                     'in_progress'    => self::VALUE_N,
                     'attempts'       => '0',
@@ -372,10 +371,8 @@
                     'method'         => $method,
                     'priority'       => $priority,
                     'params'         => $params,
-                ];
+                ]);
             }
-
-            $this->DB->addItems(self::TABLE, $arData);
 
             $this->priority = null;
 
@@ -430,7 +427,7 @@
             }
 
 
-            $taskId = $this->DB->addItem(
+            $taskId = $this->DB->add(
                 self::TABLE, [
                                'active'         => self::VALUE_N,
                                'in_progress'    => self::VALUE_N,
@@ -475,7 +472,7 @@
             if ($taskId === null) {
                 throw new CoreException('Не передан идентификатор задания');
             }
-            return $this->DB->remove(self::TABLE, ['id' => $taskId]);
+            return $this->DB->delete(self::TABLE, ['id' => $taskId]);
         }
 
         /**
@@ -507,7 +504,7 @@
          */
         public function execute(int $taskId): MQResponse
         {
-            $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+            $arTask = $this->DB->get(self::TABLE, ['id' => $taskId]);
 
             Log::logToFile(
                 $this->getWorkerId() . ': Задание ' . $taskId . ' взято в работу',
@@ -662,9 +659,9 @@
          */
         private function saveTaskToHistory(int $taskId): ?int
         {
-            $arTask = $this->DB->getItem(self::TABLE, ['id' => $taskId]);
+            $arTask = $this->DB->get(self::TABLE, ['id' => $taskId]);
             if (!empty($arTask)) {
-                $taskHistoryId = $this->DB->addItem(
+                $taskHistoryId = $this->DB->add(
                     self::TABLE_HISTORY, [
                                            'task_id'        => $arTask['id'],
                                            'execution_time' => $arTask['execution_time'],
@@ -723,11 +720,7 @@
          */
         public function getCountTasks(?array $filter = null): int
         {
-            $filterString = '';
-            if (!empty($filter)) {
-                $filterString = ' WHERE ' . $this->DB->createWhere($filter);
-            }
-            return (int)$this->DB->query('SELECT count(id) as count FROM ' . self::TABLE . $filterString)[0]['count'];
+            return (int)$this->DB->getCount(self::TABLE . $filter);
         }
 
         /**
@@ -740,11 +733,7 @@
          */
         public function getCountTasksHistory(?array $filter = null): int
         {
-            $filterString = '';
-            if (!empty($filter)) {
-                $filterString = ' WHERE ' . $this->DB->createWhere($filter);
-            }
-            return (int)$this->DB->query('SELECT count(id) as count FROM ' . self::TABLE_HISTORY . $filterString)[0]['count'];
+            return (int)$this->DB->getCount(self::TABLE_HISTORY . $filter);
         }
 
         /**

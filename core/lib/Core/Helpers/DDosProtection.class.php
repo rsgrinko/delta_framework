@@ -24,7 +24,7 @@
     namespace Core\Helpers;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
 
     /**
      * Класс защиты от DDOS атак
@@ -80,8 +80,8 @@
 
         private function clearData(): void
         {
-            /** @var DB $db */
-            $DB = DB::getInstance();
+            /** @var DataBase $db */
+            $DB = DataBase::getInstance();
             $DB->query('DELETE FROM ' . self::TABLE . ' WHERE last_active < ' . (time() - $this->timeInterval));
         }
 
@@ -93,9 +93,9 @@
             $this->clearData();
             $this->checkAndSetDefaultParams();
 
-            /** @var DB $db */
-            $DB = DB::getInstance();
-            $item = $DB->getItem(self::TABLE, ['observed_key' => $this->observedKey]);
+            /** @var DataBase $db */
+            $DB = DataBase::getInstance();
+            $item = $DB->get(self::TABLE, ['observed_key' => $this->observedKey]);
             if ($item) {
                 if (USE_DDOS_PROTECTION && $item['attempts'] >= $item['attempts_limit'] && (time() - $item['last_active']) <= $item['time_interval']) {
                     echo '<div style="color: #b30000;background: #ffe2e2;padding: 10px;border: 1px solid #ffa0a0;margin: 10px;display: inline-block;">';
@@ -107,7 +107,7 @@
 
                 $DB->update(self::TABLE, ['id' => $item['id']], ['attempts' => ++$item['attempts'], 'last_active' => time()]);
             } else {
-                $DB->addItem(self::TABLE,
+                $DB->add(self::TABLE,
                              [
                                  'user_id'        => $this->userId,
                                  'place'          => $this->place,

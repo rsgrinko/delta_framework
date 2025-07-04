@@ -21,7 +21,7 @@
 
     namespace Core;
 
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Helpers\Mail;
     use Core\Helpers\SystemFunctions;
     use Core\Helpers\Thumbs;
@@ -57,8 +57,8 @@
 
         public static function sendBash(...$args): ?string
         {
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
             $file = file_get_contents('http://bashorg.org/random');
             $file = preg_match_all('|<div class="quote">(.+)</div>|U', $file, $frazes);
@@ -79,7 +79,7 @@
                 $res  = $DB->query('SELECT * FROM bashorg WHERE hash="' . $hash . '"');
                 if (!$res) {
                     $i++;
-                    $DB->addItem('bashorg', ['hash' => $hash, 'text' => $text]);
+                    $DB->add('bashorg', ['hash' => $hash, 'text' => $text]);
                 }
             }
             sleep(2);
@@ -88,8 +88,8 @@
 
         public static function bashPage($page)
         {
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
             $file = file_get_contents('http://bashorg.org/page/' . $page . '/');
             $file = preg_match_all('|<div class="quote">(.+)</div>|U', $file, $frazes);
@@ -108,7 +108,7 @@
                 $res  = $DB->query('SELECT * FROM bashorg WHERE hash="' . $hash . '"');
                 if (!$res) {
                     $i++;
-                    $itemId = $DB->addItem('bashorg', ['hash' => $hash, 'text' => $text]);
+                    $itemId = $DB->add('bashorg', ['hash' => $hash, 'text' => $text]);
                     sendTelegram('<b>Добавлена цитата ID ' . $itemId . ' (' . $page . ' страница)</b>' . PHP_EOL . $text);
                 }
                 $text = null;
@@ -125,8 +125,8 @@
 
         public static function bashPageMeta($page)
         {
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
             $file = file_get_contents('http://bashorg.org/page/' . $page . '/');
             $file = \iconv('windows-1251//IGNORE', 'UTF-8//IGNORE', $file);
@@ -180,8 +180,8 @@
 
         public static function anekdot()
         {
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
             $file    = file_get_contents('https://www.anekdot.ru/rss/randomu.html');
             $file    = explode('JSON.parse(\'', $file)[1];
@@ -200,7 +200,7 @@
                 $res  = $DB->query('SELECT * FROM jokes WHERE hash="' . $hash . '"');
                 if (!$res) {
                     $i++;
-                    $itemId = $DB->addItem('jokes', ['hash' => $hash, 'text' => $joke]);
+                    $itemId = $DB->add('jokes', ['hash' => $hash, 'text' => $joke]);
                 }
             }
             if($i < 1 ) {
@@ -214,8 +214,8 @@
         {
             //$result = 'Ничего нового не добавлено';
             $result = null;
-                /** @var DB $DB */
-            $DB = DB::getInstance();
+                /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
             /**
              * CType = ?
@@ -247,7 +247,7 @@
             $file = addslashes($file);
             $res  = $DB->query('SELECT * FROM jokes WHERE hash="' . $hash . '"');
             if (!$res) {
-                $itemId = $DB->addItem('jokes', ['hash' => $hash, 'text' => $file]);
+                $itemId = $DB->add('jokes', ['hash' => $hash, 'text' => $file]);
                 $result = 'Добавлен новый элемент с ID ' . $itemId;
             }
 
@@ -260,8 +260,8 @@
 
         public static function clearDuplicates()
         {
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
             $DB->query(
                 'CREATE TEMPORARY TABLE `t_temp` AS  (SELECT min(id) as id FROM `jokes` GROUP BY hash );
 DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
@@ -278,10 +278,10 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             $telegram = new \Core\ExternalServices\TelegramSender(SystemConfig::getValue('TELEGRAM_BOT_TOKEN'));
             $telegram->setChat(' -1001610334197');
 
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
-            $joke = $DB->getItem('jokes', ['sended' => 'N']);
+            $joke = $DB->get('jokes', ['sended' => 'N']);
             $joke = $DB->query('select * from jokes where sended="N" order by id desc')[0];
             $telegram->sendMessage('<b>Шутейка #' . $joke['id'] . '</b>' . PHP_EOL . $joke['text']);
             $DB->update('jokes', ['id' => $joke['id']], ['sended' => 'Y']);
@@ -292,8 +292,8 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
         public static function getMySLO()
         {
             $result = 'Нет данных для обновления';
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
 
             $file  = file_get_contents('https://myslo.ru/news/criminal');
@@ -346,7 +346,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
                 $res = $telegram->sendPhoto($tmpFile, $post);
                 sendTelegram($post);
                 @unlink($tmpFile);
-                $itemId = $DB->addItem('myslo', ['hash' => $hash, 'title' => $title, 'image' => $image, 'text' => $lidArticle . PHP_EOL . $fullArticle, 'link' => $link]);
+                $itemId = $DB->add('myslo', ['hash' => $hash, 'title' => $title, 'image' => $image, 'text' => $lidArticle.PHP_EOL.$fullArticle, 'link' => $link]);
 
                 return $res;//'Добавлен новый элемент с ID ' . $itemId;
             } else {
@@ -429,17 +429,17 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
 
             $result = [];
             $lastId = null;
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
             foreach ($response['posts'] as $post) {
                 if ($post['type'] !== 'post') {
                     continue;
                 }
-                if ($DB->getItem($tableName, ['post_id' => (int)$post['id']])) {
+                if ($DB->get($tableName, ['post_id' => (int) $post['id']])) {
                     continue;
                 }
                 $DB->query('SET NAMES \'utf8mb4\'');
-                $result[] = $DB->addItem(
+                $result[] = $DB->add(
                     $tableName, [
                                      'type'          => $post['type'],
                                      'post_id'       => (int)$post['id'],
@@ -509,13 +509,13 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
          */
         public static function spider(string $url): string
         {
-            $DB = DB::getInstance();
+            $DB = DataBase::getInstance();
 
             if (empty($url)) {
                 throw new Exception('Передан пустой url');
             }
 
-            if ($DB->getItem('spider',['url' => $url]) !== null) {
+            if ($DB->get('spider',['url' => $url]) !== null) {
                 throw new Exception('Данный url ' . $url . ' уже присутствует в базе');
             }
             $defaultSocketTimeout = ini_get('default_socket_timeout');
@@ -554,7 +554,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             $dataText = preg_replace('/<[^>]+>/', '', $data);
 
             try {
-                $DB->addItem(
+                $DB->add(
                     'spider',
                     [
                         'url'  => $url,
@@ -593,7 +593,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
 
 
 
-                if ($DB->getItem('spider',['url' => $link]) !== null) {
+                if ($DB->get('spider',['url' => $link]) !== null) {
                     $counterBreak++;
                     continue;
                 }

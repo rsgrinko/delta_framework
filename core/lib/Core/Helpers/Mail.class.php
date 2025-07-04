@@ -22,7 +22,7 @@
     namespace Core\Helpers;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Models\User;
     use Core\SystemConfig;
     use Throwable;
@@ -254,15 +254,15 @@
             $message[] = '--' . $boundary . '--';
             $res       = [];
 
-            /** @var DB $DB */
-            $DB = DB::getInstance();
+            /** @var DataBase $DB */
+            $DB = DataBase::getInstance();
 
             foreach ($array_to as $to) {
                 $result = mb_send_mail($to, $subject, implode("\r\n", $message), implode("\r\n", $headers));
                 $res[] = $result;
 
                 try {
-                    $DB->addItem(self::TABLE, [
+                    $DB->add(self::TABLE, [
                         'to_mail'       => $this->toEmail,
                         'to_name'       => $this->toName,
                         'from_mail'     => $this->fromEmail,

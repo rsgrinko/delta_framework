@@ -22,7 +22,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
 
     class File
     {
@@ -42,9 +42,9 @@
         private ?string $folder = null;
 
         /**
-         * @var DB|null $DB Объект базы
+         * @var DataBase|null $DB Объект базы
          */
-        private ?DB $DB;
+        private ?DataBase $DB;
 
         /**
          * @var int|null $id Идентификатор файла
@@ -69,7 +69,7 @@
         public function __construct(?int $id = null)
         {
             $this->folder = $_SERVER['DOCUMENT_ROOT'] . self::FOLDER;
-            $this->DB     = DB::getInstance();
+            $this->DB     = DataBase::getInstance();
             if (!empty($id) && $id > 0) {
                 $this->id = $id;
                 $this->loadFileProps();
@@ -207,7 +207,7 @@
             $this->name = htmlspecialchars(strip_tags(trim($fileName)));
             $this->path = self::FOLDER . '/' . $storageFileName;
 
-            $this->id = $this->DB->addItem(self::TABLE, ['name' => $this->name, 'path' => $this->path]);
+            $this->id = $this->DB->add(self::TABLE, ['name' => $this->name, 'path' => $this->path]);
 
             return $this;
         }

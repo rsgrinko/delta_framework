@@ -21,7 +21,7 @@
 
     namespace Core\Models;
 
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Throwable;
 
     /**
@@ -262,11 +262,11 @@
             ];
 
             try {
-                /** @var DB $db */
-                $db = DB::getInstance();
+                /** @var DataBase $db */
+                $db = DataBase::getInstance();
 
                 if ($this->id === null) {
-                    $result = $db->addItem(self::TABLE, $utmData);
+                    $result = $db->add(self::TABLE, $utmData);
                     if ($result > 0) {
                         $this->id = $result;
                     }

@@ -22,7 +22,7 @@
     namespace Core\Models;
 
     use Core\CoreException;
-    use Core\DataBases\DB;
+    use Core\Database\DataBase;
     use Core\Helpers\Cache;
 
     class Roles
@@ -89,8 +89,8 @@
             if (Cache::check($cacheId)) {
                 $userRoles = Cache::get($cacheId);
             } else {
-                /** @var  $DB DB */
-                $DB = DB::getInstance();
+                /** @var  $DB DataBase */
+                $DB = DataBase::getInstance();
 
                 $res       = $DB->query('SELECT role_id FROM `' . self::USER_ROLES_TABLE . '` WHERE user_id=' . $this->user->getId());
                 $userRoles = [];
@@ -117,9 +117,9 @@
             $cacheId = md5(__CLASS__ . '::' . __FUNCTION__ . '_' . $this->user->getId());
             Cache::delete($cacheId);
 
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
-            return $DB->addItem(self::USER_ROLES_TABLE, ['user_id' => $this->user->getId(), 'role_id' => $roleId]);
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
+            return $DB->add(self::USER_ROLES_TABLE, ['user_id' => $this->user->getId(), 'role_id' => $roleId]);
         }
 
         /**
@@ -135,8 +135,8 @@
             $cacheId = md5(__CLASS__ . '::' . __FUNCTION__);
             Cache::delete($cacheId);
 
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
             return $DB->query('DELETE FROM ' . self::USER_ROLES_TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND role_id=' . $roleId);
         }
 
@@ -148,8 +148,8 @@
          */
         public function getFullRoles(): ?array
         {
-            /** @var  $DB DB */
-            $DB = DB::getInstance();
+            /** @var  $DB DataBase */
+            $DB = DataBase::getInstance();
             return $DB->query(
                 'SELECT ' . self::ROLES_TABLE . '.id, ' . self::ROLES_TABLE . '.name, ' . self::ROLES_TABLE . '.description FROM '
                 . self::USER_ROLES_TABLE . ' left JOIN ' . self::ROLES_TABLE . ' ON  ' . self::USER_ROLES_TABLE . '.role_id = ' . self::ROLES_TABLE
@@ -169,8 +169,8 @@
             if (Cache::check($cacheId)) {
                 $roles = Cache::get($cacheId);
             } else {
-                /** @var  $DB DB */
-                $DB    = DB::getInstance();
+                /** @var  $DB DataBase */
+                $DB    = DataBase::getInstance();
                 $res   = $DB->query('SELECT * FROM ' . self::ROLES_TABLE);
                 $roles = [];
                 if (!empty($res)) {
