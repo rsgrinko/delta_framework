@@ -199,8 +199,7 @@ callback). `$callback` — это либо строка `'\Core\App::method'`, �
 ### Внешние сервисы (`core/lib/Core/ExternalServices/`)
 Тонкие клиенты для Telegram (`Telegram`, `Telegram2`, `TelegramSender`, `TelegramActions` — обратите внимание, есть
 параллельные/устаревшие варианты, проверяйте, какой реально подключён, прежде чем расширять), `ChatGPT`,
-`RemoteHosts`, а также пара HTTP `Request`/`RequestOLD` (для нового кода предпочитайте `Request/`, а не вариант
-OLD).
+а также пара HTTP `Request`/`RequestOLD` (для нового кода предпочитайте `Request/`, а не вариант OLD).
 
 ### Константы конфигурации
 `core/config.php` определяет всю конфигурацию времени выполнения как глобальные константы (`DB_HOST`, `CACHE_*`,
