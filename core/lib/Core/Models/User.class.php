@@ -676,6 +676,7 @@
                     if (empty($_SESSION['authorize'])) {
                         self::authorize($arUser['id']);
                     }
+                    $DB->update(self::TABLE, ['id' => $arUser['id']], ['last_active' => time()]);
                     return true;
                 }
             }

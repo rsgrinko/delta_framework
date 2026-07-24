@@ -99,7 +99,7 @@
          */
         public function update(string $table, array $where, array $set): bool
         {
-            return $this->db->update($table, $set, $where);
+            return $this->db->update($table, $where, $set);
         }
 
         /**
