@@ -1,23 +1,26 @@
 {% extends 'layout.twig' %}
+{% import '_icons.twig' as icons %}
 {% block title %}Информация о сборке{% endblock %}
 {% block main %}
-    <h1>Информация о сборке</h1>
-    <p>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Ключ</th>
-            <th>Значение</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for key, value in data %}
-        <tr>
-            <td>{{ key }}</td>
-            <td>{{ value }}</td>
-        </tr>
-        {%  endfor %}
-        </tbody>
-    </table>
-    </p>
+    <div class="page-head">
+        <div class="page-head-icon">{{ icons.info() }}</div>
+        <div>
+            <h1>Информация о сборке</h1>
+            <p class="page-subtitle">Текущие параметры и версия ядра фреймворка</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="meta-grid">
+            {% for key, value in data %}
+                <div class="meta-item">
+                    <div class="meta-item-icon">{{ icons.hash() }}</div>
+                    <div>
+                        <span class="meta-item-label">{{ key }}</span>
+                        <span class="meta-item-value">{{ value }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}

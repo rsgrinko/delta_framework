@@ -1,53 +1,84 @@
 {% extends 'layout.twig' %}
-{% block title %}Диалоги{% endblock %}
+{% import '_icons.twig' as icons %}
+{% block title %}Диалог с {{ companionName }}{% endblock %}
 {% block main %}
     {% if isAuthorized %}
-        <h1>Диалог # {{ dialog_id }} с "{{ companionName }} ({{ companionId }})"</h1>
-
-        <div class="messageBox">
-            {% for message in messages %}
-                <div class="message {% if message.user_from == userId %}fromMe{% else %}fromCompanion{% endif %}">
-                    <div class="name"><a href="/users/{{ message.user_from_data.id }}">{{ message.user_from_data.name }}</a></div>
-                    <div class="text">
-                        {% if message.type == 'text' %}
-                            {{ message.text }}
-                        {% elseif message.type == 'image' %}
-                            {% if message.file.error == false %}
-                                <a href="{{ message.file.path }}" target="_blank">
-                                    <img class="dialogImage" src="{{ message.file.path }}" alt="{{ message.file.name }}">
-                                </a>
-                            {% else %}
-                                <b>Некорректное изображение</b>
-                            {% endif %}
-                        {% elseif message.type == 'file' %}
-                            {% if message.file.error == false %}
-                                <a class="fileLink" href="{{ message.file.path }}" target="_blank">{{ message.file.name }}</a>
-                            {% else %}
-                                <b>Некорректный файл</b>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                    <div class="date">{{ message.date }}</div>
-                    {% if message.user_from == userId %}
-                        <div class="deliveryStatus {% if message.user_from == userId and message.viewed == "Y" %}viewed{% endif %}">&nbsp;</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+        <div class="page-head">
+            <div class="page-head-icon">{{ (companionName|default('?'))|slice(0, 1)|upper }}</div>
+            <div>
+                <h1>{{ companionName }}</h1>
+                <p class="page-subtitle">Диалог №{{ dialog_id }}</p>
+            </div>
         </div>
 
-        <p>
-        <form method="POST" action="/users/{{ companionId }}/sendMessage" enctype="multipart/form-data">
-            <input type="hidden" name="dialogId" value="{{ dialog_id }}">
-            <textarea name="message"></textarea>
-        <label class="input-file w100">
-            <input type="file" name="file">
-            <span class="w100">Выберите файл</span>
-        </label>
-            <button class="button w100" type="submit" value="sendMessage">Отправить</button>
-        </form>
-        </p>
+        <div class="chat-panel">
+            <div class="chat-panel-header">
+                <span class="user-avatar">{{ (companionName|default('?'))|slice(0, 1)|upper }}</span>
+                <div class="chat-panel-header-meta">
+                    <strong>{{ companionName }}</strong>
+                    <span class="status {% if companionOnline %}is-online{% endif %}">
+                        <span class="status-dot"></span>
+                        {{ companionOnline ? 'Онлайн' : 'Не в сети' }}
+                    </span>
+                </div>
+                <span class="pill">{{ icons.chat() }} {{ messagesCount }} сообщений</span>
+            </div>
 
+            {% if messages is empty %}
+                <div class="messageBox">
+                    <div class="empty-state">
+                        {{ icons.chat() }}
+                        <span>Сообщений пока нет &mdash; начните переписку</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="messageBox">
+                    {% for message in messages %}
+                        <div class="message {% if message.user_from == userId %}fromMe{% else %}fromCompanion{% endif %}">
+                            <div class="name"><a href="/users/{{ message.user_from_data.id }}">{{ message.user_from_data.name }}</a></div>
+                            <div class="text">
+                                {% if message.type == 'text' %}
+                                    {{ message.text }}
+                                {% elseif message.type == 'image' %}
+                                    {% if message.file.error == false %}
+                                        <a href="{{ message.file.path }}" target="_blank">
+                                            <img class="dialogImage" src="{{ message.file.path }}" alt="{{ message.file.name }}">
+                                        </a>
+                                    {% else %}
+                                        <b>Некорректное изображение</b>
+                                    {% endif %}
+                                {% elseif message.type == 'file' %}
+                                    {% if message.file.error == false %}
+                                        <a class="fileLink" href="{{ message.file.path }}" target="_blank">{{ icons.paperclip() }} {{ message.file.name }}</a>
+                                    {% else %}
+                                        <b>Некорректный файл</b>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="date">{{ message.date }}</div>
+                            {% if message.user_from == userId %}
+                                <div class="deliveryStatus {% if message.user_from == userId and message.viewed == "Y" %}viewed{% endif %}">&nbsp;</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="chat-compose">
+                <form method="POST" action="/users/{{ companionId }}/sendMessage" enctype="multipart/form-data">
+                    <input type="hidden" name="dialogId" value="{{ dialog_id }}">
+                    <textarea name="message" placeholder="Введите сообщение..."></textarea>
+                    <div class="chat-compose-actions">
+                        <label class="input-file">
+                            <input type="file" name="file">
+                            <span>{{ icons.paperclip() }} Файл</span>
+                        </label>
+                        <button class="button" type="submit" value="sendMessage">{{ icons.send() }} Отправить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     {% else %}
-        <div class="alert alert-error">Вы не авторизованы</div>
+        <div class="alert alert-error">{{ icons.warning() }}<span>Вы не авторизованы</span></div>
     {% endif %}
 {% endblock %}

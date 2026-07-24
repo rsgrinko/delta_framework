@@ -1,28 +1,79 @@
 {% extends 'layout.twig' %}
+{% import '_icons.twig' as icons %}
 {% block title %}Главная страница{% endblock %}
 {% block main %}
-    <h1>Главная страница</h1>
-    <p>Добро пожаловать на сайт проекта DeltaFrameework!</p>
-    <p>Публичная часть сайта работает с использованием шаблонизатора Twig и пока малофункциональна.</p>
-    <h2>Контакты</h2>
-    <p>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Способ связи</th>
-            <th>Контакт</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>E-mail</td>
-            <td>rsgrinko@gmail.com</td>
-        </tr>
-        <tr>
-            <td>Telegram</td>
-            <td>rsgrinko</td>
-        </tr>
-        </tbody>
-    </table>
-    </p>
+    <div class="page-head">
+        <div class="page-head-icon">{{ icons.home() }}</div>
+        <div>
+            <h1>Главная страница</h1>
+            <p class="page-subtitle">Добро пожаловать на сайт проекта DeltaFramework!</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <p>Публичная часть сайта работает с использованием шаблонизатора Twig и пока малофункциональна, но уже
+            показывает живые данные из системы.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.info() }} Система в цифрах</h2>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-tile tone-primary">
+                <div class="stat-tile-icon">{{ icons.users() }}</div>
+                <div>
+                    <div class="stat-tile-value">{{ stats.usersTotal }}</div>
+                    <div class="stat-tile-label">Всего пользователей</div>
+                </div>
+            </div>
+            <div class="stat-tile tone-success">
+                <div class="stat-tile-icon">{{ icons.chat() }}</div>
+                <div>
+                    <div class="stat-tile-value">{{ stats.usersOnline }}</div>
+                    <div class="stat-tile-label">Онлайн сейчас</div>
+                </div>
+            </div>
+            <div class="stat-tile tone-violet">
+                <div class="stat-tile-icon">{{ icons.check() }}</div>
+                <div>
+                    <div class="stat-tile-value">{{ stats.usersVerified }}</div>
+                    <div class="stat-tile-label">С подтверждённым E-Mail</div>
+                </div>
+            </div>
+            <div class="stat-tile tone-accent">
+                <div class="stat-tile-icon">{{ icons.flask() }}</div>
+                <div>
+                    <div class="stat-tile-value">{{ stats.coreVersion }}</div>
+                    <div class="stat-tile-label">Версия ядра</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.mail() }} Контакты</h2>
+        </div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Способ связи</th>
+                    <th>Контакт</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>E-mail</td>
+                    <td>rsgrinko@gmail.com</td>
+                </tr>
+                <tr>
+                    <td>Telegram</td>
+                    <td>rsgrinko</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}

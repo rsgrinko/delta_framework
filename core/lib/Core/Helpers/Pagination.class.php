@@ -64,6 +64,26 @@
         }
 
         /**
+         * Получение номера текущей страницы
+         *
+         * @return int
+         */
+        public static function getPage(): int
+        {
+            return (int)self::$page;
+        }
+
+        /**
+         * Получение общего количества страниц
+         *
+         * @return int
+         */
+        public static function getTotalPages(): int
+        {
+            return self::$total_pages;
+        }
+
+        /**
          * Вывод пагинации на страницу
          *
          * @param string $paginator_name

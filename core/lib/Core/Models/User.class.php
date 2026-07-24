@@ -401,6 +401,17 @@
         }
 
         /**
+         * Получение количества пользователей, находящихся сейчас онлайн
+         *
+         * @return int
+         */
+        public static function getOnlineCount(): int
+        {
+            $res = (DataBase::getInstance())->query('SELECT COUNT(*) as count FROM `' . self::TABLE . '` WHERE last_active > ' . (time() - USER_ONLINE_TIME));
+            return (int)$res[0]['count'];
+        }
+
+        /**
          * Шифрование пароля
          *
          * @param string $password Пароль

@@ -1,18 +1,57 @@
 {% extends 'layout.twig' %}
+{% import '_icons.twig' as icons %}
 
 {% block title %}Профиль пользователя {{ userData.login }}{% endblock %}
 
 {% block main %}
-    <h1>Профиль пользователя {{ userData.login }}</h1>
-    <p>
-        <span><b>ID:</b> {{ userData.id }}</span><br>
-        <span><b>Логин:</b> {{ userData.login }}</span><br>
-        <span><b>Имя:</b> {{ userData.name }}</span><br>
-        <span><b>E-Mail:</b> {{ userData.email }}</span><br>
-        <span><b>Был активен:</b> {{ userData.last_active }}</span><br>
-        <form action="/users/{{ userData.id }}/dialog" method="POST">
-            <button class="button" type="submit">Написать</button>
-        </form>
+    <div class="profile-hero">
+        <div class="profile-hero-avatar">
+            {% if avatar %}
+                <img src="{{ avatar.path }}" alt="{{ userData.name }}">
+            {% else %}
+                {{ (userData.name|default(userData.login))|slice(0, 1)|upper }}
+            {% endif %}
+        </div>
+        <div>
+            <h1>{{ userData.name|default(userData.login) }}</h1>
+            <p class="page-subtitle">Профиль пользователя {{ userData.login }}</p>
+            <div class="status {% if online %}is-online{% endif %}">
+                <span class="status-dot"></span>
+                {{ online ? 'Онлайн' : 'Не в сети' }}
+            </div>
+            {% if roles is not empty %}
+                <div class="profile-hero-roles">
+                    {% for role in roles %}
+                        <span class="role-badge">{{ icons.shield() }} {{ role.name }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
-    </p>
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.info() }} Данные пользователя</h2>
+        </div>
+        <dl class="info-list">
+            <dt>{{ icons.hash() }} ID</dt>
+            <dd>{{ userData.id }}</dd>
+            <dt>{{ icons.users() }} Логин</dt>
+            <dd>{{ userData.login }}</dd>
+            <dt>{{ icons.users() }} Имя</dt>
+            <dd>{{ userData.name }}</dd>
+            <dt>{{ icons.mail() }} E-Mail</dt>
+            <dd>{{ userData.email }}</dd>
+            <dt>{{ icons.check() }} Активен</dt>
+            <dd>{{ userData.active == 'Y' ? 'Да' : 'Нет' }}</dd>
+            <dt>{{ icons.clock() }} Регистрация</dt>
+            <dd>{{ userData.date_created }}</dd>
+            <dt>{{ icons.clock() }} Был активен</dt>
+            <dd>{{ userData.last_active }}</dd>
+        </dl>
+    </div>
+
+    <form action="/users/{{ userData.id }}/dialog" method="POST">
+        <button class="button" type="submit">{{ icons.chat() }} Написать сообщение</button>
+    </form>
 {% endblock %}

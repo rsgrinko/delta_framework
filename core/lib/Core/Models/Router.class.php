@@ -76,8 +76,9 @@
          */
         public static function execute()
         {
+            $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             foreach (self::$routes as $pattern => $callback) {
-                if (preg_match($pattern, $_SERVER['REQUEST_URI'], $params)) // сравнение идет через регулярное выражение
+                if (preg_match($pattern, $requestPath, $params)) // сравнение идет через регулярное выражение
                 {
                     array_shift($params);
                     Registry::set('currentPage', $callback);

@@ -102,12 +102,15 @@
       <path value="$PROJECT_DIR$/vendor/cakephp/core" />
       <path value="$PROJECT_DIR$/vendor/cakephp/utility" />
       <path value="$PROJECT_DIR$/vendor/robmorgan/phinx" />
+      <path value="$PROJECT_DIR$/vendor/phpoption/phpoption" />
+      <path value="$PROJECT_DIR$/vendor/graham-campbell/result-type" />
+      <path value="$PROJECT_DIR$/vendor/vlucas/phpdotenv" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
     <interpreters>
       <interpreter id="9b5f2f5e-509e-45e2-a30a-b4d1544b217e" name="rsgrinko@dev.it-stories.ru:22 password" home="sshConfig://DATA" auto="false" debugger_id="php.debugger.XDebug">
-        <remote_data INTERPRETER_PATH="/usr/bin/php" HELPERS_PATH="/home/rsgrinko/.phpstorm_helpers" VALID="true" RUN_AS_ROOT_VIA_SUDO="false" SSH_CONFIG_ID="b4bdc3dc-f3e4-4fbe-9d94-3cb514b49751" SSH_CONFIG_NAME="rsgrinko@dev.it-stories.ru:22 password" SSH_CREDENTIALS_ID="sshConfig://rsgrinko@dev.it-stories.ru:22 password" />
+        <remote_data INTERPRETER_PATH="/usr/bin/php" HELPERS_PATH="/home/rsgrinko/.phpstorm_helpers" VALID="true" RUN_AS_ROOT_VIA_SUDO="false" SSH_CONFIG_ID="b4bdc3dc-f3e4-4fbe-9d94-3cb514b49751" SSH_CONFIG_NAME="rsgrinko@10.10.10.56:22 password" SSH_CREDENTIALS_ID="sshConfig://rsgrinko@dev.it-stories.ru:22 password" />
       </interpreter>
     </interpreters>
   </component>

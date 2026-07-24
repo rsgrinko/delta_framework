@@ -48,10 +48,6 @@
     Router::route('/test/(\d+)', '\Core\App::test');
     Router::route('/test/(\d+)/page/(\d+)', '\Core\App::test');
 
-    /** Тестовые маршруты */
-    Router::route('/sections', '\Core\App::sections');
-    Router::route('/section/(\d+)', '\Core\App::section');
-
     Router::route('blog/(\w+)/(\d+)', function ($category, $id) {
         echo $category . ':' . $id;
     });

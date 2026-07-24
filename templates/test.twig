@@ -1,36 +1,50 @@
 {% extends 'layout.twig' %}
+{% import '_icons.twig' as icons %}
 
-{% block title %}тестинг{% endblock %}
+{% block title %}Тестовая страница{% endblock %}
 
 {% block main %}
-    <h1>Тестовая страница</h1>
-    <p>This is sample text!</p>
-    <div class="alert alert-error">Error alert</div>
-    <div class="alert alert-success">Success alert</div>
-    <div class="alert alert-info">Info alert</div>
+    <div class="page-head">
+        <div class="page-head-icon">{{ icons.flask() }}</div>
+        <div>
+            <h1>Тестовая страница</h1>
+            <p class="page-subtitle">Витрина компонентов оформления</p>
+        </div>
+    </div>
 
-    <h2>Table</h2>
-    <p>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Field 1</th>
-            <th>Field 2</th>
-            <th>Field 3</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>Value 1</td>
-            <td>Value 2</td>
-            <td>Value 3</td>
-        </tr>
-        <tr>
-            <td>Value 4</td>
-            <td>Value 5</td>
-            <td>Value 6</td>
-        </tr>
-        </tbody>
-    </table>
-    </p>
+    <div class="section">
+        <p>This is sample text!</p>
+        <div class="alert alert-error">{{ icons.warning() }}<span>Error alert</span></div>
+        <div class="alert alert-success">{{ icons.check() }}<span>Success alert</span></div>
+        <div class="alert alert-info">{{ icons.info() }}<span>Info alert</span></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.hash() }} Table</h2>
+        </div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Field 1</th>
+                    <th>Field 2</th>
+                    <th>Field 3</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Value 1</td>
+                    <td>Value 2</td>
+                    <td>Value 3</td>
+                </tr>
+                <tr>
+                    <td>Value 4</td>
+                    <td>Value 5</td>
+                    <td>Value 6</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}

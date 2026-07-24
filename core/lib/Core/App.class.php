@@ -82,18 +82,31 @@
 
         public static function index()
         {
-            self::render('index.twig');
+            self::render('index.twig', [
+                'stats' => [
+                    'usersTotal'    => User::getUsersCount(),
+                    'usersOnline'   => User::getOnlineCount(),
+                    'usersVerified' => User::getUsersCount(true),
+                    'coreVersion'   => CORE_VERSION,
+                ],
+            ]);
         }
 
         public static function info()
         {
             $buildInfo = [
-                'Версия ядра'               => CORE_VERSION,
-                'Лимит пагинации'           => SystemConfig::getValue('PAGINATION_LIMIT'),
-                'Время для расчета онлайна' => USER_ONLINE_TIME,
-                'Время жизни кеша'          => CACHE_TTL,
-                'E-Mail сайта'              => SERVER_EMAIL,
-                'Имя отправителя сайта'     => SERVER_EMAIL_NAME,
+                'Версия ядра'                => CORE_VERSION,
+                'Версия PHP'                 => PHP_VERSION,
+                'Лимит пагинации'            => SystemConfig::getValue('PAGINATION_LIMIT'),
+                'Время для расчета онлайна'  => USER_ONLINE_TIME . ' сек.',
+                'Кеширование'                => USE_CACHE ? 'Включено' : 'Выключено',
+                'Время жизни кеша'           => CACHE_TTL . ' сек.',
+                'Captcha'                    => USE_CAPTCHA ? 'Включена' : 'Выключена',
+                'Защита от DDoS'             => USE_DDOS_PROTECTION ? 'Включена' : 'Выключена',
+                'Префикс таблиц БД'          => DB_TABLE_PREFIX,
+                'E-Mail сайта'               => SERVER_EMAIL,
+                'Имя отправителя сайта'      => SERVER_EMAIL_NAME,
+                'Часовой пояс'               => date_default_timezone_get(),
             ];
             self::render('info.twig', ['data' => $buildInfo]);
         }
@@ -102,21 +115,32 @@
         {
             /** @var User $USER */
             global $USER;
-            self::render('dialogs.twig', ['dialogs' => User::isAuthorized() ? $USER->getDialogs() : []]);
+            $dialogs = [];
+            if (User::isAuthorized()) {
+                $dialogs = $USER->getDialogs();
+                foreach ($dialogs as $key => $dialog) {
+                    $dialogs[$key]['companionOnline'] = User::isOnline((int)$dialog['companionId']);
+                    $dialogs[$key]['messagesCount']    = $USER->getDialogObject()->getDialogMessagesCount((int)$dialog['id']);
+                }
+            }
+            self::render('dialogs.twig', ['dialogs' => $dialogs]);
         }
 
         public static function dialog(int $id)
         {
             /** @var User $USER */
             global $USER;
+            $companionId = $USER->getDialogObject()->getDialogCompanionId($id);
             self::render(
                 'dialog.twig',
                 [
-                    'dialog_id'     => $id,
-                    'messages'      => $USER->getMessages($id, true),
-                    'userId'        => $USER->getId(),
-                    'companionId'   => $USER->getDialogObject()->getDialogCompanionId($id),
-                    'companionName' => (new User($USER->getDialogObject()->getDialogCompanionId($id)))->getName(),
+                    'dialog_id'       => $id,
+                    'messages'        => $USER->getMessages($id, true),
+                    'userId'          => $USER->getId(),
+                    'companionId'     => $companionId,
+                    'companionName'   => (new User($companionId))->getName(),
+                    'companionOnline' => User::isOnline($companionId),
+                    'messagesCount'   => $USER->getDialogObject()->getDialogMessagesCount($id),
                 ]
             );
         }
@@ -139,16 +163,19 @@
 
         public static function users()
         {
-            Pagination::execute($_REQUEST['page'], User::getAllCount(), SystemConfig::getValue('PAGINATION_LIMIT'));
+            Pagination::execute((int)($_REQUEST['page'] ?? 1), User::getAllCount(), (string)SystemConfig::getValue('PAGINATION_LIMIT'));
             $limit = Pagination::getLimit();
-            $limit= '0, 10';
             $arUsers = User::getUsers($limit);
             foreach($arUsers as $key => $user) {
                 unset($arUsers[$key]['password']);
+                $arUsers[$key]['online'] = User::isOnline((int)$user['id']);
             }
-            self::render('users.twig', ['users' => $arUsers]);
+            self::render('users.twig', [
+                'users'      => $arUsers,
+                'page'       => Pagination::getPage(),
+                'totalPages' => Pagination::getTotalPages(),
+            ]);
         }
-
 
         public static function test($a = null, $b = null, $c = null, $d = null)
         {
@@ -204,8 +231,13 @@
 
         public static function userProfile(int $id)
         {
-            $userData = (new User($id))->getAllUserData(true);
-            self::render('userProfile.twig', ['userData' => $userData]);
+            $userObject = new User($id);
+            self::render('userProfile.twig', [
+                'userData' => $userObject->getAllUserData(true),
+                'roles'    => $userObject->getRolesObject()->getFullRoles(),
+                'online'   => User::isOnline($id),
+                'avatar'   => $userObject->getImage(),
+            ]);
         }
 
         public static function goToDialog(int $userId)

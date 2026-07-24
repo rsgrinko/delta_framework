@@ -1,44 +1,66 @@
-<!DOCTUPE html>
+{% import '_icons.twig' as icons %}<!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
     <title>{% block title %}Delta Framework{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/assets/css/style.css?{{ salt }}" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="/assets/js/jquery-3.7.0.min.js?{{ salt }}"></script>
     <script src="/assets/js/script.js?{{ salt }}"></script>
 </head>
 <body>
-<div class="main">
-    <div class="logo">
-        <div class="logoText">DeltaFramework</div>
-    </div>
-    <div class="header">
-        <div class="mainMenu">
-            <div class="menuItem {% if currentPage == 'index' %}active{% endif %}"><a href="/">Главная</a></div>
-            <div class="menuItem"><a href="/admin/">Админка</a></div>
-            {% if isAuthorized %}
-                <div class="menuItem {% if currentPage == 'dialogs' %}active{% endif %}"><a href="/dialogs">Диалоги{% if newMessages > 0 %} ({{ newMessages }}){% endif %}</a></div>
-            {% endif %}
-            <div class="menuItem {% if currentPage == 'users' %}active{% endif %}"><a href="/users">Список пользователей</a></div>
-            <div class="menuItem {% if currentPage == 'info' %}active{% endif %}"><a href="/info">Информация о сборке</a></div>
-            <div class="menuItem {% if currentPage == 'test' %}active{% endif %}"><a href="/test">Тестовая</a></div>
 
-            <div class="userInfo">
+<div class="brand-block">
+    <div class="brand-mark">&Delta;</div>
+    <div class="brand-title">Delta<span>Framework</span></div>
+    <div class="brand-tagline">Простой PHP-фреймворк для веб-проектов</div>
+</div>
+
+<div class="shell">
+    <header class="shell-header">
+        <div class="shell-header-inner">
+            <button class="nav-toggle" id="navToggle" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="mainNav">
+                {{ icons.menu('nav-toggle-icon nav-toggle-open') }}
+                {{ icons.close('nav-toggle-icon nav-toggle-close') }}
+            </button>
+
+            <nav class="nav" id="mainNav">
+                <a class="nav-link {% if currentPage == 'index' %}active{% endif %}" href="/">{{ icons.home() }}<span>Главная</span></a>
+                <a class="nav-link" href="/admin/">{{ icons.shield() }}<span>Админка</span></a>
                 {% if isAuthorized %}
-                    {{ userData.name }} [<a href="/logout">Выход</a>]
-                {%  else %}
-                    Гость [<a href="/login">Войти</a>]
+                    <a class="nav-link {% if currentPage == 'dialogs' %}active{% endif %}" href="/dialogs">
+                        {{ icons.chat() }}<span>Диалоги</span>
+                        {% if newMessages > 0 %}<span class="nav-badge">{{ newMessages }}</span>{% endif %}
+                    </a>
                 {% endif %}
-            </div>
+                <a class="nav-link {% if currentPage == 'users' %}active{% endif %}" href="/users">{{ icons.users() }}<span>Пользователи</span></a>
+                <a class="nav-link {% if currentPage == 'info' %}active{% endif %}" href="/info">{{ icons.info() }}<span>Информация</span></a>
+                <a class="nav-link {% if currentPage == 'test' %}active{% endif %}" href="/test">{{ icons.flask() }}<span>Тестовая</span></a>
+
+                <div class="nav-user">
+                    {% if isAuthorized %}
+                        <span class="user-avatar">{{ (userData.name|default(userData.login|default('U')))|slice(0, 1)|upper }}</span>
+                        <span class="user-name">{{ userData.name }}</span>
+                        <a class="nav-link nav-link-icon" href="/logout" title="Выход">{{ icons.logout() }}</a>
+                    {% else %}
+                        <a class="nav-link nav-link-guest" href="/login">{{ icons.login() }}<span>Войти</span></a>
+                    {% endif %}
+                </div>
+            </nav>
         </div>
-    </div>
-    <div class="content">
-        <div class="breadcrumbs"><a href="/">Главная</a> &raquo; Раздел &raquo; Тестовая</div>
+    </header>
+
+    <div class="shell-content">
         {% block main %}{% endblock %}
     </div>
-    <div class="footer">
-        <a href="https://github.com/rsgrinko/delta_framework" target="_blank">DeltaFramework</a> by <a href="https://it-stories.ru/about" target="_blank">Roman S Grinko</a>, {{ currentYear }} | Generation time: {{ executionTime }} | Memory use: {{ memoryUse }}
-    </div>
+
+    <footer class="shell-footer">
+        <div class="shell-footer-inner">
+            <span><a href="https://github.com/rsgrinko/delta_framework" target="_blank">DeltaFramework</a> by <a href="https://it-stories.ru/about" target="_blank">Roman S Grinko</a> &copy; {{ currentYear }}</span>
+            <span class="footer-meta">{{ executionTime }} &middot; {{ memoryUse }}</span>
+        </div>
+    </footer>
 </div>
+
 </body>
 </html>

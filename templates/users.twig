@@ -1,29 +1,83 @@
 {% extends 'layout.twig' %}
+{% import '_icons.twig' as icons %}
 
 {% block title %}Список пользователей{% endblock %}
 
 {% block main %}
-    <h1>Список пользователей</h1>
-    <p>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Логин</th>
-            <th>Имя</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.login }}</td>
-                <td>{{ user.name }}</td>
-                <td><a href="/users/{{ user.id }}">Открыть профиль</a></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    </p>
+    <div class="page-head">
+        <div class="page-head-icon">{{ icons.users() }}</div>
+        <div>
+            <h1>Пользователи</h1>
+            <p class="page-subtitle">Все зарегистрированные пользователи системы</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.users() }} Список пользователей</h2>
+            {% if users is not empty %}<span class="pill">{{ users|length }} шт.</span>{% endif %}
+        </div>
+
+        {% if users is empty %}
+            <div class="empty-state">
+                {{ icons.users() }}
+                <span>Пользователи не найдены</span>
+            </div>
+        {% else %}
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th>Пользователь</th>
+                        <th>E-Mail</th>
+                        <th style="width: 130px;">Статус</th>
+                        <th style="width: 130px;">Регистрация</th>
+                        <th style="width: 130px;"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>
+                                <div class="cell-user">
+                                    <span class="user-avatar">{{ (user.name|default(user.login))|slice(0, 1)|upper }}</span>
+                                    <div class="cell-user-meta">
+                                        <span>{{ user.name }}</span>
+                                        <span class="cell-user-sub">{{ user.login }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {{ user.email }}<br>
+                                {% if user.email_confirmed == 'Y' %}
+                                    <span class="confirm-badge is-yes">{{ icons.check() }} подтверждён</span>
+                                {% else %}
+                                    <span class="confirm-badge is-no">{{ icons.warning() }} не подтверждён</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status {% if user.online %}is-online{% endif %}">
+                                    <span class="status-dot"></span>
+                                    {{ user.online ? 'Онлайн' : 'Не в сети' }}
+                                </span>
+                            </td>
+                            <td>{{ user.date_created|default('&mdash;') }}</td>
+                            <td><a class="row-action" href="/users/{{ user.id }}">{{ icons.users() }} Профиль</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if totalPages > 1 %}
+                <div class="pagination">
+                    <a class="page-btn {% if page <= 1 %}is-disabled{% endif %}" href="/users?page={{ page - 1 }}">{{ icons.arrowLeft() }}</a>
+                    <span class="page-info">Страница {{ page }} из {{ totalPages }}</span>
+                    <a class="page-btn {% if page >= totalPages %}is-disabled{% endif %}" href="/users?page={{ page + 1 }}">{{ icons.arrowRight() }}</a>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}
