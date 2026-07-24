@@ -47,8 +47,8 @@
             $DB       = DataBase::getInstance();
             $dialogId = $DB->query(
                 'SELECT `id` FROM ' . self::TABLE_DIALOGS
-                    . ' WHERE (`send`="' . $userOne . '" and `receive`="' . $userTwo
-                . '") OR (`send`="' . $userTwo . '" and `receive`="' . $userOne . '")'
+                    . ' WHERE (`send`=:userOne1 and `receive`=:userTwo1) OR (`send`=:userTwo2 and `receive`=:userOne2)',
+                ['userOne1' => $userOne, 'userTwo1' => $userTwo, 'userTwo2' => $userTwo, 'userOne2' => $userOne]
             );
             if (!$dialogId) {
                 return null;
@@ -87,7 +87,8 @@
             /** @var $DB DataBase Объект базы данных */
             $DB = DataBase::getInstance();
             $dialogs = $DB->query(
-                'SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `send`="' . $this->user->getId() . '" OR `receive`="' . $this->user->getId() . '" ORDER BY `date_updated` DESC'
+                'SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `send`=:userId1 OR `receive`=:userId2 ORDER BY `date_updated` DESC',
+                ['userId1' => $this->user->getId(), 'userId2' => $this->user->getId()]
             );
             if (empty($dialogs)) {
                 return [];
@@ -107,7 +108,7 @@
         {
             /** @var $DB DataBase Объект базы данных */
             $DB     = DataBase::getInstance();
-            $dialog = $DB->query('SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `id`="' . $dialogId . '"');
+            $dialog = $DB->query('SELECT * FROM ' . self::TABLE_DIALOGS . ' WHERE `id`=:dialogId', ['dialogId' => $dialogId]);
             if (empty($dialog)) {
                 return null;
             }
@@ -136,9 +137,15 @@
             $DB = DataBase::getInstance();
             $paginationSqlString = '';
             if ($paginationData !== null) {
-                $paginationSqlString = ' LIMIT ' . $paginationData['from'] . ', ' . $paginationData['to'];
+                // LIMIT/OFFSET не могут быть переданы через именованный плейсхолдер подготовленного
+                // выражения (PDO::ATTR_EMULATE_PREPARES выключен для MySQL), поэтому приводим к int и
+                // подставляем в текст запроса напрямую — приведение типа исключает инъекцию.
+                $paginationSqlString = ' LIMIT ' . (int)$paginationData['from'] . ', ' . (int)$paginationData['to'];
             }
-            $messages = $DB->query('SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`="' . $dialogId . '" ORDER BY id ASC' . $paginationSqlString);
+            $messages = $DB->query(
+                'SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`=:dialogId ORDER BY id ASC' . $paginationSqlString,
+                ['dialogId' => $dialogId]
+            );
             if ($markDialogViewed) {
                 $this->markDialogViewed($dialogId);
             }
@@ -250,7 +257,10 @@
         {
             /** @var $DB DataBase Объект базы данных */
             $DB = DataBase::getInstance();
-            $res = $DB->query('SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`="' . $dialogId . '" ORDER BY id DESC LIMIT 1');
+            $res = $DB->query(
+                'SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`=:dialogId ORDER BY id DESC LIMIT 1',
+                ['dialogId' => $dialogId]
+            );
             return $res ? $res[0] : null;
         }
 

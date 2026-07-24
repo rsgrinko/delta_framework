@@ -92,7 +92,7 @@
                 /** @var  $DB DataBase */
                 $DB = DataBase::getInstance();
 
-                $res       = $DB->query('SELECT role_id FROM `' . self::USER_ROLES_TABLE . '` WHERE user_id=' . $this->user->getId());
+                $res       = $DB->query('SELECT role_id FROM `' . self::USER_ROLES_TABLE . '` WHERE user_id=:userId', ['userId' => $this->user->getId()]);
                 $userRoles = [];
                 if (!empty($res)) {
                     foreach ($res as $row) {
@@ -137,7 +137,10 @@
 
             /** @var  $DB DataBase */
             $DB = DataBase::getInstance();
-            return $DB->query('DELETE FROM ' . self::USER_ROLES_TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND role_id=' . $roleId);
+            return $DB->query(
+                'DELETE FROM ' . self::USER_ROLES_TABLE . ' WHERE user_id=:userId AND role_id=:roleId',
+                ['userId' => $this->user->getId(), 'roleId' => $roleId]
+            );
         }
 
         /**
@@ -153,7 +156,8 @@
             return $DB->query(
                 'SELECT ' . self::ROLES_TABLE . '.id, ' . self::ROLES_TABLE . '.name, ' . self::ROLES_TABLE . '.description FROM '
                 . self::USER_ROLES_TABLE . ' left JOIN ' . self::ROLES_TABLE . ' ON  ' . self::USER_ROLES_TABLE . '.role_id = ' . self::ROLES_TABLE
-                . '.id WHERE ' . self::USER_ROLES_TABLE . '.user_id = "' . $this->user->getId() . '"'
+                . '.id WHERE ' . self::USER_ROLES_TABLE . '.user_id = :userId',
+                ['userId' => $this->user->getId()]
             ) ?: [];
         }
 

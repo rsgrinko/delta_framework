@@ -84,7 +84,7 @@
          */
         private function loadFileProps(): self
         {
-            $res = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id="' . $this->id . '"')[0];
+            $res = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id=:id', ['id' => $this->id])[0];
             if (empty($res)) {
                 throw new CoreException('Файл с идентификатором ' . $this->id . ' не найден', CoreException::ERROR_FILE_NOT_FOUND);
             }
@@ -159,7 +159,7 @@
          */
         public function getAllProps(): ?array
         {
-            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id="' . $this->id . '"')[0];
+            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id=:id', ['id' => $this->id])[0];
         }
 
 

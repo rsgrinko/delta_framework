@@ -75,13 +75,20 @@
             /** @var  $DB DataBase */
             $DB = DataBase::getInstance();
 
-            $sql = 'SELECT * FROM ' . self::TABLE;
+            $sql    = 'SELECT * FROM ' . self::TABLE;
+            $params = [];
             if (!empty($this->sectionId)) {
-                $sql .= ' WHERE section_id="' . $this->sectionId . '"';
+                $sql .= ' WHERE section_id=:sectionId';
+                $params['sectionId'] = $this->sectionId;
             }
 
-            $sql .= ' ORDER BY id ' . $sort . ' LIMIT ' . $limit;
-            return $DB->query($sql) ?: [];
+            // ORDER BY/LIMIT не являются значениями и не подставляются через плейсхолдер:
+            // направление сортировки идёт через белый список, лимит (может быть строкой
+            // вида "0, 10") разбирается на числа и приводится к int.
+            $safeSort  = strtoupper($sort) === 'ASC' ? 'ASC' : 'DESC';
+            $safeLimit = implode(', ', array_map('intval', explode(',', $limit)));
+            $sql .= ' ORDER BY id ' . $safeSort . ' LIMIT ' . $safeLimit;
+            return $DB->query($sql, $params) ?: [];
         }
 
         public function getAllPostData(): ?array
@@ -115,11 +122,13 @@
             /** @var  $DB DataBase */
             $DB = DataBase::getInstance();
 
-            $sql = 'SELECT count(*) as count FROM ' . self::TABLE;
+            $sql    = 'SELECT count(*) as count FROM ' . self::TABLE;
+            $params = [];
             if (!empty($this->sectionId)) {
-                $sql .= ' WHERE section_id = "' . $this->sectionId . '"';
+                $sql .= ' WHERE section_id=:sectionId';
+                $params['sectionId'] = $this->sectionId;
             }
-            $res = $DB->query($sql);
+            $res = $DB->query($sql, $params);
             return  $res ? (int)$res[0]['count'] : 0;
         }
 

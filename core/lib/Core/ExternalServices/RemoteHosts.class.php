@@ -63,7 +63,11 @@
         {
             /** @var DataBase $DB Объект БД */
             $DB  = DataBase::getInstance();
-            $res = $DB->query('SELECT * FROM `' . self::TABLE . '` ORDER BY `id` ' . $sort . ' LIMIT ' . $limit);
+            // ORDER BY/LIMIT не подставляются через плейсхолдер: направление сортировки идёт через
+            // белый список, лимит приводится к int.
+            $safeSort  = strtoupper($sort) === 'DESC' ? 'DESC' : 'ASC';
+            $safeLimit = implode(', ', array_map('intval', explode(',', $limit)));
+            $res = $DB->query('SELECT * FROM `' . self::TABLE . '` ORDER BY `id` ' . $safeSort . ' LIMIT ' . $safeLimit);
             return $res ?? [];
         }
 

@@ -32,5 +32,10 @@
     "require-dev": {
         "vimeo/psalm": "^4.27",
         "phpunit/phpunit": "^9.5"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }

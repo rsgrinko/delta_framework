@@ -38,7 +38,7 @@
                 /** @var  $DB DataBase */
                 $DB = DataBase::getInstance();
 
-                $res      = $DB->query('SELECT * FROM `' . self::TABLE . '` WHERE user_id=' . $this->user->getId());
+                $res      = $DB->query('SELECT * FROM `' . self::TABLE . '` WHERE user_id=:userId', ['userId' => $this->user->getId()]);
                 $userMeta = [];
                 if (!empty($res)) {
                     foreach ($res as $meta) {
@@ -70,7 +70,10 @@
             } else {
                 /** @var  $DB DataBase */
                 $DB  = DataBase::getInstance();
-                $res = $DB->query('SELECT * FROM `' . self::TABLE . '` WHERE user_id=' . $this->user->getId() . ' AND name="' . $name . '"');
+                $res = $DB->query(
+                    'SELECT * FROM `' . self::TABLE . '` WHERE user_id=:userId AND name=:name',
+                    ['userId' => $this->user->getId(), 'name' => $name]
+                );
                 if (!empty($res)) {
                     $userMeta = [];
                     foreach ($res as $meta) {
@@ -122,7 +125,10 @@
 
             /** @var  $DB DataBase */
             $DB = DataBase::getInstance();
-            $DB->query('DELETE FROM ' . self::TABLE . ' WHERE user_id=' . $this->user->getId() . ' AND id="' . $id . '"');
+            $DB->query(
+                'DELETE FROM ' . self::TABLE . ' WHERE user_id=:userId AND id=:id',
+                ['userId' => $this->user->getId(), 'id' => $id]
+            );
         }
 
         /**

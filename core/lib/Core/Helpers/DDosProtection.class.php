@@ -82,7 +82,7 @@
         {
             /** @var DataBase $db */
             $DB = DataBase::getInstance();
-            $DB->query('DELETE FROM ' . self::TABLE . ' WHERE last_active < ' . (time() - $this->timeInterval));
+            $DB->query('DELETE FROM ' . self::TABLE . ' WHERE last_active < :threshold', ['threshold' => time() - $this->timeInterval]);
         }
 
         public function checkDDos(): void

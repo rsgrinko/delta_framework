@@ -76,7 +76,7 @@
                 $text = htmlspecialchars_decode($text);
                 $text = str_replace('\'', '\\\'', $text);
                 $hash = md5($text);
-                $res  = $DB->query('SELECT * FROM bashorg WHERE hash="' . $hash . '"');
+                $res  = $DB->query('SELECT * FROM bashorg WHERE hash=:hash', ['hash' => $hash]);
                 if (!$res) {
                     $i++;
                     $DB->add('bashorg', ['hash' => $hash, 'text' => $text]);
@@ -105,7 +105,7 @@
                 $text = htmlspecialchars_decode($text);
                 $text = str_replace('\'', '\\\'', $text);
                 $hash = md5($text);
-                $res  = $DB->query('SELECT * FROM bashorg WHERE hash="' . $hash . '"');
+                $res  = $DB->query('SELECT * FROM bashorg WHERE hash=:hash', ['hash' => $hash]);
                 if (!$res) {
                     $i++;
                     $itemId = $DB->add('bashorg', ['hash' => $hash, 'text' => $text]);
@@ -166,7 +166,7 @@
                 $text = htmlspecialchars_decode($text);
                 $text = str_replace('\'', '\\\'', $text);
                 $hash = md5($text);
-                $res  = $DB->query('SELECT * FROM bashorg WHERE hash="' . $hash . '" AND date is null');
+                $res  = $DB->query('SELECT * FROM bashorg WHERE hash=:hash AND date is null', ['hash' => $hash]);
                 if ($res) {
                     $j++;
                     $DB->update(
@@ -197,7 +197,7 @@
                 $hash = md5($joke);
                 $joke = str_replace('<br>', PHP_EOL, $joke);
                 $joke = addslashes($joke);
-                $res  = $DB->query('SELECT * FROM jokes WHERE hash="' . $hash . '"');
+                $res  = $DB->query('SELECT * FROM jokes WHERE hash=:hash', ['hash' => $hash]);
                 if (!$res) {
                     $i++;
                     $itemId = $DB->add('jokes', ['hash' => $hash, 'text' => $joke]);
@@ -245,7 +245,7 @@
 
             $hash = md5($file);
             $file = addslashes($file);
-            $res  = $DB->query('SELECT * FROM jokes WHERE hash="' . $hash . '"');
+            $res  = $DB->query('SELECT * FROM jokes WHERE hash=:hash', ['hash' => $hash]);
             if (!$res) {
                 $itemId = $DB->add('jokes', ['hash' => $hash, 'text' => $file]);
                 $result = 'Добавлен новый элемент с ID ' . $itemId;
@@ -310,7 +310,7 @@ DELETE from `jokes` WHERE `jokes`.id not in (SELECT id FROM t_temp);'
             $link = 'https://myslo.ru' . trim($link[1][0]);
 
             $hash = md5($link);
-            $res  = $DB->query('SELECT * FROM myslo WHERE hash="' . $hash . '"');
+            $res  = $DB->query('SELECT * FROM myslo WHERE hash=:hash', ['hash' => $hash]);
             if (!$res) {
 
                 $full = file_get_contents($link);

@@ -184,7 +184,8 @@
         private function getActiveTasksCount(): int
         {
             return (int)$this->DB->query(
-                'SELECT count(id) AS count FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '"'
+                'SELECT count(id) AS count FROM ' . self::TABLE . ' WHERE active=:active',
+                ['active' => self::VALUE_Y]
             )[0]['count'];
         }
 
@@ -220,13 +221,14 @@
                 // Вычисляем сколько заданий требуется докинуть
                 $num     = self::EXECUTION_TASKS_LIMIT - $countTasks;
                 $arTasks = $this->DB->query(
-                    'SELECT id FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_N . '" AND in_progress="' . self::VALUE_N
-                    . '" ORDER BY priority ASC LIMIT ' . $num
+                    'SELECT id FROM ' . self::TABLE . ' WHERE active=:active AND in_progress=:inProgress'
+                    . ' ORDER BY priority ASC LIMIT ' . (int)$num,
+                    ['active' => self::VALUE_N, 'inProgress' => self::VALUE_N]
                 );
                 if (!empty($arTasks)) {
                     $arTaskIds = [];
                     foreach ($arTasks as $task) {
-                        $arTaskIds[] = $task['id'];
+                        $arTaskIds[] = (int)$task['id'];
                     }
                     Log::logToFile(
                         $this->getWorkerId() . ': Взято в работу заданий ' . count($arTaskIds),
@@ -237,7 +239,10 @@
                         false
                     );
 
-                    $this->DB->query('UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_Y . '" WHERE id IN (' . implode(',', $arTaskIds) . ')');
+                    $this->DB->query(
+                        'UPDATE ' . self::TABLE . ' SET active=:active WHERE id IN (' . implode(',', $arTaskIds) . ')',
+                        ['active' => self::VALUE_Y]
+                    );
                 }
             }
         }
@@ -488,8 +493,8 @@
         private function checkDuplicates(?string $class, string $method, string $params): bool
         {
             $count = $this->DB->query(
-                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE class="' . addslashes($class) . '" and method="' . $method
-                . '" and params="' . addslashes($params) . '"'
+                'SELECT count(id) as count FROM ' . self::TABLE . ' WHERE class=:class and method=:method and params=:params',
+                ['class' => (string)$class, 'method' => $method, 'params' => $params]
             )[0]['count'];
             return ($count > 0);
         }
@@ -694,7 +699,13 @@
          */
         public function getTasks(string $limit = '10', string $orderBy = 'id', string $sort = 'DESC'): ?array
         {
-            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' ORDER BY ' . $orderBy . ' ' . $sort . ' LIMIT ' . $limit) ?? [];
+            // ORDER BY/LIMIT — синтаксис запроса, а не значения, поэтому не подставляются через
+            // плейсхолдер: имя колонки идёт через белый список символов, направление сортировки —
+            // через белый список ASC/DESC, лимит приводится к int.
+            $safeOrderBy = preg_replace('/[^a-zA-Z0-9_]/', '', $orderBy);
+            $safeSort    = strtoupper($sort) === 'ASC' ? 'ASC' : 'DESC';
+            $safeLimit   = implode(', ', array_map('intval', explode(',', $limit)));
+            return $this->DB->query('SELECT * FROM ' . self::TABLE . ' ORDER BY `' . $safeOrderBy . '` ' . $safeSort . ' LIMIT ' . $safeLimit) ?? [];
         }
 
         /**
@@ -707,7 +718,11 @@
          */
         public function getTasksHistory(string $limit = '10', string $orderBy = 'id', string $sort = 'DESC'): ?array
         {
-            return $this->DB->query('SELECT * FROM ' . self::TABLE_HISTORY . ' ORDER BY ' . $orderBy . ' ' . $sort . ' LIMIT ' . $limit) ?? [];
+            // См. комментарий в getTasks() — ORDER BY/LIMIT идут через белый список/приведение типа.
+            $safeOrderBy = preg_replace('/[^a-zA-Z0-9_]/', '', $orderBy);
+            $safeSort    = strtoupper($sort) === 'ASC' ? 'ASC' : 'DESC';
+            $safeLimit   = implode(', ', array_map('intval', explode(',', $limit)));
+            return $this->DB->query('SELECT * FROM ' . self::TABLE_HISTORY . ' ORDER BY `' . $safeOrderBy . '` ' . $safeSort . ' LIMIT ' . $safeLimit) ?? [];
         }
 
         /**
@@ -791,7 +806,8 @@
         {
             $arStuckTasks = [];
             $runTasks     = $this->DB->query(
-                'SELECT * FROM ' . self::TABLE . ' WHERE active="' . self::VALUE_Y . '" AND in_progress="' . self::VALUE_Y . '"'
+                'SELECT * FROM ' . self::TABLE . ' WHERE active=:active AND in_progress=:inProgress',
+                ['active' => self::VALUE_Y, 'inProgress' => self::VALUE_Y]
             );
             if (!empty($runTasks)) {
                 foreach ($runTasks as $task) {
@@ -812,10 +828,11 @@
 
                 if (!empty($arStuckTasks)) {
                     $this->DB->query(
-                        'UPDATE ' . self::TABLE . ' SET active="' . self::VALUE_N . '", in_progress="' . self::VALUE_N . '" WHERE id in(' . implode(
+                        'UPDATE ' . self::TABLE . ' SET active=:active, in_progress=:inProgress WHERE id in(' . implode(
                             ',',
                             $arStuckTasks
-                        ) . ')'
+                        ) . ')',
+                        ['active' => self::VALUE_N, 'inProgress' => self::VALUE_N]
                     );
 
                     sendTelegram('Задания были возвращены в работу (' . count($arStuckTasks) . ' шт)' . PHP_EOL . implode(', ', $arStuckTasks));
@@ -841,9 +858,9 @@
          */
         public function getTaskResponse(int $taskId): MQResponse
         {
-            $res = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id="' . $taskId . '"')[0];
+            $res = $this->DB->query('SELECT * FROM ' . self::TABLE . ' WHERE id=:id', ['id' => $taskId])[0];
             if (empty($res)) {
-                $res = $this->DB->query('SELECT * FROM ' . self::TABLE_HISTORY . ' WHERE task_id="' . $taskId . '"')[0];
+                $res = $this->DB->query('SELECT * FROM ' . self::TABLE_HISTORY . ' WHERE task_id=:taskId', ['taskId' => $taskId])[0];
             }
             if (empty($res)) {
                 throw new CoreException('Задание с ID ' . $taskId . ' не найдено');

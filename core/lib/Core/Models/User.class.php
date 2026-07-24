@@ -244,11 +244,17 @@
          */
         public static function getUsers(string $limit = '10', string $sort = 'ASC'): array
         {
-            $cacheId = md5('User_getUsers_' . $limit . '_' . $sort);
+            // ORDER BY/LIMIT — это не значения, а часть синтаксиса запроса, поэтому плейсхолдер
+            // подготовленного выражения тут не применим: направление сортировки идёт через
+            // белый список, а лимит (может быть строкой вида "0, 10" от Pagination::getLimit())
+            // разбирается на числа и приводится к int перед подстановкой.
+            $safeSort  = strtoupper($sort) === 'DESC' ? 'DESC' : 'ASC';
+            $safeLimit = implode(', ', array_map('intval', explode(',', $limit)));
+            $cacheId = md5('User_getUsers_' . $safeLimit . '_' . $safeSort);
             if (Cache::check($cacheId)) {
                 $res = Cache::get($cacheId);
             } else {
-                $res = (DataBase::getInstance())->query('SELECT * FROM `'.self::TABLE.'` ORDER BY `id` '.$sort.' LIMIT '.$limit);
+                $res = (DataBase::getInstance())->query('SELECT * FROM `'.self::TABLE.'` ORDER BY `id` '.$safeSort.' LIMIT '.$safeLimit);
                 Cache::set($cacheId, $res);
             }
             return $res;
@@ -390,7 +396,7 @@
          */
         public static function isOnline(int $id): bool
         {
-            $res         = (DataBase::getInstance())->query('SELECT last_active FROM `'.self::TABLE.'` WHERE id='.$id);
+            $res         = (DataBase::getInstance())->query('SELECT last_active FROM `'.self::TABLE.'` WHERE id=:id', ['id' => $id]);
             $last_active = $res[0]['last_active'];
             $timeNow     = time();
             if ($last_active > ($timeNow - USER_ONLINE_TIME)) {
@@ -407,7 +413,10 @@
          */
         public static function getOnlineCount(): int
         {
-            $res = (DataBase::getInstance())->query('SELECT COUNT(*) as count FROM `' . self::TABLE . '` WHERE last_active > ' . (time() - USER_ONLINE_TIME));
+            $res = (DataBase::getInstance())->query(
+                'SELECT COUNT(*) as count FROM `' . self::TABLE . '` WHERE last_active > :threshold',
+                ['threshold' => time() - USER_ONLINE_TIME]
+            );
             return (int)$res[0]['count'];
         }
 
@@ -974,11 +983,13 @@
         {
             /** @var $DB DataBase Объект базы данных */
             $DB  = DataBase::getInstance();
-            $sql = 'SELECT COUNT(*) as count FROM ' . self::TABLE;
+            $sql    = 'SELECT COUNT(*) as count FROM ' . self::TABLE;
+            $params = [];
             if ($onlyConfirmed) {
-                $sql .= ' WHERE email_confirmed="' . CODE_VALUE_Y . '"';
+                $sql .= ' WHERE email_confirmed=:emailConfirmed';
+                $params['emailConfirmed'] = CODE_VALUE_Y;
             }
-            $res = $DB->query($sql);
+            $res = $DB->query($sql, $params);
             return (int)$res[0]['count'];
         }
 
