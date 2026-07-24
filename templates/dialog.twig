@@ -3,81 +3,47 @@
 {% block title %}Диалог с {{ companionName }}{% endblock %}
 {% block main %}
     {% if isAuthorized %}
-        <div class="page-head">
-            <div class="page-head-icon">{{ (companionName|default('?'))|slice(0, 1)|upper }}</div>
-            <div>
-                <h1>{{ companionName }}</h1>
-                <p class="page-subtitle">Диалог №{{ dialog_id }}</p>
-            </div>
-        </div>
+        <a class="back-link" href="/dialogs">{{ icons.arrowLeft() }} Все диалоги</a>
 
-        <div class="chat-panel">
+        <div class="chat-panel" id="chatPanel" data-dialog-id="{{ dialog_id }}" data-messages-count="{{ messagesCount }}">
             <div class="chat-panel-header">
-                <span class="user-avatar">{{ (companionName|default('?'))|slice(0, 1)|upper }}</span>
+                <span class="user-avatar chat-panel-avatar">
+                    {% if companionAvatar %}
+                        <img src="{{ companionAvatar }}" alt="{{ companionName }}">
+                    {% else %}
+                        {{ (companionName|default('?'))|slice(0, 1)|upper }}
+                    {% endif %}
+                </span>
                 <div class="chat-panel-header-meta">
                     <strong>{{ companionName }}</strong>
-                    <span class="status {% if companionOnline %}is-online{% endif %}">
+                    <span class="status {% if companionOnline %}is-online{% endif %}" id="companionStatus">
                         <span class="status-dot"></span>
-                        {{ companionOnline ? 'Онлайн' : 'Не в сети' }}
+                        <span id="companionStatusText">{{ companionOnline ? 'Онлайн' : 'Не в сети' }}</span>
                     </span>
                 </div>
-                <span class="pill">{{ icons.chat() }} {{ messagesCount }} сообщений</span>
+                <span class="pill">{{ icons.chat() }} <span id="messagesCountText">{{ messagesCount }}</span> сообщений</span>
             </div>
 
-            {% if messages is empty %}
-                <div class="messageBox">
-                    <div class="empty-state">
-                        {{ icons.chat() }}
-                        <span>Сообщений пока нет &mdash; начните переписку</span>
-                    </div>
-                </div>
-            {% else %}
-                <div class="messageBox">
-                    {% for message in messages %}
-                        <div class="message {% if message.user_from == userId %}fromMe{% else %}fromCompanion{% endif %}">
-                            <div class="name"><a href="/users/{{ message.user_from_data.id }}">{{ message.user_from_data.name }}</a></div>
-                            <div class="text">
-                                {% if message.type == 'text' %}
-                                    {{ message.text }}
-                                {% elseif message.type == 'image' %}
-                                    {% if message.file.error == false %}
-                                        <a href="{{ message.file.path }}" target="_blank">
-                                            <img class="dialogImage" src="{{ message.file.path }}" alt="{{ message.file.name }}">
-                                        </a>
-                                    {% else %}
-                                        <b>Некорректное изображение</b>
-                                    {% endif %}
-                                {% elseif message.type == 'file' %}
-                                    {% if message.file.error == false %}
-                                        <a class="fileLink" href="{{ message.file.path }}" target="_blank">{{ icons.paperclip() }} {{ message.file.name }}</a>
-                                    {% else %}
-                                        <b>Некорректный файл</b>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                            <div class="date">{{ message.date }}</div>
-                            {% if message.user_from == userId %}
-                                <div class="deliveryStatus {% if message.user_from == userId and message.viewed == "Y" %}viewed{% endif %}">&nbsp;</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <div class="messageBox" id="messageBox">
+                {% include '_messageList.twig' with {messages: messages, userId: userId} %}
+            </div>
 
             <div class="chat-compose">
-                <form method="POST" action="/users/{{ companionId }}/sendMessage" enctype="multipart/form-data">
+                <form method="POST" action="/users/{{ companionId }}/sendMessage" enctype="multipart/form-data" id="chatComposeForm">
                     <input type="hidden" name="dialogId" value="{{ dialog_id }}">
-                    <textarea name="message" placeholder="Введите сообщение..."></textarea>
+                    <textarea name="message" id="chatMessageInput" placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — новая строка)"></textarea>
                     <div class="chat-compose-actions">
                         <label class="input-file">
-                            <input type="file" name="file">
-                            <span>{{ icons.paperclip() }} Файл</span>
+                            <input type="file" name="file" id="chatFileInput">
+                            <span id="chatFileLabel">{{ icons.paperclip() }} Файл</span>
                         </label>
-                        <button class="button" type="submit" value="sendMessage">{{ icons.send() }} Отправить</button>
+                        <button class="button" type="submit" value="sendMessage" id="chatSendButton">{{ icons.send() }} Отправить</button>
                     </div>
                 </form>
             </div>
         </div>
+
+        <script src="/assets/js/chat.js?{{ salt }}"></script>
     {% else %}
         <div class="alert alert-error">{{ icons.warning() }}<span>Вы не авторизованы</span></div>
     {% endif %}

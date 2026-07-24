@@ -37,6 +37,7 @@
 
     Router::route('/dialogs', '\Core\App::dialogs');
     Router::route('/dialog/(\d+)', '\Core\App::dialog');
+    Router::route('/dialog/(\d+)/messages', '\Core\App::dialogMessages');
 
     Router::route('/users', '\Core\App::users');
     Router::route('/users/(\d+)', '\Core\App::userProfile');

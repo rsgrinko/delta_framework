@@ -23,48 +23,46 @@
                     <span>Диалогов пока нет</span>
                 </div>
             {% else %}
-                <div class="table-wrap">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>Собеседник</th>
-                            <th style="width: 120px;">Статус</th>
-                            <th style="width: 110px;">Сообщений</th>
-                            <th style="width: 130px;">Непрочитанных</th>
-                            <th style="width: 150px;"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for dialog in dialogs %}
-                            <tr>
-                                <td>
-                                    <div class="cell-user">
-                                        <span class="user-avatar">{{ dialog.companionData.nameForDisplay|slice(0, 1)|upper }}</span>
-                                        <div class="cell-user-meta">
-                                            <span>{{ dialog.companionData.name }}</span>
-                                            <span class="cell-user-sub">{{ dialog.companionData.login }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="status {% if dialog.companionOnline %}is-online{% endif %}">
-                                        <span class="status-dot"></span>
-                                        {{ dialog.companionOnline ? 'Онлайн' : 'Не в сети' }}
-                                    </span>
-                                </td>
-                                <td>{{ dialog.messagesCount }}</td>
-                                <td>
-                                    {% if dialog.unviewedCount > 0 %}
-                                        <span class="nav-badge">{{ dialog.unviewedCount }}</span>
+                <div class="dialog-list">
+                    {% for dialog in dialogs %}
+                        <a class="dialog-row {% if dialog.unviewedCount > 0 %}has-unread{% endif %}" href="/dialog/{{ dialog.id }}">
+                            <span class="avatar-wrap">
+                                <span class="user-avatar">
+                                    {% if dialog.companionAvatar %}
+                                        <img src="{{ dialog.companionAvatar }}" alt="{{ dialog.companionData.name }}">
                                     {% else %}
-                                        &mdash;
+                                        {{ (dialog.companionData.name|default(dialog.companionData.login))|slice(0, 1)|upper }}
                                     {% endif %}
-                                </td>
-                                <td><a class="row-action" href="/dialog/{{ dialog.id }}">{{ icons.chat() }} Открыть</a></td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                                </span>
+                                <span class="avatar-status-dot {% if dialog.companionOnline %}is-online{% endif %}"></span>
+                            </span>
+                            <div class="dialog-row-main">
+                                <div class="dialog-row-top">
+                                    <strong>{{ dialog.companionData.name }}</strong>
+                                    {% if dialog.lastMessage %}
+                                        <span class="dialog-row-time">{{ dialog.lastMessage.date|date('d.m.Y H:i') }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="dialog-row-preview">
+                                    {% if dialog.lastMessage %}
+                                        {% if dialog.lastMessage.user_from == userId %}<span class="dialog-row-you">Вы:</span>{% endif %}
+                                        {% if dialog.lastMessage.type == 'text' %}
+                                            {{ dialog.lastMessage.text|slice(0, 80) }}{% if dialog.lastMessage.text|length > 80 %}&hellip;{% endif %}
+                                        {% elseif dialog.lastMessage.type == 'image' %}
+                                            {{ icons.paperclip() }} Изображение
+                                        {% elseif dialog.lastMessage.type == 'file' %}
+                                            {{ icons.paperclip() }} Файл
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="dialog-row-empty">Сообщений пока нет</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if dialog.unviewedCount > 0 %}
+                                <span class="nav-badge">{{ dialog.unviewedCount }}</span>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
                 </div>
             {% endif %}
         </div>

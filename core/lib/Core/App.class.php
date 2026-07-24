@@ -121,16 +121,22 @@
                 foreach ($dialogs as $key => $dialog) {
                     $dialogs[$key]['companionOnline'] = User::isOnline((int)$dialog['companionId']);
                     $dialogs[$key]['messagesCount']    = $USER->getDialogObject()->getDialogMessagesCount((int)$dialog['id']);
+                    $dialogs[$key]['lastMessage']      = $USER->getDialogObject()->getLastMessage((int)$dialog['id']);
+                    $dialogs[$key]['companionAvatar']  = self::getAvatarPath($dialog['companionData']['image_id'] ?? null);
                 }
             }
-            self::render('dialogs.twig', ['dialogs' => $dialogs]);
+            self::render('dialogs.twig', [
+                'dialogs' => $dialogs,
+                'userId'  => User::isAuthorized() ? $USER->getId() : null,
+            ]);
         }
 
         public static function dialog(int $id)
         {
             /** @var User $USER */
             global $USER;
-            $companionId = $USER->getDialogObject()->getDialogCompanionId($id);
+            $companionId     = $USER->getDialogObject()->getDialogCompanionId($id);
+            $companionObject = new User($companionId);
             self::render(
                 'dialog.twig',
                 [
@@ -138,19 +144,52 @@
                     'messages'        => $USER->getMessages($id, true),
                     'userId'          => $USER->getId(),
                     'companionId'     => $companionId,
-                    'companionName'   => (new User($companionId))->getName(),
+                    'companionName'   => $companionObject->getName(),
+                    'companionAvatar' => self::getAvatarPath($companionObject->getAllUserData(true)['image_id'] ?? null),
                     'companionOnline' => User::isOnline($companionId),
                     'messagesCount'   => $USER->getDialogObject()->getDialogMessagesCount($id),
                 ]
             );
         }
 
+        /**
+         * Получение пути к файлу аватара по идентификатору изображения
+         *
+         * @param int|null $imageId Идентификатор файла
+         *
+         * @return string|null
+         */
+        private static function getAvatarPath(?int $imageId): ?string
+        {
+            if (empty($imageId)) {
+                return null;
+            }
+            try {
+                $image = (new File((int)$imageId))->getAllProps();
+            } catch (CoreException $e) {
+                return null;
+            }
+            return $image['path'] ?? null;
+        }
+
         public static function sendMessage(int $userId)
         {
             /** @var User $USER */
             global $USER;
+
+            $isAjax  = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
+            $message = trim((string)($_REQUEST['message'] ?? ''));
+
+            if (empty($_FILES['file']['tmp_name']) && $message === '') {
+                if ($isAjax) {
+                    self::outputJson(['success' => false, 'error' => 'Сообщение пустое']);
+                }
+                header('Location: /dialog/' . (int)$_REQUEST['dialogId']);
+                return;
+            }
+
             if (empty($_FILES['file']['tmp_name'])) {
-                $USER->getDialogObject()->sendMessage($userId, $_REQUEST['message']);
+                $USER->getDialogObject()->sendMessage($userId, $message);
             } else {
                 $fileObject = new File();
                 $fileObject->saveFile($_FILES['file']['tmp_name'], $_FILES['file']['name'], true);
@@ -158,7 +197,66 @@
                 $USER->getDialogObject()->sendFile($userId, $fileObject->getId(), in_array($_FILES['file']['type'], ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true));
             }
 
-            header('Location: /dialog/' . (int)$_REQUEST['dialogId']);
+            $dialogId = (int)$_REQUEST['dialogId'];
+
+            if ($isAjax) {
+                self::outputDialogJson($dialogId);
+            }
+
+            header('Location: /dialog/' . $dialogId);
+        }
+
+        public static function dialogMessages(int $id)
+        {
+            self::outputDialogJson($id);
+        }
+
+        /**
+         * Отдаёт JSON со свежим списком сообщений диалога (для AJAX-отправки и опроса новых сообщений)
+         *
+         * @param int $dialogId Идентификатор диалога
+         *
+         * @return void
+         */
+        private static function outputDialogJson(int $dialogId): void
+        {
+            /** @var User $USER */
+            global $USER, $twig;
+
+            if (empty($USER)) {
+                self::outputJson(['success' => false, 'error' => 'Не авторизован']);
+            }
+
+            $companionId = $USER->getDialogObject()->getDialogCompanionId($dialogId);
+            if ($companionId === null) {
+                self::outputJson(['success' => false, 'error' => 'Диалог не найден']);
+            }
+
+            $html = $twig->render('_messageList.twig', [
+                'messages' => $USER->getMessages($dialogId, true),
+                'userId'   => $USER->getId(),
+            ]);
+
+            self::outputJson([
+                'success'         => true,
+                'html'            => $html,
+                'messagesCount'   => $USER->getDialogObject()->getDialogMessagesCount($dialogId),
+                'companionOnline' => User::isOnline($companionId),
+            ]);
+        }
+
+        /**
+         * Отдаёт массив данных в виде JSON и завершает работу скрипта
+         *
+         * @param array $data Данные
+         *
+         * @return void
+         */
+        private static function outputJson(array $data): void
+        {
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode($data);
+            die();
         }
 
         public static function users()

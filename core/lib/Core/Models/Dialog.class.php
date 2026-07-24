@@ -242,5 +242,19 @@
             return $DB->getCount(self::TABLE_MESSAGES, ['dialog_id' => $dialogId]);
         }
 
+        /**
+         * Получение последнего сообщения диалога (для превью в списке диалогов)
+         *
+         * @param int $dialogId Идентификатор диалога
+         *
+         * @return array|null
+         */
+        public function getLastMessage(int $dialogId): ?array
+        {
+            /** @var $DB DataBase Объект базы данных */
+            $DB = DataBase::getInstance();
+            $res = $DB->query('SELECT * FROM ' . self::TABLE_MESSAGES . ' WHERE `dialog_id`="' . $dialogId . '" ORDER BY id DESC LIMIT 1');
+            return $res ? $res[0] : null;
+        }
 
     }

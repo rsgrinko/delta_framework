@@ -1,0 +1,46 @@
+{% import '_icons.twig' as icons %}
+{% if messages is empty %}
+    <div class="empty-state">
+        {{ icons.chat() }}
+        <span>Сообщений пока нет &mdash; начните переписку</span>
+    </div>
+{% else %}
+    {% for message in messages %}
+        {% set prevMessage = not loop.first ? messages[loop.index0 - 1] : null %}
+        {% set isNewDay = prevMessage is null or (message.date|date('Y-m-d')) != (prevMessage.date|date('Y-m-d')) %}
+        {% set isGrouped = prevMessage is not null and prevMessage.user_from == message.user_from and not isNewDay %}
+
+        {% if isNewDay %}
+            <div class="message-day-separator"><span>{{ message.date|date('d.m.Y') }}</span></div>
+        {% endif %}
+
+        <div class="message {% if message.user_from == userId %}fromMe{% else %}fromCompanion{% endif %}{% if isGrouped %} grouped{% endif %}">
+            {% if not isGrouped %}
+                <div class="name"><a href="/users/{{ message.user_from_data.id }}">{{ message.user_from_data.name }}</a></div>
+            {% endif %}
+            <div class="text">
+                {% if message.type == 'text' %}
+                    {{ message.text }}
+                {% elseif message.type == 'image' %}
+                    {% if message.file.error == false %}
+                        <a href="{{ message.file.path }}" target="_blank">
+                            <img class="dialogImage" src="{{ message.file.path }}" alt="{{ message.file.name }}">
+                        </a>
+                    {% else %}
+                        <b>Некорректное изображение</b>
+                    {% endif %}
+                {% elseif message.type == 'file' %}
+                    {% if message.file.error == false %}
+                        <a class="fileLink" href="{{ message.file.path }}" target="_blank">{{ icons.paperclip() }} {{ message.file.name }}</a>
+                    {% else %}
+                        <b>Некорректный файл</b>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="date">{{ message.date|date('H:i') }}</div>
+            {% if message.user_from == userId %}
+                <div class="deliveryStatus {% if message.viewed == "Y" %}viewed{% endif %}">&nbsp;</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endif %}

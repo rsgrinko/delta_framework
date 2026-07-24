@@ -1048,9 +1048,6 @@ textarea:focus,
    Chat / dialogs
    ========================================================================== */
 .chat-panel {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -1059,27 +1056,29 @@ textarea:focus,
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 18px;
-    background: var(--color-surface-muted);
+    padding: 0 0 16px;
     border-bottom: 1px solid var(--color-border);
 }
 
-.chat-panel-header .user-avatar {
-    width: 38px;
-    height: 38px;
-    font-size: 1em;
+.chat-panel-header .chat-panel-avatar {
+    width: 46px;
+    height: 46px;
+    font-size: 1.15em;
+    font-weight: 700;
     background: var(--gradient-brand);
     color: #fff;
+    flex-shrink: 0;
 }
 
 .chat-panel-header-meta {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
 }
 
 .chat-panel-header-meta strong {
-    font-size: 0.98em;
+    font-size: 1.1em;
 }
 
 .chat-panel-header .pill {
@@ -1089,7 +1088,7 @@ textarea:focus,
 .messageBox {
     display: flex;
     flex-direction: column;
-    padding: 22px 24px 6px;
+    padding: 20px 0 6px;
     max-height: 56vh;
     overflow-y: auto;
 }
@@ -1113,6 +1112,28 @@ textarea:focus,
     background: var(--gradient-brand);
     color: white;
     border-color: transparent;
+}
+
+.messageBox .message.grouped {
+    padding-top: 12px;
+    margin-bottom: 4px;
+}
+
+.message-day-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 6px 0 18px;
+}
+
+.message-day-separator span {
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.78em;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
 }
 
 .messageBox .message a {
@@ -1175,13 +1196,16 @@ a.fileLink {
 
 .chat-compose {
     border-top: 1px solid var(--color-border);
-    background: var(--color-surface-muted);
-    padding: 16px 24px;
+    padding: 16px 0 0;
 }
 
 .chat-compose textarea {
     margin-bottom: 10px;
-    height: 80px;
+    height: 44px;
+    max-height: 200px;
+    min-height: 44px;
+    resize: none;
+    overflow-y: auto;
 }
 
 .chat-compose-actions {
@@ -1192,6 +1216,110 @@ a.fileLink {
 
 .chat-compose-actions .button {
     margin-left: auto;
+}
+
+.chat-compose-actions .button:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   Dialogs list (messenger-style)
+   ========================================================================== */
+.dialog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dialog-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: background var(--transition);
+}
+
+.dialog-row:hover {
+    background: var(--color-surface-muted);
+}
+
+.dialog-row.has-unread .dialog-row-preview,
+.dialog-row.has-unread strong {
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+.avatar-wrap {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.avatar-wrap .user-avatar {
+    background: var(--gradient-brand);
+}
+
+.avatar-status-dot {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #cbd2e0;
+    border: 2px solid var(--color-surface);
+}
+
+.avatar-status-dot.is-online {
+    background: #22c55e;
+}
+
+.dialog-row-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.dialog-row-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.dialog-row-top strong {
+    font-size: 0.98em;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.dialog-row-time {
+    flex-shrink: 0;
+    font-size: 0.78em;
+    color: var(--color-text-faint);
+}
+
+.dialog-row-preview {
+    margin-top: 2px;
+    color: var(--color-text-faint);
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dialog-row-you {
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.dialog-row-empty {
+    font-style: italic;
 }
 
 /* ==========================================================================
