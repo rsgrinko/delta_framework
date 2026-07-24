@@ -687,63 +687,6 @@
         }
 
         /**
-         * Парсинг логов nginx
-         *
-         * @param string      $logPath     Путь до файла логов
-         * @param bool        $isOnlyCount Только получение количества
-         * @param string|null $limit       Ограничение выборки "0, 10"
-         * @param bool        $isReverse   Перевернуть выборку
-         *
-         * @return array|int
-         * @throws CoreException
-         */
-        public static function getNginxLogData(string $logPath, bool $isOnlyCount = false, ?string $limit = null, bool $isReverse = false)
-        {
-            if (!file_exists($logPath)) {
-                throw new CoreException('Файл логов не найден', CoreException::ERROR_FILE_NOT_FOUND);
-            }
-            $arLogs = file($logPath);
-            $logCount = count($arLogs);
-            if ($isOnlyCount) {
-                return $logCount;
-            }
-            if ($isReverse) {
-                $arLogs = array_reverse($arLogs);
-            }
-            $arLimit = [0, $logCount];
-            if ($limit !== null) {
-                $arLimit['start'] = (int)explode(',', $limit)[0];
-                $arLimit['stop']  = $arLimit['start'] + (int)explode(',', $limit)[1];
-            }
-            $regExp   = '/(?<ip>[0-9.]+)\s+\-\s+\-\s\[(?<date>[^\]]+)\]\s"(?<request>[^"]+)"\s(?<code>\d+)\s+(?<size>\d+)\s"(?<url>[^"]+)"\s"(?<useragent>[^"]+)"/m';
-            $arResult = [];
-            $result   = null;
-            $counter = 0;
-            foreach ($arLogs as $logEvent) {
-                $counter++;
-                if ($limit !== null && ($counter - 1) < $arLimit['start']) {
-                    continue;
-                }
-                preg_match_all($regExp, $logEvent, $result, PREG_SET_ORDER, 0);
-                $result     = array_shift($result);
-                $arResult[] = [
-                    'ip'        => $result['ip'],
-                    'date'      => $result['date'],
-                    'request'   => $result['request'],
-                    'httpCode'  => $result['code'],
-                    'size'      => $result['size'],
-                    'url'       => $result['url'],
-                    'userAgent' => $result['useragent'],
-                ];
-                $result     = null;
-                if ($limit !== null && ($counter + 1) > $arLimit['stop']) {
-                    break;
-                }
-            }
-            return $arResult;
-        }
-
-        /**
          * Возвращает подсвеченную PHP строку
          *
          * @param string $string Строка кода
