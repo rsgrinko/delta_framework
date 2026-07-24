@@ -889,6 +889,62 @@
                 )->setTemplateVars(['TITLE' => 'Подтверждение E-Mail'])->send()[0];
         }
 
+        /**
+         * Смена пароля пользователем (с проверкой текущего пароля)
+         *
+         * @param string $currentPassword Текущий пароль
+         * @param string $newPassword     Новый пароль
+         *
+         * @return bool
+         * @throws CoreException
+         */
+        public function changePassword(string $currentPassword, string $newPassword): bool
+        {
+            $currentData = $this->getAllUserData();
+            if ($currentData['password'] !== self::passwordEncryption($currentPassword)) {
+                return false;
+            }
+            $this->update(['password' => self::passwordEncryption($newPassword)]);
+            Log::logToFile('Пользователь сменил пароль', 'User.log', ['userId' => $this->id]);
+
+            // Обновляем хеш пароля, сохранённый в сессии при авторизации, иначе isAuthorized()
+            // разлогинит пользователя на следующем же запросе, так как пароль в БД уже другой
+            if (isset($_SESSION['id']) && (int)$_SESSION['id'] === $this->id) {
+                $_SESSION['password'] = self::passwordEncryption(self::passwordEncryption($newPassword));
+            }
+
+            return true;
+        }
+
+        /**
+         * Смена E-Mail пользователем (с обязательной повторной верификацией)
+         *
+         * @param string $newEmail Новый E-Mail
+         *
+         * @return bool
+         * @throws CoreException
+         */
+        public function changeEmail(string $newEmail): bool
+        {
+            $newEmail = Sanitize::sanitizeEmail($newEmail);
+            if ($newEmail === $this->getEmail()) {
+                return true;
+            }
+            if (self::isUserExistsByParams(['email' => $newEmail])) {
+                throw new CoreException('Пользователь с данным E-Mail уже существует', CoreException::ERROR_CREATE_USER);
+            }
+
+            $verificationCode = md5(self::$cryptoSalt . $newEmail . $this->getLogin() . time());
+            $this->update([
+                'email'             => $newEmail,
+                'email_confirmed'   => CODE_VALUE_N,
+                'verification_code' => $verificationCode,
+            ]);
+            Log::logToFile('Пользователь сменил E-Mail', 'User.log', ['userId' => $this->id, 'newEmail' => $newEmail]);
+            $this->sendVerificationCode();
+            return true;
+        }
+
         public function resetPassword(): bool
         {
             $newPassword = SystemFunctions::generatePassword();

@@ -217,6 +217,21 @@ a {
     flex-shrink: 0;
 }
 
+.nav-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px 6px 6px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background var(--transition);
+}
+
+.nav-profile-link:hover,
+.nav-profile-link.active {
+    background: rgba(255, 255, 255, 0.14);
+}
+
 .user-avatar {
     display: inline-flex;
     align-items: center;
@@ -1022,6 +1037,28 @@ textarea:focus,
 
 .profile-hero-roles {
     margin-top: 8px;
+}
+
+.profile-avatar-form {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.profile-avatar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.confirm-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: -6px 0 14px;
 }
 
 .info-list {

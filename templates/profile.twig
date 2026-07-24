@@ -1,0 +1,99 @@
+{% extends 'layout.twig' %}
+{% import '_icons.twig' as icons %}
+{% block title %}Личный кабинет{% endblock %}
+{% block main %}
+    <div class="page-head">
+        <div class="page-head-icon">{{ icons.sliders() }}</div>
+        <div>
+            <h1>Личный кабинет</h1>
+            <p class="page-subtitle">Управление профилем, аватаром и безопасностью аккаунта</p>
+        </div>
+    </div>
+
+    {% if message %}
+        <div class="alert {% if message.type == 'success' %}alert-success{% else %}alert-error{% endif %}">
+            {{ message.type == 'success' ? icons.check() : icons.warning() }}
+            <span>{{ message.text }}</span>
+        </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.camera() }} Аватар</h2>
+        </div>
+        <form method="POST" action="/profile/avatar" enctype="multipart/form-data" class="profile-avatar-form">
+            <div class="profile-hero-avatar">
+                {% if avatar %}
+                    <img src="{{ avatar.path }}" alt="{{ profileData.name }}">
+                {% else %}
+                    {{ (profileData.name|default(profileData.login))|slice(0, 1)|upper }}
+                {% endif %}
+            </div>
+            <div class="profile-avatar-controls">
+                <label class="input-file">
+                    <input type="file" name="avatar" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <span>{{ icons.camera() }} Выбрать файл</span>
+                </label>
+                <button class="button" type="submit">Загрузить</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.user() }} Личные данные</h2>
+        </div>
+        <form method="POST" action="/profile/personal">
+            <input class="input" type="text" name="name" value="{{ profileData.name }}" placeholder="Имя">
+            <input class="input" type="email" name="email" value="{{ profileData.email }}" placeholder="E-Mail">
+
+            <div class="confirm-row">
+                {% if emailConfirmed %}
+                    <span class="confirm-badge is-yes">{{ icons.check() }} E-Mail подтверждён</span>
+                {% else %}
+                    <span class="confirm-badge is-no">{{ icons.warning() }} E-Mail не подтверждён</span>
+                    <button class="button button-ghost" type="submit" form="resendVerificationForm">Отправить код повторно</button>
+                {% endif %}
+            </div>
+
+            <button class="button" type="submit">Сохранить</button>
+        </form>
+        {% if not emailConfirmed %}
+            <form method="POST" action="/profile/resend-verification" id="resendVerificationForm"></form>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.lock() }} Смена пароля</h2>
+        </div>
+        <form method="POST" action="/profile/password">
+            <input class="input" type="password" name="currentPassword" placeholder="Текущий пароль" autocomplete="current-password">
+            <input class="input" type="password" name="newPassword" placeholder="Новый пароль" autocomplete="new-password">
+            <input class="input" type="password" name="confirmPassword" placeholder="Повторите новый пароль" autocomplete="new-password">
+            <button class="button" type="submit">Сменить пароль</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
+            <h2>{{ icons.info() }} Информация об аккаунте</h2>
+        </div>
+        <dl class="info-list">
+            <dt>{{ icons.hash() }} ID</dt>
+            <dd>{{ profileData.id }}</dd>
+            <dt>{{ icons.user() }} Логин</dt>
+            <dd>{{ profileData.login }}</dd>
+            <dt>{{ icons.clock() }} Регистрация</dt>
+            <dd>{{ profileData.date_created }}</dd>
+            <dt>{{ icons.shield() }} Роли</dt>
+            <dd>
+                {% for role in roles %}
+                    <span class="role-badge">{{ role.name }}</span>
+                {% else %}
+                    &mdash;
+                {% endfor %}
+            </dd>
+        </dl>
+    </div>
+{% endblock %}

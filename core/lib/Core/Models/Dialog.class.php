@@ -65,12 +65,9 @@
         private function markDialogViewed(int $dialogId): void
         {
             /** @var $DB DataBase Объект базы данных */
-            $DB       = DataBase::getInstance();
-            $dialogData = $DB->get(self::TABLE_DIALOGS, ['id' => $dialogId]);
-            if ($this->user->getId() === (int)$dialogData['receive']) {
-                $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed' => CODE_VALUE_Y]);
-                $DB->update(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'user_to' => $this->user->getId(), 'viewed' => CODE_VALUE_N], ['viewed' => CODE_VALUE_Y]);
-            }
+            $DB = DataBase::getInstance();
+            $DB->update(self::TABLE_DIALOGS, ['id' => $dialogId], ['viewed' => CODE_VALUE_Y]);
+            $DB->update(self::TABLE_MESSAGES, ['dialog_id' => $dialogId, 'user_to' => $this->user->getId(), 'viewed' => CODE_VALUE_N], ['viewed' => CODE_VALUE_Y]);
         }
 
         public function createDialog(int $userId): ?int

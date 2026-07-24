@@ -44,6 +44,12 @@
     Router::route('/users/(\d+)/sendMessage', '\Core\App::sendMessage');
     Router::route('/users/(\d+)/dialog', '\Core\App::goToDialog');
 
+    Router::route('/profile', '\Core\App::profile');
+    Router::route('/profile/personal', '\Core\App::profileUpdatePersonal');
+    Router::route('/profile/password', '\Core\App::profileUpdatePassword');
+    Router::route('/profile/avatar', '\Core\App::profileUpdateAvatar');
+    Router::route('/profile/resend-verification', '\Core\App::profileResendVerification');
+
 
     Router::route('/test', '\Core\App::test', true);
     Router::route('/test/(\d+)', '\Core\App::test');

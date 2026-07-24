@@ -59,6 +59,7 @@
                 'isAuthorized'  => User::isAuthorized(),
                 'isAdmin'       => User::isAuthorized() && $USER->isAdmin(),
                 'userData'      => User::isAuthorized() ? $USER->getAllUserData(true) : [],
+                'userAvatar'    => User::isAuthorized() ? $USER->getImage() : null,
                 'currentYear'   => date('Y'),
                 'newMessages'   => User::isAuthorized() ? $USER->getDialogObject()->getUnviewedMessagesCount() : 0,
             ];
@@ -347,5 +348,144 @@
                 $dialogId = $USER->getDialogObject()->createDialog($userId);
             }
             header('Location: /dialog/' . $dialogId);
+        }
+
+        public static function profile()
+        {
+            /** @var User $USER */
+            global $USER;
+            if (empty($USER)) {
+                header('Location: /login');
+                return;
+            }
+
+            $message = $_SESSION['profileMessage'] ?? null;
+            unset($_SESSION['profileMessage']);
+
+            self::render('profile.twig', [
+                'profileData'    => $USER->getAllUserData(true),
+                'roles'          => $USER->getRolesObject()->getFullRoles(),
+                'avatar'         => $USER->getImage(),
+                'emailConfirmed' => $USER->isEmailConfirmed(),
+                'message'        => $message,
+            ]);
+        }
+
+        public static function profileUpdatePersonal()
+        {
+            /** @var User $USER */
+            global $USER;
+            if (empty($USER)) {
+                header('Location: /login');
+                return;
+            }
+
+            $name  = trim((string)($_REQUEST['name'] ?? ''));
+            $email = trim((string)($_REQUEST['email'] ?? ''));
+
+            try {
+                if ($name !== '') {
+                    $USER->update(['name' => $name]);
+                }
+                if ($email !== '' && $email !== $USER->getEmail()) {
+                    $USER->changeEmail($email);
+                    self::setProfileMessage('success', 'Данные обновлены. На новый E-Mail отправлен код подтверждения.');
+                } else {
+                    self::setProfileMessage('success', 'Данные успешно обновлены.');
+                }
+            } catch (CoreException $e) {
+                self::setProfileMessage('error', $e->getMessage());
+            }
+
+            header('Location: /profile');
+        }
+
+        public static function profileUpdatePassword()
+        {
+            /** @var User $USER */
+            global $USER;
+            if (empty($USER)) {
+                header('Location: /login');
+                return;
+            }
+
+            $currentPassword = (string)($_REQUEST['currentPassword'] ?? '');
+            $newPassword     = (string)($_REQUEST['newPassword'] ?? '');
+            $confirmPassword = (string)($_REQUEST['confirmPassword'] ?? '');
+
+            if ($newPassword === '' || $newPassword !== $confirmPassword) {
+                self::setProfileMessage('error', 'Новый пароль пуст или не совпадает с подтверждением.');
+            } elseif (!$USER->changePassword($currentPassword, $newPassword)) {
+                self::setProfileMessage('error', 'Текущий пароль указан неверно.');
+            } else {
+                self::setProfileMessage('success', 'Пароль успешно изменён.');
+            }
+
+            header('Location: /profile');
+        }
+
+        public static function profileUpdateAvatar()
+        {
+            /** @var User $USER */
+            global $USER;
+            if (empty($USER)) {
+                header('Location: /login');
+                return;
+            }
+
+            if (empty($_FILES['avatar']['tmp_name'])) {
+                self::setProfileMessage('error', 'Файл не выбран.');
+                header('Location: /profile');
+                return;
+            }
+
+            if (!in_array($_FILES['avatar']['type'], ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
+                self::setProfileMessage('error', 'Аватар должен быть изображением (JPEG, PNG, GIF или WEBP).');
+                header('Location: /profile');
+                return;
+            }
+
+            try {
+                $fileObject = new File();
+                $fileObject->saveFile($_FILES['avatar']['tmp_name'], $_FILES['avatar']['name'], true);
+                $USER->update(['image_id' => $fileObject->getId()]);
+                self::setProfileMessage('success', 'Аватар обновлён.');
+            } catch (CoreException $e) {
+                self::setProfileMessage('error', 'Не удалось загрузить файл.');
+            }
+
+            header('Location: /profile');
+        }
+
+        public static function profileResendVerification()
+        {
+            /** @var User $USER */
+            global $USER;
+            if (empty($USER)) {
+                header('Location: /login');
+                return;
+            }
+
+            try {
+                $USER->sendVerificationCode();
+                self::setProfileMessage('success', 'Письмо с кодом подтверждения отправлено повторно.');
+            } catch (CoreException $e) {
+                self::setProfileMessage('error', 'Не удалось отправить письмо подтверждения.');
+            }
+
+            header('Location: /profile');
+        }
+
+        /**
+         * Сохранение сообщения для отображения на странице личного кабинета
+         *
+         * @param string $type Тип сообщения (success|error)
+         * @param string $text Текст сообщения
+         *
+         * @return void
+         */
+        private static function setProfileMessage(string $type, string $text): void
+        {
+            $_SESSION['profileMessage'] = ['type' => $type, 'text' => $text];
         }
     }

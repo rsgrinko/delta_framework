@@ -39,8 +39,16 @@
 
                 <div class="nav-user">
                     {% if isAuthorized %}
-                        <span class="user-avatar">{{ (userData.name|default(userData.login|default('U')))|slice(0, 1)|upper }}</span>
-                        <span class="user-name">{{ userData.name }}</span>
+                        <a class="nav-profile-link {% if currentPage == 'profile' %}active{% endif %}" href="/profile" title="Личный кабинет">
+                            <span class="user-avatar">
+                                {% if userAvatar %}
+                                    <img src="{{ userAvatar.path }}" alt="{{ userData.name }}">
+                                {% else %}
+                                    {{ (userData.name|default(userData.login|default('U')))|slice(0, 1)|upper }}
+                                {% endif %}
+                            </span>
+                            <span class="user-name">{{ userData.name }}</span>
+                        </a>
                         <a class="nav-link nav-link-icon" href="/logout" title="Выход">{{ icons.logout() }}</a>
                     {% else %}
                         <a class="nav-link nav-link-guest" href="/login">{{ icons.login() }}<span>Войти</span></a>

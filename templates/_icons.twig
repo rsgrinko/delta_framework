@@ -43,3 +43,9 @@
 {% macro arrowRight(class) %}{{ _self.base('<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>', class) }}{% endmacro %}
 
 {% macro user(class) %}{{ _self.base('<circle cx="12" cy="8" r="3.4"/><path d="M6 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/>', class) }}{% endmacro %}
+
+{% macro sliders(class) %}{{ _self.base('<line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"/>', class) }}{% endmacro %}
+
+{% macro lock(class) %}{{ _self.base('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', class) }}{% endmacro %}
+
+{% macro camera(class) %}{{ _self.base('<path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.3"/>', class) }}{% endmacro %}
