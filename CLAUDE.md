@@ -1,176 +1,223 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Этот файл содержит инструкции для Claude Code (claude.ai/code) при работе с кодом в этом репозитории.
 
-## Project overview
+## Обзор проекта
 
-Delta Framework — a custom, self-written PHP framework (not built on Laravel/Symfony/etc.). Code, comments, and
-commit messages are predominantly in Russian. No frontend build system (no npm/webpack) — the public site uses
-server-rendered Twig templates with a hand-written CSS design system, the admin panel uses plain PHP/jQuery pages.
+Delta Framework — собственный, самописный PHP-фреймворк (не построен на Laravel/Symfony/и т.п.). Код, комментарии и
+сообщения коммитов преимущественно на русском языке. Нет системы сборки фронтенда (нет npm/webpack) — публичный сайт
+использует серверный рендеринг шаблонов Twig с самописной CSS-дизайн-системой, админ-панель использует обычные
+страницы PHP/jQuery.
 
-## Commands
+## Команды
 
 ```bash
-# Install dependencies
+# Установка зависимостей
 composer install
 
-# Run all tests (as used in .gitlab-ci.yml)
+# Запуск всех тестов (используется в .gitlab-ci.yml)
 vendor/bin/phpunit --testdox tests
 
-# Run a single test file / method
+# Запуск отдельного файла теста / метода
 vendor/bin/phpunit tests/UserTest.php
 vendor/bin/phpunit --filter testGetAllUserData tests/UserTest.php
 
-# Static analysis (dev dependency, used by .github/workflows/psalm.yml)
+# Статический анализ (dev-зависимость, используется в .github/workflows/psalm.yml)
 vendor/bin/psalm
 
-# Database migrations (Phinx, config in phinx.php, migrations in db/migrations, seeds in db/seed)
+# Миграции базы данных (Phinx, конфиг в phinx.php, миграции в db/migrations, сиды в db/seed)
 vendor/bin/phinx migrate -e dev
 vendor/bin/phinx migrate -e prod
 vendor/bin/phinx seed:run -e dev
 
-# Quick syntax/render sanity check without a browser (no test harness renders Twig otherwise):
+# Быстрая проверка синтаксиса/рендера без браузера (иначе нет тестового окружения, рендерящего Twig):
 php -l core/lib/Core/App.class.php
 php -r '$root="."; require $root."/vendor/autoload.php"; $t=new Twig\Environment(new Twig\Loader\FilesystemLoader($root."/templates"),["strict_variables"=>false]); echo $t->render("index.twig", [...]);'
 ```
 
-There is no local dev server script — this is a classic Apache/nginx + PHP-FPM app; `.htaccess` handles rewriting
-to `index.php`. In this project's actual dev setup, edits made on disk are synced to a live `dev.it-stories.ru`
-host automatically — that host is useful for verifying behavior end-to-end (e.g. via `curl` with a cookie jar to
-exercise session-authenticated POST flows) when something can't be confirmed from code alone.
+Локального скрипта dev-сервера нет — это классическое приложение Apache/nginx + PHP-FPM; `.htaccess` отвечает за
+перенаправление на `index.php`. В реальном dev-окружении этого проекта правки на диске автоматически
+синхронизируются с работающим хостом `dev.it-stories.ru` — этот хост полезен для сквозной проверки поведения
+(например, через `curl` с cookie jar для проверки POST-сценариев с авторизацией по сессии), когда что-то нельзя
+подтвердить только по коду.
 
-## Architecture
+## Архитектура
 
-### Entry points
-- `index.php` — sets `USE_ROUTER = true` and requires `core/bootstrap.php`. This is the single entry point for the
-  public site (all requests are rewritten here, then dispatched by the router).
-- `core/api.php` — REST API entry point. Dispatches to `Core\Api\ApiController` methods by `$_REQUEST['method']`,
-  authenticates via `$_REQUEST['token']` against `User::getByToken()`, except for methods listed in `$noAuthMethods`
-  (includes `createUser`/`getToken`, so account creation and login-for-a-token both work unauthenticated).
-- `core/cron.php` — scans `core/cronTasks/*.php` (except `init.php`) and `exec()`s each one as a detached background
-  PHP process. This is the mechanism for scheduled/background jobs, not a job scheduler library.
-- `admin/index.php` and siblings (`admin/users.php`, `admin/posts.php`, etc.) — the admin panel is a separate set of
-  plain PHP pages (not routed through `core/routes.php`), sharing `admin/inc/bootstrap.php`, `header.php`, `footer.php`.
-  AJAX handlers live in `admin/ajax/`.
+### Точки входа
+- `index.php` — устанавливает `USE_ROUTER = true` и подключает `core/bootstrap.php`. Это единственная точка входа
+  для публичного сайта (все запросы переписываются сюда, затем диспетчеризуются роутером).
+- `core/api.php` — точка входа REST API. Диспетчеризует вызовы к методам `Core\Api\ApiController` по
+  `$_REQUEST['method']`, аутентифицирует через `$_REQUEST['token']` по `User::getByToken()`, за исключением методов,
+  перечисленных в `$noAuthMethods` (включает `createUser`/`getToken`, поэтому создание аккаунта и получение токена по
+  логину работают без авторизации).
+- `core/cron.php` — сканирует `core/cronTasks/*.php` (кроме `init.php`) и запускает каждый через `exec()` как
+  отдельный фоновый PHP-процесс. Это механизм для плановых/фоновых задач, а не библиотека планировщика.
+- `admin/index.php` и соседние файлы (`admin/users.php`, `admin/posts.php` и т.д.) — админ-панель представляет собой
+  отдельный набор обычных PHP-страниц (не маршрутизируется через `core/routes.php`), использующих общие
+  `admin/inc/bootstrap.php`, `header.php`, `footer.php`. AJAX-обработчики находятся в `admin/ajax/`.
 
-### Bootstrap and config loading order (`core/bootstrap.php`)
+### Порядок бутстрапа и загрузки конфигурации (`core/bootstrap.php`)
 1. `vendor/autoload.php` (Composer PSR-4: `Core\` → `core/lib/`)
-2. Optional root-level `config.local.php` if present — this is the mechanism for running multiple sites/environments
-   off one codebase (mount shared `/core/`, `/uploads/`, `/admin/` and override settings per site).
-3. `core/config.php` — defines all configuration as global constants, each guarded by `if (!defined(...))` so
-   `config.local.php` values (defined earlier) take precedence.
-4. A second, custom `spl_autoload_register` autoloader loads any `Core\*` class from `core/lib/**/*.class.php` or
-   `**/*.php` — this exists alongside the Composer PSR-4 autoloader because most classes use the `.class.php` suffix,
-   which Composer's PSR-4 mapping alone won't resolve.
-5. If `CORE_FULL_LOAD` (i.e. not a cron process) and `USE_ROUTER === true`: initializes Twig
-   (`PATH_TO_TEMPLATES` = `/templates`), requires `core/routes.php`, calls `Router::execute()`, then `die()`.
+2. Опциональный `config.local.php` в корне проекта, если он присутствует — это механизм для запуска нескольких
+   сайтов/окружений на одной кодовой базе (монтирование общих `/core/`, `/uploads/`, `/admin/` с переопределением
+   настроек для каждого сайта).
+3. `core/config.php` — определяет всю конфигурацию как глобальные константы, каждая обёрнута в
+   `if (!defined(...))`, чтобы значения из `config.local.php` (определённые раньше) имели приоритет.
+4. Второй, самописный автозагрузчик через `spl_autoload_register` загружает любой класс `Core\*` из
+   `core/lib/**/*.class.php` или `**/*.php` — он существует наряду с Composer PSR-4 автозагрузчиком, потому что
+   большинство классов используют суффикс `.class.php`, который сам по себе не резолвится PSR-4 маппингом Composer.
+5. Если `CORE_FULL_LOAD` (т.е. это не cron-процесс) и `USE_ROUTER === true`: инициализируется Twig
+   (`PATH_TO_TEMPLATES` = `/templates`), подключается `core/routes.php`, вызывается `Router::execute()`, затем
+   `die()`.
 
-`IS_CRON_PROCESS` (if defined true before bootstrap) skips UTM tracking, cache flush/logout handling, and DDoS
-protection setup — cron tasks include `bootstrap.php` with this flag set.
+`IS_CRON_PROCESS` (если определена как true до бутстрапа) отключает UTM-трекинг, обработку сброса кэша/логаута и
+настройку DDoS-защиты — cron-задачи подключают `bootstrap.php` с этим флагом.
 
-### Routing (`core/routes.php`, `Core\Models\Router`)
-Routes are registered with `Router::route(string $pattern, $callback, bool $usePagination = false)`. `$pattern` is a
-path like `/users/(\d+)` (regex groups become positional args passed to the callback). `$callback` is either a
-`'\Core\App::method'` string or a closure. `$usePagination = true` additionally matches `/pattern/page/(\d+)`.
-`Router::execute()` matches against `parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)` (the query string is stripped
-before matching), so routes work correctly even when hit with `?foo=bar` — pagination on `/users` uses a query
-string (`?page=N`) precisely because of this. Unmatched routes fall through to whatever route is registered as
-`/404`. The default controller for site routes is `Core\App` (`core/lib/Core/App.class.php`); its private `render()`
-merges page-specific template vars with common layout vars from `getLayoutParams()` (auth state, current user +
-avatar, memory/time usage, unread messages, etc.) before handing off to Twig.
+### Маршрутизация (`core/routes.php`, `Core\Models\Router`)
+Маршруты регистрируются через `Router::route(string $pattern, $callback, bool $usePagination = false)`. `$pattern` —
+это путь вида `/users/(\d+)` (группы регулярного выражения становятся позиционными аргументами, передаваемыми в
+callback). `$callback` — это либо строка `'\Core\App::method'`, либо замыкание. `$usePagination = true`
+дополнительно матчит `/pattern/page/(\d+)`. `Router::execute()` сопоставляет по
+`parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)` (строка запроса отбрасывается перед сопоставлением), поэтому
+маршруты корректно работают даже при обращении с `?foo=bar` — пагинация на `/users` использует именно строку
+запроса (`?page=N`) именно из-за этого. Не совпавшие маршруты попадают на маршрут, зарегистрированный как `/404`.
+Контроллер по умолчанию для маршрутов сайта — `Core\App` (`core/lib/Core/App.class.php`); его приватный `render()`
+объединяет специфичные для страницы переменные шаблона с общими переменными макета из `getLayoutParams()` (статус
+авторизации, текущий пользователь + аватар, использование памяти/времени, непрочитанные сообщения и т.д.) перед
+передачей в Twig.
 
-Route groups beyond the obvious CRUD-ish ones:
-- `/dialog/(\d+)/messages` (GET) — JSON endpoint returning a freshly rendered message-list HTML fragment + counts,
-  used by both `chat.js`'s AJAX-send flow and its polling loop (see Frontend section below).
-- `/profile`, `/profile/personal`, `/profile/password`, `/profile/avatar`, `/profile/resend-verification` — the
-  self-service account settings area (`App::profile*` methods), all POST-and-redirect-back-to-`/profile` with a
-  one-shot flash message stored in `$_SESSION['profileMessage']`.
+Группы маршрутов помимо очевидных CRUD-подобных:
+- `/dialog/(\d+)/messages` (GET) — JSON-эндпоинт, возвращающий свежесгенерированный HTML-фрагмент списка сообщений +
+  счётчики, используется как AJAX-отправкой в `chat.js`, так и его циклом опроса (см. раздел "Фронтенд" ниже).
+- `/profile`, `/profile/personal`, `/profile/password`, `/profile/avatar`, `/profile/resend-verification` — раздел
+  самостоятельного управления настройками аккаунта (методы `App::profile*`), все работают по схеме
+  POST-и-редирект-обратно-на-`/profile` с одноразовым флеш-сообщением, хранящимся в `$_SESSION['profileMessage']`.
 
-### Database layer (`Core\Database\DataBase`)
-Singleton facade (`DataBase::getInstance($driver)`) wrapping a `DatabaseDriverInterface` implementation, selected in
-the constructor via a `match` on driver name (currently only `'mysql'` → `Core\Database\Drivers\MySqlDriver`; the
-`match` structure is meant for adding other drivers under `core/lib/Core/Database/Drivers/`). The facade exposes
-`query`, `add`, `update`, `delete`, `get`, `getList`, `getCount`, and transaction methods
-(`startTransaction`/`commitTransaction`/`rollbackTransaction`), all delegating to the underlying driver. Table names
-throughout the codebase are prefixed with `DB_TABLE_PREFIX` (e.g. `Core\Models\MQ::TABLE = DB_TABLE_PREFIX . 'threads'`).
+### Слой базы данных (`Core\Database\DataBase`)
+Синглтон-фасад (`DataBase::getInstance($driver)`), оборачивающий реализацию `DatabaseDriverInterface`, выбираемую в
+конструкторе через `match` по имени драйвера (на данный момент только `'mysql'` → `Core\Database\Drivers\MySqlDriver`;
+структура `match` предназначена для добавления других драйверов в `core/lib/Core/Database/Drivers/`). Фасад
+предоставляет `query`, `add`, `update`, `delete`, `get`, `getList`, `getCount`, а также методы транзакций
+(`startTransaction`/`commitTransaction`/`rollbackTransaction`), все делегируют вызовы драйверу. Имена таблиц по всей
+кодовой базе имеют префикс `DB_TABLE_PREFIX` (например, `Core\Models\MQ::TABLE = DB_TABLE_PREFIX . 'threads'`).
 
-`MySqlDriver::update()`/`delete()` always return `false` in practice (they infer success from `fetchAll()` on a
-non-SELECT statement, which is always empty) — don't branch on `DataBase::update()`'s return value; a thrown
-`DatabaseException` is the only reliable failure signal. Known dormant bug: `User::update()`'s cache invalidation
-key doesn't match the keys `User::getAllUserData()` actually caches under (it's missing the `onlySecureData` flag
-component), so cached user data is never properly invalidated on write — currently harmless because `USE_CACHE` is
-off by default, but will surface stale data (stale password/email/etc. via `getLogin()`/`getEmail()`/`getAllUserData()`)
-if caching is ever turned on. Fix by aligning the cache key format in `update()` with `getAllUserData()`'s.
+`MySqlDriver::update()`/`delete()` на практике всегда возвращают `false` (они определяют успех по `fetchAll()` для
+не-SELECT запроса, который всегда пуст) — не стоит ветвиться по возвращаемому значению `DataBase::update()`;
+единственный надёжный сигнал ошибки — выброшенное исключение `DatabaseException`. Известный спящий баг: ключ
+инвалидации кэша в `User::update()` не совпадает с ключами, под которыми `User::getAllUserData()` реально кэширует
+данные (в нём отсутствует компонент флага `onlySecureData`), поэтому кэшированные данные пользователя никогда
+корректно не инвалидируются при записи — сейчас это безвредно, поскольку `USE_CACHE` по умолчанию выключен, но
+проявится в виде устаревших данных (устаревший пароль/email/и т.д. через `getLogin()`/`getEmail()`/`getAllUserData()`),
+если кэширование когда-либо включат. Чинится выравниванием формата ключа кэша в `update()` с форматом в
+`getAllUserData()`.
 
-### Models (`core/lib/Core/Models/`)
-Plain classes (not an ORM) wrapping `DataBase` calls per feature area:
-- `User`/`UserModel`/`UserMeta` — auth, profile, presence. `isOnline($id)`/`getOnlineCount()` compute presence from
-  `last_active` + `USER_ONLINE_TIME`; `last_active` is only ever refreshed as a side effect of `isAuthorized()`
-  (both its cookie- and session-based branches). `changePassword()`/`changeEmail()` are the self-service versions
-  used by `/profile` (as opposed to `resetPassword()`, which force-generates and emails a random password). **Gotcha:**
-  `changePassword()` must refresh `$_SESSION['password']` after a successful change, or the very next request's
-  `isAuthorized()` session-consistency check (which compares a double-hash of the current DB password against the
-  hash captured at login) will silently log the user out — this is exactly the kind of bug that looks like "wrong
-  current password" on the *next* attempt when it isn't.
-- `Dialog` — private messages; `getLastMessage($dialogId)` backs the inbox-style previews in the dialogs list.
-- `Posts`, `Roles`, `File`, `UTM` (marketing tag capture, runs on every full-load request), and `MQ`/`MQResponse` (a
-  DB-backed message-queue/task-runner used by the admin "Менеджер очереди" panel and by `MQTasks.class.php`).
-- `Core\DataObjects\AbstractModel`/`AbstractCollection`/`ModelCollection` provide a lightweight base for
-  model/collection behavior used by newer models.
+### Структура базы данных (`delta`, MySQL)
+База содержит 24 таблицы. Внешних ключей (`FOREIGN KEY`) в базе нет вообще — все связи между таблицами (`user_id`,
+`dialog_id` и т.п.) обеспечиваются только на уровне кода, а не средствами СУБД.
 
-### Frontend (`templates/`, `assets/`)
-Server-rendered Twig, one shared layout, no client-side framework or build step.
-- `templates/layout.twig` is the page shell: a centered "card" (`.shell`) with a gradient header/footer and an icon
-  nav, floating on a plain page background — not a full-bleed app chrome. Every page renders inside `.shell-content`.
-- `templates/_icons.twig` holds every icon as a Twig macro emitting inline SVG (no icon font, no CDN). **Import it
-  per-template** — `{% import '_icons.twig' as icons %}` at the top of *each* template that uses `icons.xxx()`, since
-  Twig imports are not inherited from the parent template through `{% extends %}`.
-- `assets/css/style.css` is a single hand-written stylesheet using CSS custom properties (`:root` design tokens:
-  colors, radii, shadows, the `--gradient-brand` used everywhere for primary accents). Reusable component classes:
-  `.page-head` (page title + icon), `.section`/`.section-title` (content grouping — deliberately *not* its own
-  bordered box, to avoid a "card inside a card" look now that `.shell` already frames the page), `.info-list` /
-  `.meta-grid` (key/value display), `.status` + `.avatar-wrap`/`.avatar-status-dot` (online/offline presence dot
-  overlaid on an avatar), `.pill`/`.nav-badge` (counts), `.dialog-list`/`.dialog-row` (messenger-style inbox rows).
-  When adding a new panel-like UI element, avoid giving it its own `border`/`box-shadow` if it already lives inside
-  `.shell-content` — that's the recurring mistake that produces the nested-window look.
-- Dialogs/chat (`dialog.twig`, `dialogs.twig`, `templates/_messageList.twig`, `assets/js/chat.js`): the message-list
-  markup (grouping consecutive messages from the same sender, day separators, per-type rendering for
-  text/image/file) lives in exactly one place, `_messageList.twig`, which is rendered both for the normal full-page
-  load and, standalone, by `App::outputDialogJson()` for AJAX responses — keep it that way rather than duplicating
-  render logic in JS. `chat.js` handles AJAX send (`FormData`, no full-page reload), textarea auto-resize,
-  Enter-to-send (Shift+Enter for newline), and polls `/dialog/(\d+)/messages` every few seconds for new messages,
-  only re-scrolling to bottom if the user was already scrolled near the bottom.
-- Avatars: `File`-backed images are optional per user — every place that renders an avatar (nav, dialogs list, chat
-  header, profile) must handle the "no `image_id`" case by falling back to an initial-letter badge; see any existing
-  `{% if x.avatar %}...{% else %}...{% endif %}` block for the pattern (and use `name|default(login)`, not
-  `nameForDisplay`, for the initial — the latter is a formatted `"[id] (login) name"` string).
+Таблицы приложения (префикс `d_` = `DB_TABLE_PREFIX`):
+- `d_users` — пользователи: `login` уникален, есть индекс по `token`; `last_active` хранится как `varchar`, а не
+  `datetime`/`timestamp`.
+- `d_roles` / `d_user_roles` — роли и их назначение пользователям.
+- `d_user_meta` — произвольные атрибуты пользователя в формате ключ/значение.
+- `d_dialogs` / `d_messages` — личные сообщения (диалоги и сами сообщения).
+- `d_posts` / `d_sections` — контент и разделы (CMS).
+- `d_files` — метаданные загруженных файлов.
+- `d_utm_history` — история UTM-меток.
+- `d_mail_history` — история отправленных писем (~1.5 МБ).
+- `d_threads` / `d_threads_history` — таблицы очереди задач (MQ), используемые панелью "Менеджер очереди" в
+  админке. `d_threads_history` — самая большая из "рабочих" таблиц: **315 469 строк / ~27 МБ** на момент анализа
+  (2026-07-24) — похоже, никогда не чистится/не архивируется.
+- `d_ddos_protection`, `d_phinxlog`, `d_migrations` — служебные/инфраструктурные таблицы.
 
-### Helpers (`core/lib/Core/Helpers/`)
-Cross-cutting utilities: `Cache` (file-backed, gated by `USE_CACHE`/`CACHE_DIR`/`CACHE_TTL`, initialized once in
-bootstrap), `Log`, `Mail`, `Captcha`, `DDosProtection` (basic rate limiting per `USE_DDOS_PROTECTION`), `Registry`
-(simple static key/value store used e.g. to stash the current route callback), `Sanitize`, `Files`, `Thumbs`, `Zip`,
-`SystemFunctions`, `Pagination` (`execute()`/`getLimit()` compute the SQL `LIMIT` offset; `getPage()`/`getTotalPages()`
-getters exist for rendering prev/next controls — call `execute()` before either getter).
+Таблицы без префикса `d_` (не по общей конвенции именования, судя по всему из отдельных cron-скриптов/парсеров
+контента):
+- `podslyshano` — 64 738 строк, ~71 МБ — самая большая таблица во всей базе.
+- `spider` — 1889 строк, ~47 МБ; есть индекс `text_index` по колонке `text` (обычный `MUL`, не `FULLTEXT` — стоит
+  проверить, не подразумевался ли полнотекстовый индекс).
+- `bashorg`, `jokes`, `myslo` — небольшие таблицы, похожи на парсеры шуток/цитат.
+- `test__table`, `test__table2` — пустые таблицы на движке MyISAM, похожи на мусор/остатки экспериментов,
+  кандидаты на удаление.
 
-### External services (`core/lib/Core/ExternalServices/`)
-Thin clients for Telegram (`Telegram`, `Telegram2`, `TelegramSender`, `TelegramActions` — note there are parallel/
-legacy variants, check which is actually wired up before extending), `ChatGPT`, `RemoteHosts`, and an HTTP
-`Request`/`RequestOLD` pair (prefer `Request/` over the OLD variant for new code).
+### Модели (`core/lib/Core/Models/`)
+Обычные классы (не ORM), оборачивающие вызовы `DataBase` по функциональным областям:
+- `User`/`UserModel`/`UserMeta` — авторизация, профиль, присутствие. `isOnline($id)`/`getOnlineCount()` вычисляют
+  присутствие по `last_active` + `USER_ONLINE_TIME`; `last_active` обновляется только как побочный эффект
+  `isAuthorized()` (в обеих её ветках — и куки-, и сессионной). `changePassword()`/`changeEmail()` — это
+  self-service версии, используемые в `/profile` (в отличие от `resetPassword()`, которая принудительно
+  генерирует и отправляет по почте случайный пароль). **Подводный камень:** `changePassword()` должна обновить
+  `$_SESSION['password']` после успешной смены пароля, иначе проверка согласованности сессии в `isAuthorized()` на
+  самом следующем запросе (которая сравнивает двойной хэш текущего пароля из БД с хэшем, захваченным при логине)
+  молча разлогинит пользователя — это именно тот баг, который на *следующей* попытке выглядит как "неверный
+  текущий пароль", хотя таковым не является.
+- `Dialog` — личные сообщения; `getLastMessage($dialogId)` формирует превью в стиле "входящие" для списка диалогов.
+- `Posts`, `Roles`, `File`, `UTM` (сбор UTM-меток, выполняется на каждом полном запросе) и `MQ`/`MQResponse`
+  (очередь задач/исполнитель на основе БД, используется панелью "Менеджер очереди" в админке и `MQTasks.class.php`).
+- `Core\DataObjects\AbstractModel`/`AbstractCollection`/`ModelCollection` предоставляют лёгкую базу для поведения
+  моделей/коллекций, используемую более новыми моделями.
 
-### Configuration constants
-`core/config.php` defines all runtime configuration as global constants (`DB_HOST`, `CACHE_*`, `TELEGRAM_*`,
-`USE_CAPTCHA`, `USE_DDOS_PROTECTION`, `CRYPTO_KEY`, etc.), each wrapped in `if (!defined(...))` so a `config.local.php`
-at the project root can override any subset before `core/config.php` runs. `Core\SystemConfig::getValue($name)` is a
-thin `constant()` wrapper used where a config value needs to be fetched dynamically by name rather than referenced
-directly. Note: this repo currently has real-looking secrets (DB password, Telegram bot token, crypto key) committed
-directly in `core/config.php` and `phinx.php` — don't add more secrets this way; if touching this area, prefer
-environment-driven config and flag the existing hardcoded values rather than propagating the pattern.
+### Фронтенд (`templates/`, `assets/`)
+Серверный рендеринг Twig, единый общий макет, никакого клиентского фреймворка или шага сборки.
+- `templates/layout.twig` — это каркас страницы: центрированная "карточка" (`.shell`) с градиентным
+  хедером/футером и иконочной навигацией, плавающая на простом фоне страницы — не full-bleed интерфейс приложения.
+  Каждая страница рендерится внутри `.shell-content`.
+- `templates/_icons.twig` содержит все иконки в виде Twig-макросов, выводящих инлайновый SVG (без иконочного шрифта,
+  без CDN). **Импортируйте его в каждом шаблоне** — `{% import '_icons.twig' as icons %}` в начале *каждого*
+  шаблона, использующего `icons.xxx()`, поскольку импорты Twig не наследуются от родительского шаблона через
+  `{% extends %}`.
+- `assets/css/style.css` — единая самописная таблица стилей, использующая CSS custom properties (дизайн-токены в
+  `:root`: цвета, радиусы, тени, `--gradient-brand`, используемый повсюду для основных акцентов). Переиспользуемые
+  классы компонентов: `.page-head` (заголовок страницы + иконка), `.section`/`.section-title` (группировка
+  контента — намеренно *не* отдельный блок с рамкой, чтобы избежать вида "карточка внутри карточки", раз `.shell`
+  уже обрамляет страницу), `.info-list` / `.meta-grid` (отображение ключ/значение), `.status` +
+  `.avatar-wrap`/`.avatar-status-dot` (точка присутствия онлайн/офлайн поверх аватара), `.pill`/`.nav-badge`
+  (счётчики), `.dialog-list`/`.dialog-row` (строки списка в стиле мессенджера). При добавлении нового
+  панелеподобного UI-элемента избегайте собственных `border`/`box-shadow`, если он уже находится внутри
+  `.shell-content` — это регулярно повторяющаяся ошибка, дающая эффект "окна внутри окна".
+- Диалоги/чат (`dialog.twig`, `dialogs.twig`, `templates/_messageList.twig`, `assets/js/chat.js`): разметка списка
+  сообщений (группировка последовательных сообщений от одного отправителя, разделители по дням, рендеринг по типам
+  для text/image/file) находится ровно в одном месте, `_messageList.twig`, который рендерится как при обычной
+  полной загрузке страницы, так и отдельно, через `App::outputDialogJson()`, для AJAX-ответов — следует сохранять
+  это, а не дублировать логику рендеринга в JS. `chat.js` обрабатывает AJAX-отправку (`FormData`, без полной
+  перезагрузки страницы), авто-изменение размера textarea, отправку по Enter (Shift+Enter для новой строки) и
+  опрашивает `/dialog/(\d+)/messages` каждые несколько секунд на предмет новых сообщений, прокручивая вниз заново
+  только если пользователь уже был проскроллен близко к низу.
+- Аватары: изображения на основе `File` опциональны для каждого пользователя — каждое место, рендерящее аватар
+  (навигация, список диалогов, шапка чата, профиль), должно обрабатывать случай "нет `image_id`" через запасной
+  вариант — бейдж с буквой инициала; см. любой существующий блок
+  `{% if x.avatar %}...{% else %}...{% endif %}` для образца (и используйте `name|default(login)`, а не
+  `nameForDisplay`, для инициала — последнее является отформатированной строкой `"[id] (login) name"`).
 
-### Testing
-PHPUnit tests live in `tests/` (currently minimal — see `tests/UserTest.php`). CI (`.gitlab-ci.yml`) runs
-`./vendor/bin/phpunit --testdox tests` on every push; a separate GitHub Actions workflow
-(`.github/workflows/psalm.yml`) runs Psalm's security scan on `main` and PRs into it. There's no automated test
-coverage for routes/templates — when changing `App.class.php` controllers or Twig templates, sanity-check with
-`php -l` plus a throwaway Twig render (see Commands above) before considering the change done, and prefer verifying
-session-dependent flows (login, password change, AJAX endpoints) against the live `dev.it-stories.ru` sync target
-with `curl` and a cookie jar rather than guessing from code alone.
+### Хелперы (`core/lib/Core/Helpers/`)
+Сквозные утилиты: `Cache` (файловое хранение, управляется `USE_CACHE`/`CACHE_DIR`/`CACHE_TTL`, инициализируется
+один раз в бутстрапе), `Log`, `Mail`, `Captcha`, `DDosProtection` (базовое ограничение частоты запросов по
+`USE_DDOS_PROTECTION`), `Registry` (простое статическое хранилище ключ/значение, используемое, например, для
+хранения текущего callback маршрута), `Sanitize`, `Files`, `Thumbs`, `Zip`, `SystemFunctions`, `Pagination`
+(`execute()`/`getLimit()` вычисляют смещение для SQL `LIMIT`; геттеры `getPage()`/`getTotalPages()` существуют для
+рендеринга элементов управления пред./след. — вызывайте `execute()` перед любым из геттеров).
+
+### Внешние сервисы (`core/lib/Core/ExternalServices/`)
+Тонкие клиенты для Telegram (`Telegram`, `Telegram2`, `TelegramSender`, `TelegramActions` — обратите внимание, есть
+параллельные/устаревшие варианты, проверяйте, какой реально подключён, прежде чем расширять), `ChatGPT`,
+`RemoteHosts`, а также пара HTTP `Request`/`RequestOLD` (для нового кода предпочитайте `Request/`, а не вариант
+OLD).
+
+### Константы конфигурации
+`core/config.php` определяет всю конфигурацию времени выполнения как глобальные константы (`DB_HOST`, `CACHE_*`,
+`TELEGRAM_*`, `USE_CAPTCHA`, `USE_DDOS_PROTECTION`, `CRYPTO_KEY` и т.д.), каждая обёрнута в `if (!defined(...))`,
+чтобы `config.local.php` в корне проекта мог переопределить любое подмножество до выполнения `core/config.php`.
+`Core\SystemConfig::getValue($name)` — это тонкая обёртка над `constant()`, используемая там, где значение
+конфигурации нужно получить динамически по имени, а не через прямую ссылку. Примечание: в этом репозитории сейчас
+закоммичены похожие на реальные секреты (пароль БД, токен Telegram-бота, ключ шифрования) прямо в `core/config.php`
+и `phinx.php` — не добавляйте новые секреты таким способом; если затрагиваете эту область, предпочитайте
+конфигурацию через переменные окружения и отмечайте существующие захардкоженные значения, а не тиражируйте этот
+паттерн.
+
+### Тестирование
+Тесты PHPUnit находятся в `tests/` (пока минимальны — см. `tests/UserTest.php`). CI (`.gitlab-ci.yml`) запускает
+`./vendor/bin/phpunit --testdox tests` при каждом push; отдельный workflow GitHub Actions
+(`.github/workflows/psalm.yml`) запускает security-сканирование Psalm на `main` и в PR в неё. Автоматического
+покрытия тестами маршрутов/шаблонов нет — при изменении контроллеров `App.class.php` или шаблонов Twig делайте
+проверку через `php -l` плюс одноразовый рендер Twig (см. раздел "Команды" выше), прежде чем считать изменение
+завершённым, и предпочитайте проверять сессионно-зависимые сценарии (логин, смена пароля, AJAX-эндпоинты) на живом
+хосте синхронизации `dev.it-stories.ru` через `curl` с cookie jar, а не гадать по одному только коду.

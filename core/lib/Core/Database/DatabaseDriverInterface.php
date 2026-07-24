@@ -17,14 +17,17 @@
          */
         public function __construct(array $params);
         /**
-         * Метод для простого выполнения заданного SQL запроса
+         * Метод для простого выполнения заданного SQL запроса.
+         * $sql может содержать именованные плейсхолдеры (:name), значения для которых передаются в $params
+         * и подставляются драйвером через подготовленное выражение (без конкатенации в текст запроса).
          *
-         * @param string $sql SQL запрос
+         * @param string $sql    SQL запрос
+         * @param array  $params Параметры для подготовленного выражения (плейсхолдер => значение)
          *
          * @return array|null        Результат выполнения запроса
          * @throws DatabaseException Возможные типы исключений
          */
-        public function query(string $sql): ?array;
+        public function query(string $sql, array $params = []): ?array;
 
         /**
          * Добавить элемент в базу

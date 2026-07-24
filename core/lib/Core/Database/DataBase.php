@@ -65,17 +65,19 @@
 
         /**
          * Метод для простого выполнения заданного SQL запроса.
-         * Возвращает результат в виде массива или объекта, при неудаче возвращает null
+         * Возвращает результат в виде массива или объекта, при неудаче возвращает null.
+         * $sql может содержать именованные плейсхолдеры (:name) со значениями в $params —
+         * запрос выполняется через подготовленное выражение, значения в текст SQL не подставляются.
          *
-         * @param string $sql          SQL запрос
-         * @param bool   $returnObject Вернуть объект после выполнения
+         * @param string $sql    SQL запрос
+         * @param array  $params Параметры для подготовленного выражения (плейсхолдер => значение)
          *
          * @return mixed Результат выполнения запроса
          * @throws DatabaseException Возможные типы исключений
          */
-        public function query(string $sql): ?array
+        public function query(string $sql, array $params = []): ?array
         {
-            return $this->db->query($sql);
+            return $this->db->query($sql, $params);
         }
 
         /**
