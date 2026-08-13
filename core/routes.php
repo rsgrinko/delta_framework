@@ -49,12 +49,3 @@
     Router::route('/profile/password', '\Core\App::profileUpdatePassword');
     Router::route('/profile/avatar', '\Core\App::profileUpdateAvatar');
     Router::route('/profile/resend-verification', '\Core\App::profileResendVerification');
-
-
-    Router::route('/test', '\Core\App::test', true);
-    Router::route('/test/(\d+)', '\Core\App::test');
-    Router::route('/test/(\d+)/page/(\d+)', '\Core\App::test');
-
-    Router::route('blog/(\w+)/(\d+)', function ($category, $id) {
-        echo $category . ':' . $id;
-    });

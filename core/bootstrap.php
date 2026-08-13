@@ -164,10 +164,12 @@
          */
         $loader = new \Twig\Loader\FilesystemLoader(PATH_TO_TEMPLATES);
         $twig   = new \Twig\Environment($loader, [
-            'debug' => true,
-            //'cache' => CACHE_DIR,
+            'debug' => DEBUG,
+            'cache' => DEBUG ? false : CACHE_DIR . '/twig',
         ]);
-        $twig->addExtension(new \Twig\Extension\DebugExtension());
+        if (DEBUG) {
+            $twig->addExtension(new \Twig\Extension\DebugExtension());
+        }
         require_once __DIR__ . '/routes.php';
         Router::execute();
         die();

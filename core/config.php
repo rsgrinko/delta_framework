@@ -99,19 +99,21 @@
     }
 
     /**
-     * Параметры SQL базы
+     * Параметры SQL базы.
+     * Реквизиты доступа задаются в config.local.php (вне git), здесь только безопасные значения
+     * по умолчанию. Шаблон окружения — config.local.example.php.
      */
     if (!defined('DB_HOST')) {
         define('DB_HOST', 'localhost');
     }
     if (!defined('DB_USER')) {
-        define('DB_USER', 'delta');
+        define('DB_USER', '');
     }
     if (!defined('DB_PASSWORD')) {
-        define('DB_PASSWORD', '2670135');
+        define('DB_PASSWORD', '');
     }
     if (!defined('DB_NAME')) {
-        define('DB_NAME', 'delta');
+        define('DB_NAME', '');
     }
     if (!defined('DB_TABLE_PREFIX')) {
         define('DB_TABLE_PREFIX', 'd_');
@@ -132,10 +134,10 @@
     }
 
     /**
-     * Токен телеграм бота
+     * Токен телеграм бота. Задаётся в config.local.php.
      */
     if (!defined('TELEGRAM_BOT_TOKEN')) {
-        define('TELEGRAM_BOT_TOKEN', '5357759725:AAEPGfLRaye1ZOPMBGOrBVCMhz4kE_aecME'); //delta
+        define('TELEGRAM_BOT_TOKEN', '');
     }
 
     /**
@@ -191,9 +193,13 @@
     const CODE_VALUE_N = 'N';
 
     /**
-     * Ключ шифрования
+     * Ключ шифрования. Задаётся в config.local.php.
+     * Объявлен через define(), а не const, чтобы значение из config.local.php имело приоритет:
+     * const в глобальной области переопределить нельзя.
      */
-    const CRYPTO_KEY ='642a43f13133ea61cb6315bf46c89cd26346bd7b2cda43cee6d17b4a733854639b22b7688582b3cc';
+    if (!defined('CRYPTO_KEY')) {
+        define('CRYPTO_KEY', '');
+    }
 
     /**
      * Флаг использования логирования
@@ -234,3 +240,21 @@
      * Формат даты/времени
      */
     const DATETIME_FORMAT = 'Y-m-d H:i:s';
+
+    /**
+     * Проверка обязательных реквизитов окружения.
+     * Без config.local.php приложение не поднимется, поэтому падаем сразу и с понятным текстом,
+     * а не невнятной ошибкой подключения к базе где-то в глубине запроса.
+     */
+    if (DB_USER === '' || DB_NAME === '') {
+        $configErrorMessage = 'Не заданы реквизиты доступа к базе данных. '
+            . 'Создайте файл config.local.php в корне проекта по образцу config.local.example.php.';
+
+        if (PHP_SAPI === 'cli') {
+            fwrite(STDERR, $configErrorMessage . PHP_EOL);
+        } else {
+            http_response_code(500);
+            echo $configErrorMessage;
+        }
+        die(1);
+    }

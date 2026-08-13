@@ -276,13 +276,6 @@
             ]);
         }
 
-        public static function test($a = null, $b = null, $c = null, $d = null)
-        {
-            ddd($_SESSION);
-            print_r([$a, $b, $c, $d]);
-            self::render('test.twig');
-        }
-
         public static function logout()
         {
             Captcha::clearSession();
