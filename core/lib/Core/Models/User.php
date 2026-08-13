@@ -30,7 +30,9 @@
     use Core\Database\DataBase;
     use Core\Database\DatabaseException;
     use Core\DTO\User\FilterUser;
+    use Core\Repositories\UserRepository;
     use Core\Services\AuthService;
+    use Core\Services\RegistrationService;
     use Delta\Security\PasswordHasher;
     use Throwable;
 
@@ -137,7 +139,7 @@
             if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
-                $result = (DataBase::getInstance())->get(self::TABLE, ['id' => $this->id]);
+                $result = self::repository()->findById($this->id);
                 $result = array_merge($result, ['roles' => $this->getRolesObject()->getRoles()]);
                 $result['nameForDisplay'] = '[' . $result['id'] . '] (' . $result['login'] . ') ' . $result['name'];
 
@@ -257,7 +259,7 @@
             if (Cache::check($cacheId)) {
                 $res = Cache::get($cacheId);
             } else {
-                $res = (DataBase::getInstance())->query('SELECT * FROM `'.self::TABLE.'` ORDER BY `id` '.$safeSort.' LIMIT '.$safeLimit);
+                $res = self::repository()->paginate($safeLimit, $safeSort);
                 Cache::set($cacheId, $res);
             }
             return $res;
@@ -272,7 +274,7 @@
         public function createToken(): string
         {
             $newToken = self::generateGUID();
-            (DataBase::getInstance())->update(self::TABLE, ['id' => $this->id], ['token' => $newToken]);
+            self::repository()->update($this->id, ['token' => $newToken]);
             Log::logToFile('Создан токен', 'User.log', ['userId' => $this->id, 'token' => $newToken]);
             return $newToken;
         }
@@ -301,7 +303,7 @@
          */
         public static function isTokenExists(string $token): bool
         {
-            $result = (DataBase::getInstance())->get(self::TABLE, ['token' => $token]);
+            $result = self::repository()->findByToken($token);
             if ($result) {
                 return true;
             }
@@ -319,7 +321,7 @@
          */
         public static function getByToken(string $token): ?self
         {
-            $result = (DataBase::getInstance())->get(self::TABLE, ['token' => $token]);
+            $result = self::repository()->findByToken($token);
             if ($result) {
                 return (new self((int)$result['id']));
             }
@@ -336,7 +338,7 @@
          */
         public static function isUserExistsByParams(array $where): bool
         {
-            $result = (DataBase::getInstance())->get(self::TABLE, $where);
+            $result = self::repository()->findBy($where);
             if (!empty($result)) {
                 return true;
             }
@@ -354,7 +356,7 @@
          */
         public static function getByParams(array $where): ?self
         {
-            $result = (DataBase::getInstance())->get(self::TABLE, $where);
+            $result = self::repository()->findBy($where);
             if (!empty($result)) {
                 return (new self((int)$result['id']));
             }
@@ -399,8 +401,7 @@
          */
         public static function isOnline(int $id): bool
         {
-            $res         = (DataBase::getInstance())->query('SELECT last_active FROM `'.self::TABLE.'` WHERE id=:id', ['id' => $id]);
-            $last_active = $res[0]['last_active'];
+            $last_active = self::repository()->lastActive($id);
             $timeNow     = time();
             if ($last_active > ($timeNow - USER_ONLINE_TIME)) {
                 return true;
@@ -416,11 +417,7 @@
          */
         public static function getOnlineCount(): int
         {
-            $res = (DataBase::getInstance())->query(
-                'SELECT COUNT(*) as count FROM `' . self::TABLE . '` WHERE last_active > :threshold',
-                ['threshold' => time() - USER_ONLINE_TIME]
-            );
-            return (int)$res[0]['count'];
+            return self::repository()->countOnline(USER_ONLINE_TIME);
         }
 
         /**
@@ -443,6 +440,36 @@
         private static function hasher(): PasswordHasher
         {
             return new PasswordHasher(self::$cryptoSalt);
+        }
+
+        /**
+         * Репозиторий пользователей.
+         *
+         * Весь SQL модели вынесен в Core\Repositories\UserRepository: модель больше не знает
+         * ни про таблицы, ни про формат условий выборки.
+         *
+         * @return UserRepository Репозиторий
+         */
+        private static function repository(): UserRepository
+        {
+            return new UserRepository(DataBase::getInstance(), self::TABLE);
+        }
+
+        /**
+         * Сервис регистрации.
+         *
+         * Создание пользователя вместе с назначением роли и рассылкой вынесено
+         * в Core\Services\RegistrationService.
+         *
+         * @return RegistrationService Сервис регистрации
+         */
+        private static function registrationService(): RegistrationService
+        {
+            return new RegistrationService(
+                DataBase::getInstance(),
+                self::repository(),
+                self::hasher(),
+            );
         }
 
         /**
@@ -505,72 +532,7 @@
          */
         public static function create(string $login, string $password, string $email, string $name = ''): int
         {
-            $login = Sanitize::sanitizeString($login);
-            $email = Sanitize::sanitizeEmail($email);
-            $name  = Sanitize::sanitizeString($name);
-
-            if (self::isUserExists($login)) {
-                throw new CoreException('Пользователь с данным логином уже существует', CoreException::ERROR_CREATE_USER);
-            }
-
-            if (self::isUserExistsByParams(['email' => $email])) {
-                throw new CoreException('Пользователь с данным E-Mail уже существует', CoreException::ERROR_CREATE_USER);
-            }
-
-            Log::logToFile('Создание нового пользователя', 'User.log', func_get_args());
-            $verificationCode = bin2hex(random_bytes(16));
-
-            /** @var $DB DataBase Объект базы данных */
-            $DB         = DataBase::getInstance();
-            $objectUser = null;
-
-            /**
-             * Вставка пользователя и назначение роли — одна неделимая операция.
-             * Без транзакции падение на втором шаге оставляло в базе пользователя без роли,
-             * и откатить уже вставленную строку было некому.
-             */
-            $DB->startTransaction();
-
-            try {
-                $userId = $DB->add(self::TABLE, [
-                    'login'             => $login,
-                    'password'          => self::passwordEncryption($password),
-                    'name'              => $name,
-                    'image_id'          => 0,
-                    'token'             => null,
-                    'email'             => $email,
-                    'email_confirmed'   => CODE_VALUE_N,
-                    'verification_code' => $verificationCode,
-                    'last_active'       => time(),
-                ]);
-
-                $objectUser = new self($userId);
-                $objectUser->getRolesObject()->addRole(Roles::USER_ROLE_ID);
-
-                $DB->commitTransaction();
-            } catch (Throwable $e) {
-                $DB->rollbackTransaction();
-                Log::logToFile('Ошибка создания пользователя, транзакция откачена', 'User.log', [
-                    'login' => $login,
-                    'error' => $e->getMessage(),
-                ]);
-
-                throw new CoreException('Ошибка создания пользователя', CoreException::ERROR_CREATE_USER);
-            }
-
-            try {
-                $objectUser->sendVerificationCode();
-            } catch (CoreException $e) {
-                Log::logToFile('Ошибка отправки кода верификации пользователю', 'User.log', func_get_args());
-                throw new CoreException('Ошибка отправки кода верификации пользователю', CoreException::ERROR_SEND_VERIFICATION_CODE);
-            }
-            Log::logToFile('Пользователь успешно создан', 'User.log', ['userId' => $userId]);
-
-            $objectUser->getMailObject()->setSubject('Регистрация на сайте')->setBody(
-                    '<b>Логин:</b> ' . $objectUser->getLogin() . PHP_EOL . '<b>Пароль:</b> ' . $password
-                )->setTemplateVars(['TITLE' => 'Создана учетная запись'])->send();
-
-            return $userId;
+            return self::registrationService()->register($login, $password, $email, $name);
         }
 
         /**
@@ -590,8 +552,6 @@
             foreach($fields as $key => $value) {
                 $beforeData[$key] = $this->getAllUserData()[$key];
             }
-            /** @var $DB DataBase Объект базы данных */
-            $DB = DataBase::getInstance();
             Log::logToFile(
                 'Данные пользователя изменены', 'User.log', ['userId' => $this->id, 'before' => $beforeData, 'after' => $fields]
             );
@@ -605,7 +565,9 @@
                 Cache::delete(md5('User_getAllUserData_' . $onlySecureDataCacheKey . '_' . $this->id));
             }
 
-            return $DB->update(self::TABLE, ['id' => $this->id], $fields);
+            self::repository()->update($this->id, $fields);
+
+            return true;
         }
 
         /**
@@ -621,9 +583,7 @@
             if (Cache::check($cacheId)) {
                 $result = Cache::get($cacheId);
             } else {
-                /** @var $DB DataBase Объект базы данных */
-                $DB     = DataBase::getInstance();
-                $result = $DB->get(self::TABLE, ['login' => $login]);
+                $result = self::repository()->findByLogin($login);
                 Cache::set($cacheId, $result);
             }
 
@@ -645,9 +605,7 @@
             if (Cache::check($cacheId) && Cache::getAge($cacheId) < 300) {
                 $result = Cache::get($cacheId);
             } else {
-                /** @var $DB DataBase Объект базы данных */
-                $DB     = DataBase::getInstance();
-                $result = $DB->getList(self::TABLE, ['id' => '>0']);
+                $result = self::repository()->all();
                 Cache::set($cacheId, $result);
             }
 
@@ -813,9 +771,7 @@
          */
         public static function exportUsers(): string
         {
-            /** @var $DB DataBase Объект базы данных */
-            $DB  = DataBase::getInstance();
-            $res = $DB->query('SELECT * FROM ' . self::TABLE);
+            $res = self::repository()->all();
             foreach ($res as $key => $element) {
                 $res[$key]['roles'] = (new self($element['id']))->getRolesObject()->getRoles();
             }
@@ -862,9 +818,7 @@
         {
             $verificationCode = Sanitize::sanitizeString($verificationCode);
 
-            /** @var $DB DataBase Объект базы данных */
-            $DB  = DataBase::getInstance();
-            $res = $DB->get(self::TABLE, ['verification_code' => $verificationCode]);
+            $res = self::repository()->findByVerificationCode($verificationCode);
             if ($res) {
                 if ($res['email_confirmed'] === CODE_VALUE_Y) {
                     Log::logToFile('E-Mail уже верифицирован', 'User.log', ['userId' => $res['id'], 'code' => $verificationCode]);

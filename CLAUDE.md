@@ -157,11 +157,21 @@ php -r '$root="."; require $root."/vendor/autoload.php"; $t=new Twig\Environment
 
 ### Модели (`core/lib/Core/Models/`)
 Обычные классы (не ORM), оборачивающие вызовы `DataBase` по функциональным областям:
-- **`Core\Services\AuthService`** — авторизация вынесена из модели: проверка пароля, наполнение сессии,
-  выдача и сверка cookie автологина, выход, отпечаток сессии. Сервис не статический и принимает соединение
-  и хешер через конструктор. Статические методы `User::securityAuthorize()`, `authorize()`, `isAuthorized()`,
-  `getCurrentUserId()`, `logout()` оставлены как тонкие делегаты — на них опирается существующий код.
-  **Новый код должен работать с `AuthService`, а не с этими делегатами.**
+Идёт декомпозиция моделей. Уже выделено (все — не статические, зависимости через конструктор):
+
+- **`Core\Repositories\UserRepository`** — весь SQL по пользователям: `findById`, `findByLogin`,
+  `findByToken`, `findBy`, `findByVerificationCode`, `exists`, `paginate`, `all`, `count`, `countOnline`,
+  `lastActive`, `insert`, `update`, `delete`. Модель больше не знает ни про таблицы, ни про формат условий.
+- **`Core\Services\AuthService`** — проверка пароля, наполнение сессии, выдача и сверка cookie автологина,
+  выход, отпечаток сессии, перехеширование при входе.
+- **`Core\Services\RegistrationService`** — создание пользователя: проверка уникальности, транзакция вокруг
+  вставки и назначения роли, рассылка за пределами транзакции.
+
+Статические методы `User::securityAuthorize()`, `authorize()`, `isAuthorized()`, `getCurrentUserId()`,
+`logout()`, `create()` оставлены тонкими делегатами — на них опирается существующий код.
+**Новый код должен работать с сервисами и репозиторием напрямую, а не через эти делегаты.**
+Пока сервисы создаются фабричными методами модели (`self::repository()` и т.п.) — это временно, до
+появления DI-контейнера.
 - `User`/`UserModel`/`UserMeta` — профиль, присутствие, данные пользователя. `isOnline($id)`/`getOnlineCount()` вычисляют
   присутствие по `last_active` + `USER_ONLINE_TIME`; `last_active` обновляется только как побочный эффект
   `isAuthorized()` (в обеих её ветках — и куки-, и сессионной). `changePassword()`/`changeEmail()` — это
