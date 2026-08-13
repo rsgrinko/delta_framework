@@ -5,7 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Core\\": "core/lib/"
+            "Core\\": "core/lib/Core/"
         }
     },
     "authors": [
@@ -31,12 +31,14 @@
       "ext-gd": "*"
     },
     "require-dev": {
-        "vimeo/psalm": "^4.27",
         "phpunit/phpunit": "^9.5"
     },
     "config": {
         "allow-plugins": {
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.4.0"
         }
     }
 }

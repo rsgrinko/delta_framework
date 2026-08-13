@@ -88,25 +88,6 @@
         die();
     }
 
-    /**
-     * Реализация механизма автозагрузки классов
-     */
-    spl_autoload_register(static function ($class) {
-        if (str_starts_with($class, 'Core')) {
-            $class        = str_replace('\\', '/', $class);
-            $classPath    = ROOT_PATH . '/core/lib/' . $class . '.class.php';
-            $classPathTwo = ROOT_PATH . '/core/lib/' . $class . '.php';
-
-            if (file_exists($classPath)) {
-                require_once $classPath;
-            }
-
-            if (file_exists($classPathTwo)) {
-                require_once $classPathTwo;
-            }
-        }
-    });
-
     // Инициализация кеша
     Cache::init(CACHE_DIR, USE_CACHE);
 

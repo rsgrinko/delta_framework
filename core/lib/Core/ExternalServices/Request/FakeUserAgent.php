@@ -220,7 +220,7 @@
          * @return string Строка ОС
          * @throws Exception
          */
-        private function getMobileOS(string $os = null): string
+        private function getMobileOS(?string $os = null): string
         {
             $os = strtolower($os);
             $_os = [];

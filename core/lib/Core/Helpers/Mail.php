@@ -82,7 +82,7 @@
         /**
          * Конструктор
          */
-        public function __construct(User $user = null) {
+        public function __construct(?User $user = null) {
             if($user !== null) {
                 $this->user = $user;
                 $this->setFrom(SERVER_EMAIL, SERVER_EMAIL_NAME)

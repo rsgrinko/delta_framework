@@ -58,7 +58,7 @@
             string $filename = 'core.log',
             $content = null,
             int $priority = LOG_DEBUG,
-            string $system = null,
+            ?string $system = null,
             bool $addEnv = true
         ): int {
             if (!USE_LOG) {
