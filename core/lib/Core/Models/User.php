@@ -30,6 +30,7 @@
     use Core\Database\DataBase;
     use Core\Database\DatabaseException;
     use Core\DTO\User\FilterUser;
+    use Core\Services\AuthService;
     use Delta\Security\PasswordHasher;
     use Throwable;
 
@@ -445,6 +446,24 @@
         }
 
         /**
+         * Сервис авторизации.
+         *
+         * Работа с сессией и cookie вынесена из модели в Core\Services\AuthService; статические
+         * методы ниже оставлены как тонкие делегаты, потому что на них опирается существующий код.
+         *
+         * @return AuthService Сервис авторизации
+         */
+        private static function authService(): AuthService
+        {
+            return new AuthService(
+                DataBase::getInstance(),
+                self::hasher(),
+                self::TABLE,
+                self::$cryptoSalt,
+            );
+        }
+
+        /**
          * Проверить пароль против хранимого хеша.
          * Принимаются как новые bcrypt-хеши, так и старые md5 — последние мигрируются при входе.
          *
@@ -459,40 +478,6 @@
         }
 
         /**
-         * Перехешировать пароль, если хранимый хеш устарел.
-         *
-         * Вызывается после успешной проверки пароля: только в этот момент открытый пароль
-         * доступен, а значит можно бесшовно перевести запись на bcrypt.
-         *
-         * @param int    $userId   Идентификатор пользователя
-         * @param string $password Открытый пароль
-         * @param string $hash     Текущий хранимый хеш
-         *
-         * @return string Актуальный хеш
-         */
-        private static function rehashIfNeeded(int $userId, string $password, string $hash): string
-        {
-            $hasher = self::hasher();
-
-            if ($hasher->needsRehash($hash) === false) {
-                return $hash;
-            }
-
-            $newHash = $hasher->hash($password);
-
-            try {
-                DataBase::getInstance()->update(self::TABLE, ['id' => $userId], ['password' => $newHash]);
-            } catch (DatabaseException $e) {
-                // Не удалось обновить — вход всё равно состоялся, миграция повторится позже
-                Log::logToFile('Не удалось перехешировать пароль', 'User.log', ['userId' => $userId]);
-
-                return $hash;
-            }
-
-            return $newHash;
-        }
-
-        /**
          * Отпечаток пароля для проверки согласованности сессии.
          *
          * Хранить в сессии сам хеш пароля не нужно — достаточно производного значения,
@@ -504,23 +489,8 @@
          */
         public static function sessionFingerprint(string $storedHash): string
         {
-            return hash('sha256', self::$cryptoSalt . $storedHash);
+            return self::authService()->sessionFingerprint($storedHash);
         }
-
-        /**
-         * Значение cookie-токена автологина
-         *
-         * @param int    $id         Идентификатор пользователя
-         * @param string $login      Логин
-         * @param string $storedHash Хранимый хеш пароля
-         *
-         * @return string Токен
-         */
-        private static function authCookieToken(int $id, string $login, string $storedHash): string
-        {
-            return hash_hmac('sha256', $id . '|' . $login . '|' . $storedHash, self::$cryptoSalt);
-        }
-
 
         /**
          * Выполняет регистрацию пользователя в системе
@@ -703,26 +673,8 @@
                 throw new CoreException('Передан некорректный идентификатор пользователя');
             }
             self::logout();
-            /** @var $DB DataBase Объект базы данных */
-            $DB     = DataBase::getInstance();
-            $result = $DB->get(self::TABLE, ['id' => $id], true);
 
-            if ($result) {
-                $_SESSION['id']        = $result['id'];
-                $_SESSION['authorize'] = CODE_VALUE_Y;
-                $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = self::sessionFingerprint((string)$result['password']);
-                $_SESSION['token']     = $result['token'];
-                $_SESSION['user']      = $result;
-                if ($remember) {
-                    self::setAuthCookie('userId', (string)$result['id']);
-                    self::setAuthCookie('userLogin', (string)$result['login']);
-                    self::setAuthCookie('token', self::authCookieToken((int)$result['id'], (string)$result['login'], (string)$result['password']));
-                }
-                return true;
-            }
-
-            return false;
+            return self::authService()->loginById($id, $remember);
         }
 
         /**
@@ -736,36 +688,8 @@
          */
         public static function securityAuthorize(string $login, string $password, bool $remember = false): bool
         {
-            /** @var $DB DataBase Объект базы данных */
-            $DB     = DataBase::getInstance();
-
-            // Искать по хешу пароля больше нельзя: у bcrypt своя соль на каждую запись,
-            // поэтому пользователь ищется по логину, а пароль проверяется отдельно
-            $result = $DB->get(self::TABLE, ['login' => $login], true);
-
-            if ($result && self::verifyPassword($password, (string)$result['password'])) {
-                $result['password'] = self::rehashIfNeeded(
-                    (int)$result['id'],
-                    $password,
-                    (string)$result['password'],
-                );
-                $_SESSION['id']        = $result['id'];
-                $_SESSION['authorize'] = 'Y';
-                $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = self::sessionFingerprint((string)$result['password']);
-                $_SESSION['token']     = $result['token'];
-                $_SESSION['user']      = $result;
-                if ($remember) {
-                    self::setAuthCookie('userId', (string)$result['id']);
-                    self::setAuthCookie('userLogin', (string)$result['login']);
-                    self::setAuthCookie('token', self::authCookieToken((int)$result['id'], (string)$result['login'], (string)$result['password']));
-                }
-                return true;
-            }
-
-            return false;
+            return self::authService()->attempt($login, $password, $remember);
         }
-
         /**
          * Получение идентификатора текущего пользователя
          *
@@ -774,11 +698,7 @@
          */
         public static function getCurrentUserId(): ?int
         {
-            if (self::isAuthorized()) {
-                return $_SESSION['id'];
-            }
-
-            return null;
+            return self::authService()->id();
         }
 
         /**
@@ -789,34 +709,7 @@
          */
         public static function isAuthorized(): bool
         {
-            /** @var $DB DataBase Объект базы данных */
-            $DB = DataBase::getInstance();
-
-            if (!empty($_COOKIE['userId'])
-                && !empty($_COOKIE['userLogin'])
-                && self::isUserExists($_COOKIE['userLogin'])) {
-                $arUser = $DB->get(self::TABLE, ['id' => $_COOKIE['userId']]);
-                if (hash_equals(self::authCookieToken((int)$arUser['id'], (string)$arUser['login'], (string)$arUser['password']), (string)$_COOKIE['token'])) {
-                    if (empty($_SESSION['authorize'])) {
-                        self::authorize($arUser['id']);
-                    }
-                    $DB->update(self::TABLE, ['id' => $arUser['id']], ['last_active' => time()]);
-                    return true;
-                }
-            }
-            if (empty($_SESSION['authorize']) || $_SESSION['authorize'] !== 'Y') {
-                return false;
-            }
-            $result = $DB->get(self::TABLE, ['login' => $_SESSION['login']]);
-            if ($result) {
-                if (hash_equals(self::sessionFingerprint((string)$result['password']), (string)$_SESSION['password'])) {
-                    $DB->update(self::TABLE, ['id' => $result['id']], ['last_active' => time()]);
-                    $_SESSION['id'] = $result['id'];
-                    return true;
-                }
-                return false;
-            }
-            return false;
+            return self::authService()->check();
         }
 
         /**
@@ -853,72 +746,11 @@
         }
 
         /**
-         * Установить cookie авторизации с флагами безопасности.
-         *
-         * HttpOnly закрывает cookie от чтения из JavaScript, что ограничивает ущерб от любой XSS.
-         * SameSite=Lax не даёт браузеру отправлять её при межсайтовых POST-запросах — базовая
-         * защита от CSRF в дополнение к токену. Secure выставляется только на HTTPS, иначе
-         * cookie не установится на локальном HTTP-окружении.
-         *
-         * @param string $name  Имя cookie
-         * @param string $value Значение
-         *
-         * @return void
-         */
-        private static function setAuthCookie(string $name, string $value): void
-        {
-            // После отправки вывода заголовки менять уже нельзя: в вебе это ошибка,
-            // в CLI (тесты, cron) — обычное состояние, в обоих случаях вызов бессмыслен
-            if (headers_sent()) {
-                return;
-            }
-
-            setcookie($name, $value, [
-                'expires'  => time() + 3600 * 24,
-                'path'     => '/',
-                'httponly' => true,
-                'secure'   => (($_SERVER['HTTPS'] ?? '') !== '') && $_SERVER['HTTPS'] !== 'off',
-                'samesite' => 'Lax',
-            ]);
-        }
-
-        /**
-         * Удалить cookie авторизации
-         *
-         * @param string $name Имя cookie
-         *
-         * @return void
-         */
-        private static function forgetAuthCookie(string $name): void
-        {
-            if (headers_sent()) {
-                return;
-            }
-
-            setcookie($name, '', [
-                'expires'  => time() - 3600,
-                'path'     => '/',
-                'httponly' => true,
-                'secure'   => (($_SERVER['HTTPS'] ?? '') !== '') && $_SERVER['HTTPS'] !== 'off',
-                'samesite' => 'Lax',
-            ]);
-        }
-
-        /**
          * Метод выхода из системы
          */
         public static function logout(): void
         {
-            unset($_SESSION['id']);
-            unset($_SESSION['authorize']);
-            unset($_SESSION['login']);
-            unset($_SESSION['password']);
-            unset($_SESSION['token']);
-            unset($_SESSION['user']);
-
-            self::forgetAuthCookie('userId');
-            self::forgetAuthCookie('userLogin');
-            self::forgetAuthCookie('token');
+            self::authService()->logout();
         }
 
         /**

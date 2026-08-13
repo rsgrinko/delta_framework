@@ -157,7 +157,12 @@ php -r '$root="."; require $root."/vendor/autoload.php"; $t=new Twig\Environment
 
 ### Модели (`core/lib/Core/Models/`)
 Обычные классы (не ORM), оборачивающие вызовы `DataBase` по функциональным областям:
-- `User`/`UserModel`/`UserMeta` — авторизация, профиль, присутствие. `isOnline($id)`/`getOnlineCount()` вычисляют
+- **`Core\Services\AuthService`** — авторизация вынесена из модели: проверка пароля, наполнение сессии,
+  выдача и сверка cookie автологина, выход, отпечаток сессии. Сервис не статический и принимает соединение
+  и хешер через конструктор. Статические методы `User::securityAuthorize()`, `authorize()`, `isAuthorized()`,
+  `getCurrentUserId()`, `logout()` оставлены как тонкие делегаты — на них опирается существующий код.
+  **Новый код должен работать с `AuthService`, а не с этими делегатами.**
+- `User`/`UserModel`/`UserMeta` — профиль, присутствие, данные пользователя. `isOnline($id)`/`getOnlineCount()` вычисляют
   присутствие по `last_active` + `USER_ONLINE_TIME`; `last_active` обновляется только как побочный эффект
   `isAuthorized()` (в обеих её ветках — и куки-, и сессионной). `changePassword()`/`changeEmail()` — это
   self-service версии, используемые в `/profile` (в отличие от `resetPassword()`, которая принудительно
