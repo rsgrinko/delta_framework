@@ -15,12 +15,16 @@ Delta Framework — собственный, самописный PHP-фрейм�
 # Установка зависимостей
 composer install
 
-# Запуск всех тестов (используется в .gitlab-ci.yml)
-vendor/bin/phpunit --testdox tests
+# Юнит-тесты (без базы)
+vendor/bin/phpunit --testsuite unit
+
+# Интеграционные тесты (нужен config.local.php с реквизитами базы;
+# создают и удаляют собственные таблицы с префиксом test_)
+vendor/bin/phpunit --testsuite integration
 
 # Запуск отдельного файла теста / метода
-vendor/bin/phpunit tests/UserTest.php
-vendor/bin/phpunit --filter testGetAllUserData tests/UserTest.php
+vendor/bin/phpunit tests/Integration/AuthTest.php
+vendor/bin/phpunit --filter testLegacyPasswordIsRehashedOnLogin
 
 # Миграции базы данных (Phinx, конфиг в phinx.php, миграции в db/migrations, сиды в db/seed)
 vendor/bin/phinx migrate -e dev
@@ -239,9 +243,20 @@ php -r '$root="."; require $root."/vendor/autoload.php"; $t=new Twig\Environment
 и должны считаться скомпрометированными.
 
 ### Тестирование
-Тесты PHPUnit находятся в `tests/` (пока минимальны — см. `tests/UserTest.php`). CI (`.gitlab-ci.yml`) запускает
-`./vendor/bin/phpunit --testdox tests` при каждом push. Статического анализа в проекте нет — Psalm удалён.
-Целевая версия PHP — 8.4 (`composer.json`), на ней же работает dev-хост. Автоматического
+Конфигурация — `phpunit.xml`, загрузчик — `tests/bootstrap.php`. Два набора:
+
+- **`--testsuite unit`** — не обращается к базе, запускается где угодно.
+- **`--testsuite integration`** (`tests/Integration/`) — работает с **настоящей** базой. Реквизиты берутся из
+  `config.local.php`, но префикс таблиц переопределяется на `test_`: тесты создают собственные таблицы
+  `test_users`, `test_roles` и т.д. в той же базе и удаляют их после прогона, рабочие данные не затрагиваются.
+  Без `config.local.php` набор пропускается. Схема — `tests/Support/TestDatabase.php`; **при изменении рабочей
+  схемы её нужно синхронизировать там же.** Префикс обязан определяться до загрузки классов ядра: имена таблиц
+  вычисляются в константах классов при первой загрузке файла.
+
+Покрыты сценарии входа (включая приём старых md5-хешей и их миграцию) и личного кабинета (смена пароля,
+согласованность сессии, роли). Статического анализа в проекте нет — Psalm удалён.
+Целевая версия PHP — 8.4 (`composer.json`), на ней же работает dev-хост; локальный `php` в PATH может быть
+старее, для прогонов используйте интерпретатор 8.4. Автоматического
 покрытия тестами маршрутов/шаблонов нет — при изменении контроллеров `App.php` или шаблонов Twig делайте
 проверку через `php -l` плюс одноразовый рендер Twig (см. раздел "Команды" выше), прежде чем считать изменение
 завершённым, и предпочитайте проверять сессионно-зависимые сценарии (логин, смена пароля, AJAX-эндпоинты) на живом

@@ -23,3 +23,6 @@
 # Локальные утилиты и черновики
 /composer.phar
 /_scratch/
+
+# Кэш результатов PHPUnit
+/.phpunit.result.cache

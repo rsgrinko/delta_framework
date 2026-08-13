@@ -867,6 +867,12 @@
          */
         private static function setAuthCookie(string $name, string $value): void
         {
+            // После отправки вывода заголовки менять уже нельзя: в вебе это ошибка,
+            // в CLI (тесты, cron) — обычное состояние, в обоих случаях вызов бессмыслен
+            if (headers_sent()) {
+                return;
+            }
+
             setcookie($name, $value, [
                 'expires'  => time() + 3600 * 24,
                 'path'     => '/',
@@ -885,6 +891,10 @@
          */
         private static function forgetAuthCookie(string $name): void
         {
+            if (headers_sent()) {
+                return;
+            }
+
             setcookie($name, '', [
                 'expires'  => time() - 3600,
                 'path'     => '/',
