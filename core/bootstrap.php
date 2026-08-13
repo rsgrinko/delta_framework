@@ -27,9 +27,7 @@
     use Core\Models\User;
     use Core\Models\UTM;
     use Core\SystemConfig;
-
-    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-    date_default_timezone_set('Europe/Moscow');
+    use Delta\Config\Config;
 
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -49,13 +47,27 @@
         $_SERVER['DOCUMENT_ROOT'] = __DIR__. '/../';
     }
 
-    // Если имеется файл локальной конфигурации - подключаем его
+    // Если имеется файл локальной конфигурации - подключаем его.
+    // Он идёт первым: заданные в нём константы имеют приоритет над всем остальным.
     if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/config.local.php')) {
         require_once $_SERVER['DOCUMENT_ROOT'] . '/config.local.php';
     }
 
-    // Подключим основной файл конфигурации
+    // Собираем конфигурацию из каталога config/
+    Config::boot(__DIR__ . '/../config');
+
+    // Публикуем значения конфигурации в виде legacy-констант
     require_once __DIR__ . '/config.php';
+
+    // Режим вывода ошибок и часовой пояс определяются окружением
+    if (DEBUG) {
+        error_reporting(E_ALL);
+        ini_set('display_errors', '1');
+    } else {
+        error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED);
+        ini_set('display_errors', '0');
+    }
+    date_default_timezone_set(Config::getInstance()->get('app.timezone'));
 
     $isCronProcess = false;
     if (defined('IS_CRON_PROCESS') && IS_CRON_PROCESS === true) {

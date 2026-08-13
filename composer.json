@@ -5,7 +5,13 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
+            "Delta\\": "src/",
             "Core\\": "core/lib/Core/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
         }
     },
     "authors": [

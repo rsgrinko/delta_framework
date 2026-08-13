@@ -20,226 +20,189 @@
      */
 
     /**
+     * Слой совместимости со старым способом хранения настроек.
+     *
+     * Источник истины для конфигурации — объект Delta\Config\Config и файлы каталога config/.
+     * Этот файл лишь публикует те же значения в виде глобальных констант, потому что на них
+     * опирается существующий код ядра, админки и cron-задач. По мере перевода кода на Config
+     * константы будут исчезать отсюда; новый код должен использовать Config, а не константы.
+     *
+     * Каждая константа обёрнута в if (!defined(...)) — значение, заданное раньше
+     * в config.local.php, имеет приоритет.
+     */
+
+    use Delta\Config\Config;
+
+    $config = Config::getInstance();
+
+    /**
+     * Окружение и режим отладки
+     */
+    if (!defined('APP_ENV')) {
+        define('APP_ENV', $config->get('app.env'));
+    }
+    if (!defined('DEBUG')) {
+        define('DEBUG', (bool)$config->get('app.debug'));
+    }
+
+    /**
      * Версия сервиса
      */
-    const CORE_VERSION = '1.0.2';
-
-    /**
-     * Флаг отладки
-     */
-    if (!defined('DEBUG')) {
-        define('DEBUG', true); //SystemConfig
+    if (!defined('CORE_VERSION')) {
+        define('CORE_VERSION', $config->get('app.version'));
     }
 
-
     /**
-     * Путь до корня проекта
+     * Пути проекта
      */
     if (!defined('ROOT_PATH')) {
-        define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
+        define('ROOT_PATH', $config->get('app.paths.root'));
     }
-
-
-    /**
-     * Путь до папки ядра
-     */
     if (!defined('CORE_PATH')) {
-        define('CORE_PATH', ROOT_PATH . '/core');
+        define('CORE_PATH', $config->get('app.paths.core'));
     }
-
+    if (!defined('UPLOADS_PATH')) {
+        define('UPLOADS_PATH', $config->get('app.paths.uploads'));
+    }
+    if (!defined('PATH_TO_TEMPLATES')) {
+        define('PATH_TO_TEMPLATES', $config->get('app.paths.templates'));
+    }
+    if (!defined('LOG_PATH')) {
+        define('LOG_PATH', $config->get('app.paths.log'));
+    }
 
     /**
      * Адрес проекта
      */
     if (!defined('SITE_URL')) {
-        define('SITE_URL', 'https://' . $_SERVER['SERVER_NAME']);
+        define('SITE_URL', $config->get('app.url'));
     }
-
-
-    /**
-     * Путь до папки ядра
-     */
     if (!defined('SITE_URL_CORE')) {
         define('SITE_URL_CORE', SITE_URL . '/core');
     }
 
     /**
-     * Путь до папки загрузок
-     */
-    if (!defined('UPLOADS_PATH')) {
-        define('UPLOADS_PATH', ROOT_PATH . '/uploads');
-    }
-
-    /**
-     * Путь до папки почтовых шаблонов
+     * Почтовые шаблоны
      */
     if (!defined('MAIL_TEMPLATES_PATH')) {
-        define('MAIL_TEMPLATES_PATH', CORE_PATH . '/mail_templates');
+        define('MAIL_TEMPLATES_PATH', $config->get('mail.templates_path'));
     }
-
-    /**
-     * Почтовый шаблон по умолчанию
-     */
     if (!defined('MAIL_TEMPLATE_DEFAULT')) {
-        define('MAIL_TEMPLATE_DEFAULT', 'default');
-    }
-
-    /**
-     * Путь до директории с логами
-     */
-    if (!defined('LOG_PATH')) {
-        define('LOG_PATH', $_SERVER['DOCUMENT_ROOT'] . '/core/log');
+        define('MAIL_TEMPLATE_DEFAULT', $config->get('mail.template_default'));
     }
 
     /**
      * Количество элементов на странице
      */
     if (!defined('PAGINATION_LIMIT')) {
-        define('PAGINATION_LIMIT', 10);
+        define('PAGINATION_LIMIT', $config->get('app.pagination_limit'));
     }
 
     /**
-     * Параметры SQL базы.
-     * Реквизиты доступа задаются в config.local.php (вне git), здесь только безопасные значения
-     * по умолчанию. Шаблон окружения — config.local.example.php.
+     * Параметры SQL базы
      */
     if (!defined('DB_HOST')) {
-        define('DB_HOST', 'localhost');
+        define('DB_HOST', $config->get('database.host'));
     }
     if (!defined('DB_USER')) {
-        define('DB_USER', '');
+        define('DB_USER', $config->get('database.user'));
     }
     if (!defined('DB_PASSWORD')) {
-        define('DB_PASSWORD', '');
+        define('DB_PASSWORD', $config->get('database.password'));
     }
     if (!defined('DB_NAME')) {
-        define('DB_NAME', '');
+        define('DB_NAME', $config->get('database.name'));
     }
     if (!defined('DB_TABLE_PREFIX')) {
-        define('DB_TABLE_PREFIX', 'd_');
+        define('DB_TABLE_PREFIX', $config->get('database.table_prefix'));
     }
 
     /**
-     * Путь до шаблонов
-     */
-    if (!defined('PATH_TO_TEMPLATES')) {
-        define('PATH_TO_TEMPLATES', ROOT_PATH . '/templates');
-    }
-
-    /**
-     * Имя телеграм бота
+     * Параметры Telegram
      */
     if (!defined('TELEGRAM_BOT_USERNAME')) {
-        define('TELEGRAM_BOT_USERNAME', 'deltacore_bot');
+        define('TELEGRAM_BOT_USERNAME', $config->get('telegram.bot_username'));
     }
-
-    /**
-     * Токен телеграм бота. Задаётся в config.local.php.
-     */
     if (!defined('TELEGRAM_BOT_TOKEN')) {
-        define('TELEGRAM_BOT_TOKEN', '');
+        define('TELEGRAM_BOT_TOKEN', $config->get('telegram.bot_token'));
     }
-
-    /**
-     * ID чата канала уведомлений в телеграм
-     */
     if (!defined('TELEGRAM_NOTIFICATION_CHANNEL')) {
-        define('TELEGRAM_NOTIFICATION_CHANNEL', '-1001714289174');
+        define('TELEGRAM_NOTIFICATION_CHANNEL', $config->get('telegram.notification_channel'));
     }
-
-    /**
-     * ID чата админа в телеграм
-     */
     if (!defined('TELEGRAM_ADMIN_CHAT_ID')) {
-        define('TELEGRAM_ADMIN_CHAT_ID', '412790359');
+        define('TELEGRAM_ADMIN_CHAT_ID', $config->get('telegram.admin_chat_id'));
     }
 
     /**
-     * Время, в течении которого считаем пользователя онлайн, сек.
+     * Время, в течение которого считаем пользователя онлайн, сек.
      */
     if (!defined('USER_ONLINE_TIME')) {
-        define('USER_ONLINE_TIME', 60 * 5);
+        define('USER_ONLINE_TIME', $config->get('app.user_online_time'));
     }
 
     /**
-     * Использование кэша
+     * Кэширование
      */
     if (!defined('USE_CACHE')) {
-        define('USE_CACHE', false);
+        define('USE_CACHE', (bool)$config->get('cache.enabled'));
     }
-
-    /**
-     * Папка кэша
-     */
     if (!defined('CACHE_DIR')) {
-        define('CACHE_DIR', ROOT_PATH . '/core/cache');
+        define('CACHE_DIR', $config->get('cache.dir'));
     }
-
-    /**
-     * Время жизни кэша
-     */
     if (!defined('CACHE_TTL')) {
-        define('CACHE_TTL', 3600);
+        define('CACHE_TTL', $config->get('cache.ttl'));
     }
 
     /**
-     * Код значения Да
-     */
-    const CODE_VALUE_Y = 'Y';
-
-    /**
-     * Код значения Нет
-     */
-    const CODE_VALUE_N = 'N';
-
-    /**
-     * Ключ шифрования. Задаётся в config.local.php.
-     * Объявлен через define(), а не const, чтобы значение из config.local.php имело приоритет:
-     * const в глобальной области переопределить нельзя.
+     * Ключ шифрования
      */
     if (!defined('CRYPTO_KEY')) {
-        define('CRYPTO_KEY', '');
+        define('CRYPTO_KEY', $config->get('security.crypto_key'));
     }
 
     /**
      * Флаг использования логирования
      */
     if (!defined('USE_LOG')) {
-        define('USE_LOG', true);
+        define('USE_LOG', (bool)$config->get('app.use_log'));
     }
 
     /**
-     * E-Mail сайта
+     * Параметры почты сайта
      */
     if (!defined('SERVER_EMAIL')) {
-        define('SERVER_EMAIL', 'noreply@dev.it-stories.ru');
+        define('SERVER_EMAIL', $config->get('mail.from_email'));
     }
-
-    /**
-     * Имя E-Mail сайта
-     */
     if (!defined('SERVER_EMAIL_NAME')) {
-        define('SERVER_EMAIL_NAME', 'Delta Framework');
+        define('SERVER_EMAIL_NAME', $config->get('mail.from_name'));
     }
 
     /**
-     * Флаг использования Captcha
+     * Captcha и защита от DDoS
      */
     if (!defined('USE_CAPTCHA')) {
-        define('USE_CAPTCHA', false);
+        define('USE_CAPTCHA', (bool)$config->get('security.use_captcha'));
     }
-
-    /**
-     * Флаг использования защиты от DDoS
-     */
     if (!defined('USE_DDOS_PROTECTION')) {
-        define('USE_DDOS_PROTECTION', false);
+        define('USE_DDOS_PROTECTION', (bool)$config->get('security.use_ddos_protection'));
     }
 
     /**
      * Формат даты/времени
      */
-    const DATETIME_FORMAT = 'Y-m-d H:i:s';
+    if (!defined('DATETIME_FORMAT')) {
+        define('DATETIME_FORMAT', $config->get('app.datetime_format'));
+    }
+
+    /**
+     * Коды значений Да/Нет
+     */
+    if (!defined('CODE_VALUE_Y')) {
+        define('CODE_VALUE_Y', 'Y');
+    }
+    if (!defined('CODE_VALUE_N')) {
+        define('CODE_VALUE_N', 'N');
+    }
 
     /**
      * Проверка обязательных реквизитов окружения.
@@ -258,3 +221,5 @@
         }
         die(1);
     }
+
+    unset($config);
