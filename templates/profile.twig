@@ -22,6 +22,7 @@
             <h2>{{ icons.camera() }} Аватар</h2>
         </div>
         <form method="POST" action="/profile/avatar" enctype="multipart/form-data" class="profile-avatar-form">
+                    <input type="hidden" name="_token" value="{{ csrfToken }}">
             <div class="profile-hero-avatar">
                 {% if avatar %}
                     <img src="{{ avatar.path }}" alt="{{ profileData.name }}">
@@ -44,6 +45,7 @@
             <h2>{{ icons.user() }} Личные данные</h2>
         </div>
         <form method="POST" action="/profile/personal">
+                    <input type="hidden" name="_token" value="{{ csrfToken }}">
             <input class="input" type="text" name="name" value="{{ profileData.name }}" placeholder="Имя">
             <input class="input" type="email" name="email" value="{{ profileData.email }}" placeholder="E-Mail">
 
@@ -59,7 +61,8 @@
             <button class="button" type="submit">Сохранить</button>
         </form>
         {% if not emailConfirmed %}
-            <form method="POST" action="/profile/resend-verification" id="resendVerificationForm"></form>
+            <form method="POST" action="/profile/resend-verification" id="resendVerificationForm">
+                    <input type="hidden" name="_token" value="{{ csrfToken }}"></form>
         {% endif %}
     </div>
 
@@ -68,6 +71,7 @@
             <h2>{{ icons.lock() }} Смена пароля</h2>
         </div>
         <form method="POST" action="/profile/password">
+                    <input type="hidden" name="_token" value="{{ csrfToken }}">
             <input class="input" type="password" name="currentPassword" placeholder="Текущий пароль" autocomplete="current-password">
             <input class="input" type="password" name="newPassword" placeholder="Новый пароль" autocomplete="new-password">
             <input class="input" type="password" name="confirmPassword" placeholder="Повторите новый пароль" autocomplete="new-password">

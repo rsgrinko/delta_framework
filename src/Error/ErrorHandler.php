@@ -40,12 +40,27 @@
          */
         public function register(): self
         {
-            set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+            /**
+             * В исключение превращаются только ошибки, после которых продолжать выполнение
+             * бессмысленно. Предупреждения и замечания записываются в журнал, но не прерывают
+             * запрос: кодовая база содержит много легаси-кода, который обращается к
+             * несуществующим ключам массива, и превращение таких предупреждений в исключения
+             * ломало бы рабочие страницы вместо того, чтобы делать проблему видимой.
+             */
+            set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
                 if ((error_reporting() & $severity) === 0) {
                     return false;
                 }
 
-                throw new ErrorException($message, 0, $severity, $file, $line);
+                $fatal = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR];
+
+                if (in_array($severity, $fatal, true)) {
+                    throw new ErrorException($message, 0, $severity, $file, $line);
+                }
+
+                $this->log($message, ['severity' => $severity, 'file' => $file, 'line' => $line]);
+
+                return true;
             });
 
             set_exception_handler(function (Throwable $e): void {

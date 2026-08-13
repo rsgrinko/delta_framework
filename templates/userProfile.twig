@@ -52,6 +52,7 @@
     </div>
 
     <form action="/users/{{ userData.id }}/dialog" method="POST">
+                    <input type="hidden" name="_token" value="{{ csrfToken }}">
         <button class="button" type="submit">{{ icons.chat() }} Написать сообщение</button>
     </form>
 {% endblock %}

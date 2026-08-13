@@ -29,8 +29,10 @@
     use Delta\Config\Config;
     use Delta\Error\ErrorHandler;
     use Delta\Http\Kernel;
+    use Delta\Http\Middleware\CsrfMiddleware;
     use Delta\Http\Request;
     use Delta\Routing\Router;
+    use Delta\Security\Csrf;
 
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -174,14 +176,24 @@
         $twig   = new \Twig\Environment($loader, [
             'debug' => DEBUG,
             'cache' => DEBUG ? false : CACHE_DIR . '/twig',
+            // Пересобирать шаблон при изменении файла даже при включённом кэше:
+            // без этого правка шаблона на проде не применяется до ручной чистки кэша
+            'auto_reload' => true,
         ]);
         if (DEBUG) {
             $twig->addExtension(new \Twig\Extension\DebugExtension());
         }
 
+        // Токен защиты от CSRF доступен во всех шаблонах
+        $twig->addGlobal('csrfToken', Csrf::token());
+
         $router = new Router();
         require __DIR__ . '/routes.php';
 
-        (new Kernel($router, $errorHandler))->handle(Request::capture())->send();
+        $middleware = [
+            new CsrfMiddleware(),
+        ];
+
+        (new Kernel($router, $errorHandler, $middleware))->handle(Request::capture())->send();
         die();
     }

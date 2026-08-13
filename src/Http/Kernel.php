@@ -21,10 +21,12 @@
          *
          * @param Router            $router       Маршрутизатор
          * @param ErrorHandler|null $errorHandler Обработчик ошибок
+         * @param Middleware[]      $middleware   Промежуточные обработчики
          */
         public function __construct(
             private readonly Router $router,
             private readonly ?ErrorHandler $errorHandler = null,
+            private readonly array $middleware = [],
         ) {
         }
 
@@ -38,7 +40,10 @@
         public function handle(Request $request): Response
         {
             try {
-                return $this->router->dispatch($request);
+                return (new Pipeline($this->middleware))->handle(
+                    $request,
+                    fn(Request $request): Response => $this->router->dispatch($request),
+                );
             } catch (Throwable $e) {
                 if ($this->errorHandler === null) {
                     throw $e;

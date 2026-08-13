@@ -76,7 +76,7 @@
                 $auth = true;
             } else {
                 $auth = false;
-                if ($captchaCorrect && !empty($_REQUEST['login'] && !empty($_REQUEST['pass']))) {
+                if ($captchaCorrect && !empty($_REQUEST['login']) && !empty($_REQUEST['pass'])) {
                     if (User::securityAuthorize(
                         $_REQUEST['login'],
                         $_REQUEST['pass'],

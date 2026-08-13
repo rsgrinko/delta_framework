@@ -24,10 +24,6 @@
     require_once __DIR__ . '/inc/header.php';
 
     global $USER;
-    if ($USER->isAdmin() === false) {
-        header('Location: ./');
-        die();
-    }
     $MQ = new MQ();
 ?>
     <div class="pageheader">

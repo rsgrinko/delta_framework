@@ -24,15 +24,7 @@
     require_once __DIR__ . '/bootstrap.php';
     global $USER, $arUser;
 
-    if (User::isAuthorized() === false && $_SERVER['REQUEST_URI'] !== '/login.php') {
-        header('Location: login.php');
-        die();
-    }
-
-    if ($USER->isAdmin() === false && $USER->haveAccessToAdminPanel() === false) {
-        header('Location: ../');
-        die();
-    }
+    // Контроль доступа выполняется в admin/inc/bootstrap.php — единой точкой для всех страниц админки
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -37,6 +37,7 @@
 
             <div class="chat-compose">
                 <form method="POST" action="/users/{{ companionId }}/sendMessage" enctype="multipart/form-data" id="chatComposeForm">
+                    <input type="hidden" name="_token" value="{{ csrfToken }}">
                     <input type="hidden" name="dialogId" value="{{ dialog_id }}">
                     <textarea name="message" id="chatMessageInput" placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — новая строка)"></textarea>
                     <div class="chat-compose-actions">

@@ -609,9 +609,9 @@
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
-                    setcookie('userId', $result['id'], time() + 3600 * 24);
-                    setcookie('userLogin', $result['login'], time() + 3600 * 24);
-                    setcookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']), time() + 3600 * 24);
+                    self::setAuthCookie('userId', (string)$result['id']);
+                    self::setAuthCookie('userLogin', (string)$result['login']);
+                    self::setAuthCookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']));
                 }
                 return true;
             }
@@ -641,9 +641,9 @@
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
-                    setcookie('userId', $result['id'], time() + 3600 * 24);
-                    setcookie('userLogin', $result['login'], time() + 3600 * 24);
-                    setcookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']), time() + 3600 * 24);
+                    self::setAuthCookie('userId', (string)$result['id']);
+                    self::setAuthCookie('userLogin', (string)$result['login']);
+                    self::setAuthCookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']));
                 }
                 return true;
             }
@@ -738,6 +738,48 @@
         }
 
         /**
+         * Установить cookie авторизации с флагами безопасности.
+         *
+         * HttpOnly закрывает cookie от чтения из JavaScript, что ограничивает ущерб от любой XSS.
+         * SameSite=Lax не даёт браузеру отправлять её при межсайтовых POST-запросах — базовая
+         * защита от CSRF в дополнение к токену. Secure выставляется только на HTTPS, иначе
+         * cookie не установится на локальном HTTP-окружении.
+         *
+         * @param string $name  Имя cookie
+         * @param string $value Значение
+         *
+         * @return void
+         */
+        private static function setAuthCookie(string $name, string $value): void
+        {
+            setcookie($name, $value, [
+                'expires'  => time() + 3600 * 24,
+                'path'     => '/',
+                'httponly' => true,
+                'secure'   => (($_SERVER['HTTPS'] ?? '') !== '') && $_SERVER['HTTPS'] !== 'off',
+                'samesite' => 'Lax',
+            ]);
+        }
+
+        /**
+         * Удалить cookie авторизации
+         *
+         * @param string $name Имя cookie
+         *
+         * @return void
+         */
+        private static function forgetAuthCookie(string $name): void
+        {
+            setcookie($name, '', [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'httponly' => true,
+                'secure'   => (($_SERVER['HTTPS'] ?? '') !== '') && $_SERVER['HTTPS'] !== 'off',
+                'samesite' => 'Lax',
+            ]);
+        }
+
+        /**
          * Метод выхода из системы
          */
         public static function logout(): void
@@ -749,9 +791,9 @@
             unset($_SESSION['token']);
             unset($_SESSION['user']);
 
-            setcookie('userId', '', time() - 3600);
-            setcookie('userLogin', '', time() - 3600);
-            setcookie('token', '', time() - 3600);
+            self::forgetAuthCookie('userId');
+            self::forgetAuthCookie('userLogin');
+            self::forgetAuthCookie('token');
         }
 
         /**

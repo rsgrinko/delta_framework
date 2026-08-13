@@ -31,3 +31,42 @@
         $USER   = null;
         $arUser = [];
     }
+
+    /**
+     * Единая точка контроля доступа в админку.
+     *
+     * Раньше проверка прав была скопирована в каждую страницу по отдельности, и любая новая
+     * страница легко оставалась без неё — именно так `admin/ajax/threads.php` оказался
+     * доступен анонимно и отдавал содержимое очереди задач наружу.
+     *
+     * Страницы из списка ниже — единственные, доступные без прав администратора: на них
+     * пользователь ещё не авторизован либо как раз выходит из системы.
+     */
+    $publicAdminPages = ['login.php', 'logout.php', 'register.php'];
+
+    /**
+     * Страницы, требующие полных прав администратора, а не просто доступа в панель.
+     * Список повторяет права, которые раньше были прописаны в самих страницах.
+     */
+    $adminOnlyPages = ['cacheInfo.php', 'groups.php', 'threads.php', 'users.php'];
+
+    $currentAdminPage = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
+
+    if (in_array($currentAdminPage, $publicAdminPages, true) === false) {
+        if ($USER === null) {
+            header('Location: /admin/login.php');
+            die();
+        }
+
+        $isAdmin = $USER->isAdmin();
+
+        if (in_array($currentAdminPage, $adminOnlyPages, true)) {
+            if ($isAdmin === false) {
+                header('Location: /admin/');
+                die();
+            }
+        } elseif ($isAdmin === false && $USER->haveAccessToAdminPanel() === false) {
+            header('Location: /');
+            die();
+        }
+    }
