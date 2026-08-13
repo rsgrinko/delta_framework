@@ -150,8 +150,10 @@
                 throw new ApiException('Не задан пароль', ApiException::ERROR_INPUT_DATA);
             }
 
-            $userObject = User::getByParams(['login' => $login, 'password' => User::passwordEncryption($password)]);
-            if ($userObject === null) {
+            // Поиск по хешу пароля невозможен: у bcrypt своя соль на каждую запись,
+            // поэтому пользователь ищется по логину, а пароль проверяется отдельно
+            $userObject = User::getByParams(['login' => $login]);
+            if ($userObject === null || User::verifyPassword($password, (string)$userObject->getAllUserData()['password']) === false) {
                 throw new ApiException('Авторизация не удалась', ApiException::ERROR_AUTHORIZE);
             }
             $token = $userObject->getToken();

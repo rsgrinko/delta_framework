@@ -28,7 +28,9 @@
     use Core\CoreException;
     use Core\Helpers\{Cache, Log, Mail, Sanitize, SystemFunctions};
     use Core\Database\DataBase;
+    use Core\Database\DatabaseException;
     use Core\DTO\User\FilterUser;
+    use Delta\Security\PasswordHasher;
     use Throwable;
 
     class User
@@ -429,7 +431,94 @@
          */
         public static function passwordEncryption(string $password): string
         {
-            return md5(self::$cryptoSalt . $password);
+            return self::hasher()->hash($password);
+        }
+
+        /**
+         * Объект хеширования паролей
+         *
+         * @return PasswordHasher Хешер
+         */
+        private static function hasher(): PasswordHasher
+        {
+            return new PasswordHasher(self::$cryptoSalt);
+        }
+
+        /**
+         * Проверить пароль против хранимого хеша.
+         * Принимаются как новые bcrypt-хеши, так и старые md5 — последние мигрируются при входе.
+         *
+         * @param string $password Пароль
+         * @param string $hash     Хранимый хеш
+         *
+         * @return bool Признак совпадения
+         */
+        public static function verifyPassword(string $password, string $hash): bool
+        {
+            return self::hasher()->verify($password, $hash);
+        }
+
+        /**
+         * Перехешировать пароль, если хранимый хеш устарел.
+         *
+         * Вызывается после успешной проверки пароля: только в этот момент открытый пароль
+         * доступен, а значит можно бесшовно перевести запись на bcrypt.
+         *
+         * @param int    $userId   Идентификатор пользователя
+         * @param string $password Открытый пароль
+         * @param string $hash     Текущий хранимый хеш
+         *
+         * @return string Актуальный хеш
+         */
+        private static function rehashIfNeeded(int $userId, string $password, string $hash): string
+        {
+            $hasher = self::hasher();
+
+            if ($hasher->needsRehash($hash) === false) {
+                return $hash;
+            }
+
+            $newHash = $hasher->hash($password);
+
+            try {
+                DataBase::getInstance()->update(self::TABLE, ['id' => $userId], ['password' => $newHash]);
+            } catch (DatabaseException $e) {
+                // Не удалось обновить — вход всё равно состоялся, миграция повторится позже
+                Log::logToFile('Не удалось перехешировать пароль', 'User.log', ['userId' => $userId]);
+
+                return $hash;
+            }
+
+            return $newHash;
+        }
+
+        /**
+         * Отпечаток пароля для проверки согласованности сессии.
+         *
+         * Хранить в сессии сам хеш пароля не нужно — достаточно производного значения,
+         * которое меняется при смене пароля и тем самым инвалидирует старую сессию.
+         *
+         * @param string $storedHash Хранимый хеш пароля
+         *
+         * @return string Отпечаток
+         */
+        public static function sessionFingerprint(string $storedHash): string
+        {
+            return hash('sha256', self::$cryptoSalt . $storedHash);
+        }
+
+        /**
+         * Значение cookie-токена автологина
+         *
+         * @param int    $id         Идентификатор пользователя
+         * @param string $login      Логин
+         * @param string $storedHash Хранимый хеш пароля
+         *
+         * @return string Токен
+         */
+        private static function authCookieToken(int $id, string $login, string $storedHash): string
+        {
+            return hash_hmac('sha256', $id . '|' . $login . '|' . $storedHash, self::$cryptoSalt);
         }
 
 
@@ -459,35 +548,44 @@
             }
 
             Log::logToFile('Создание нового пользователя', 'User.log', func_get_args());
-            $verificationCode = md5(self::$cryptoSalt . $email . $login . time());
+            $verificationCode = bin2hex(random_bytes(16));
 
             /** @var $DB DataBase Объект базы данных */
             $DB         = DataBase::getInstance();
-            $userId     = $DB->add(self::TABLE, [
-                'login'             => $login,
-                'password'          => self::passwordEncryption($password),
-                'name'              => $name,
-                'image_id'          => 0,
-                'token'             => null,
-                'email'             => $email,
-                'email_confirmed'   => CODE_VALUE_N,
-                'verification_code' => $verificationCode,
-                'last_active'       => time(),
-            ]);
             $objectUser = null;
 
-            try {
-                $objectUser = (new self($userId));
-            } catch (CoreException $e) {
-                Log::logToFile('Ошибка создания объекта пользователя', 'User.log', func_get_args());
-                throw new CoreException('Ошибка создания объекта пользователя', CoreException::ERROR_CREATE_USER);
-            }
+            /**
+             * Вставка пользователя и назначение роли — одна неделимая операция.
+             * Без транзакции падение на втором шаге оставляло в базе пользователя без роли,
+             * и откатить уже вставленную строку было некому.
+             */
+            $DB->startTransaction();
 
             try {
+                $userId = $DB->add(self::TABLE, [
+                    'login'             => $login,
+                    'password'          => self::passwordEncryption($password),
+                    'name'              => $name,
+                    'image_id'          => 0,
+                    'token'             => null,
+                    'email'             => $email,
+                    'email_confirmed'   => CODE_VALUE_N,
+                    'verification_code' => $verificationCode,
+                    'last_active'       => time(),
+                ]);
+
+                $objectUser = new self($userId);
                 $objectUser->getRolesObject()->addRole(Roles::USER_ROLE_ID);
-            } catch (CoreException $e) {
-                Log::logToFile('Ошибка добавления ролей пользователю', 'User.log', func_get_args());
-                throw new CoreException('Ошибка добавления ролей пользователю', CoreException::ERROR_ADD_USER_ROLES);
+
+                $DB->commitTransaction();
+            } catch (Throwable $e) {
+                $DB->rollbackTransaction();
+                Log::logToFile('Ошибка создания пользователя, транзакция откачена', 'User.log', [
+                    'login' => $login,
+                    'error' => $e->getMessage(),
+                ]);
+
+                throw new CoreException('Ошибка создания пользователя', CoreException::ERROR_CREATE_USER);
             }
 
             try {
@@ -518,7 +616,6 @@
             foreach ($fields as $key => $value) {
                 $fields[$key] = Sanitize::sanitizeString($value);
             }
-            $cacheId = md5('User_getAllUserData_' . $this->id);
             $beforeData = [];
             foreach($fields as $key => $value) {
                 $beforeData[$key] = $this->getAllUserData()[$key];
@@ -528,7 +625,16 @@
             Log::logToFile(
                 'Данные пользователя изменены', 'User.log', ['userId' => $this->id, 'before' => $beforeData, 'after' => $fields]
             );
-            Cache::delete($cacheId);
+            /**
+             * Данные пользователя кэшируются под двумя ключами — с флагом onlySecureData и без него.
+             * Прежний код удалял ключ без этого флага, то есть не совпадающий ни с одним реально
+             * используемым, и кэш никогда не инвалидировался. Пока USE_CACHE выключен, это было
+             * незаметно, но при включении отдавало бы устаревшие пароль, email и роли.
+             */
+            foreach ([0, 1] as $onlySecureDataCacheKey) {
+                Cache::delete(md5('User_getAllUserData_' . $onlySecureDataCacheKey . '_' . $this->id));
+            }
+
             return $DB->update(self::TABLE, ['id' => $this->id], $fields);
         }
 
@@ -605,13 +711,13 @@
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = CODE_VALUE_Y;
                 $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = self::passwordEncryption($result['password']);
+                $_SESSION['password']  = self::sessionFingerprint((string)$result['password']);
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
                     self::setAuthCookie('userId', (string)$result['id']);
                     self::setAuthCookie('userLogin', (string)$result['login']);
-                    self::setAuthCookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']));
+                    self::setAuthCookie('token', self::authCookieToken((int)$result['id'], (string)$result['login'], (string)$result['password']));
                 }
                 return true;
             }
@@ -632,18 +738,27 @@
         {
             /** @var $DB DataBase Объект базы данных */
             $DB     = DataBase::getInstance();
-            $result = $DB->get(self::TABLE, ['login' => $login, 'password' => self::passwordEncryption($password)], true);
-            if ($result) {
+
+            // Искать по хешу пароля больше нельзя: у bcrypt своя соль на каждую запись,
+            // поэтому пользователь ищется по логину, а пароль проверяется отдельно
+            $result = $DB->get(self::TABLE, ['login' => $login], true);
+
+            if ($result && self::verifyPassword($password, (string)$result['password'])) {
+                $result['password'] = self::rehashIfNeeded(
+                    (int)$result['id'],
+                    $password,
+                    (string)$result['password'],
+                );
                 $_SESSION['id']        = $result['id'];
                 $_SESSION['authorize'] = 'Y';
                 $_SESSION['login']     = $result['login'];
-                $_SESSION['password']  = self::passwordEncryption($result['password']);
+                $_SESSION['password']  = self::sessionFingerprint((string)$result['password']);
                 $_SESSION['token']     = $result['token'];
                 $_SESSION['user']      = $result;
                 if ($remember) {
                     self::setAuthCookie('userId', (string)$result['id']);
                     self::setAuthCookie('userLogin', (string)$result['login']);
-                    self::setAuthCookie('token', md5(self::$cryptoSalt . $result['id'] . $result['login'] . $result['password']));
+                    self::setAuthCookie('token', self::authCookieToken((int)$result['id'], (string)$result['login'], (string)$result['password']));
                 }
                 return true;
             }
@@ -681,7 +796,7 @@
                 && !empty($_COOKIE['userLogin'])
                 && self::isUserExists($_COOKIE['userLogin'])) {
                 $arUser = $DB->get(self::TABLE, ['id' => $_COOKIE['userId']]);
-                if ($_COOKIE['token'] == md5(self::$cryptoSalt . $arUser['id'] . $arUser['login'] . $arUser['password'])) {
+                if (hash_equals(self::authCookieToken((int)$arUser['id'], (string)$arUser['login'], (string)$arUser['password']), (string)$_COOKIE['token'])) {
                     if (empty($_SESSION['authorize'])) {
                         self::authorize($arUser['id']);
                     }
@@ -694,7 +809,7 @@
             }
             $result = $DB->get(self::TABLE, ['login' => $_SESSION['login']]);
             if ($result) {
-                if (self::passwordEncryption($result['password']) == $_SESSION['password']) {
+                if (hash_equals(self::sessionFingerprint((string)$result['password']), (string)$_SESSION['password'])) {
                     $DB->update(self::TABLE, ['id' => $result['id']], ['last_active' => time()]);
                     $_SESSION['id'] = $result['id'];
                     return true;
@@ -952,16 +1067,18 @@
         public function changePassword(string $currentPassword, string $newPassword): bool
         {
             $currentData = $this->getAllUserData();
-            if ($currentData['password'] !== self::passwordEncryption($currentPassword)) {
+            if (self::verifyPassword($currentPassword, (string)$currentData['password']) === false) {
                 return false;
             }
-            $this->update(['password' => self::passwordEncryption($newPassword)]);
+
+            $newHash = self::passwordEncryption($newPassword);
+            $this->update(['password' => $newHash]);
             Log::logToFile('Пользователь сменил пароль', 'User.log', ['userId' => $this->id]);
 
-            // Обновляем хеш пароля, сохранённый в сессии при авторизации, иначе isAuthorized()
+            // Обновляем отпечаток пароля, сохранённый в сессии при авторизации, иначе isAuthorized()
             // разлогинит пользователя на следующем же запросе, так как пароль в БД уже другой
             if (isset($_SESSION['id']) && (int)$_SESSION['id'] === $this->id) {
-                $_SESSION['password'] = self::passwordEncryption(self::passwordEncryption($newPassword));
+                $_SESSION['password'] = self::sessionFingerprint($newHash);
             }
 
             return true;
@@ -985,7 +1102,7 @@
                 throw new CoreException('Пользователь с данным E-Mail уже существует', CoreException::ERROR_CREATE_USER);
             }
 
-            $verificationCode = md5(self::$cryptoSalt . $newEmail . $this->getLogin() . time());
+            $verificationCode = bin2hex(random_bytes(16));
             $this->update([
                 'email'             => $newEmail,
                 'email_confirmed'   => CODE_VALUE_N,
