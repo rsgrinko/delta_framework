@@ -20,32 +20,51 @@
      * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
      */
 
-    use Core\Models\Router;
+    /**
+     * Таблица маршрутизации.
+     *
+     * Файл получает готовый объект $router из core/bootstrap.php и возвращает его.
+     * Обработчики пока заданы строками '\Core\App::method' — это старый стиль, при котором
+     * экшен печатает в вывод. Маршрутизатор оборачивает такой вывод в объект ответа,
+     * поэтому маршруты можно переводить на новый стиль (возврат Response) по одному.
+     */
 
-    Router::route('/404', function () {
-        header('HTTP/1.0 404 Not Found');
-        echo '404 - Page Not Found';
+    use Core\Helpers\Registry;
+    use Delta\Http\Response;
+    use Delta\Routing\Router;
+
+    /** @var Router $router */
+
+    // Прикладной код узнаёт текущий маршрут через Registry — ядро о Registry не знает
+    $router->onMatch(static function (callable|string $handler): void {
+        if (is_string($handler)) {
+            Registry::set('currentPage', $handler);
+        }
     });
 
-    Router::route('/', '\Core\App::index');
-    Router::route('/info', '\Core\App::info');
+    $router->route('/404', static fn(): Response => Response::notFound());
 
-    Router::route('/login', '\Core\App::login');
-    Router::route('/login/authorize', '\Core\App::loginAuthorize');
-    Router::route('/login/failed', '\Core\App::loginFailed');
-    Router::route('/logout', '\Core\App::logout');
+    $router->route('/', '\Core\App::index');
+    $router->route('/info', '\Core\App::info');
 
-    Router::route('/dialogs', '\Core\App::dialogs');
-    Router::route('/dialog/(\d+)', '\Core\App::dialog');
-    Router::route('/dialog/(\d+)/messages', '\Core\App::dialogMessages');
+    $router->route('/login', '\Core\App::login');
+    $router->route('/login/authorize', '\Core\App::loginAuthorize');
+    $router->route('/login/failed', '\Core\App::loginFailed');
+    $router->route('/logout', '\Core\App::logout');
 
-    Router::route('/users', '\Core\App::users');
-    Router::route('/users/(\d+)', '\Core\App::userProfile');
-    Router::route('/users/(\d+)/sendMessage', '\Core\App::sendMessage');
-    Router::route('/users/(\d+)/dialog', '\Core\App::goToDialog');
+    $router->route('/dialogs', '\Core\App::dialogs');
+    $router->route('/dialog/(\d+)', '\Core\App::dialog');
+    $router->route('/dialog/(\d+)/messages', '\Core\App::dialogMessages');
 
-    Router::route('/profile', '\Core\App::profile');
-    Router::route('/profile/personal', '\Core\App::profileUpdatePersonal');
-    Router::route('/profile/password', '\Core\App::profileUpdatePassword');
-    Router::route('/profile/avatar', '\Core\App::profileUpdateAvatar');
-    Router::route('/profile/resend-verification', '\Core\App::profileResendVerification');
+    $router->route('/users', '\Core\App::users');
+    $router->route('/users/(\d+)', '\Core\App::userProfile');
+    $router->route('/users/(\d+)/sendMessage', '\Core\App::sendMessage');
+    $router->route('/users/(\d+)/dialog', '\Core\App::goToDialog');
+
+    $router->route('/profile', '\Core\App::profile');
+    $router->route('/profile/personal', '\Core\App::profileUpdatePersonal');
+    $router->route('/profile/password', '\Core\App::profileUpdatePassword');
+    $router->route('/profile/avatar', '\Core\App::profileUpdateAvatar');
+    $router->route('/profile/resend-verification', '\Core\App::profileResendVerification');
+
+    return $router;

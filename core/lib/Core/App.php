@@ -26,9 +26,13 @@
     use Core\Helpers\Registry;
     use Core\Helpers\SystemFunctions;
     use Core\Models\{File, Posts, User};
+    use Delta\Http\UploadedFile;
 
     class App
     {
+        /** @var int Предельный размер файла аватара, байт */
+        private const AVATAR_MAX_SIZE = 5 * 1024 * 1024;
+
         /**
          * Получение параметров для шаблона в целом
          *
@@ -138,9 +142,15 @@
             global $USER;
             $companionId     = $USER->getDialogObject()->getDialogCompanionId($id);
             $companionObject = new User($companionId);
+
+            // Одноразовое сообщение об ошибке отправки (например, недопустимый тип вложения)
+            $dialogMessage = $_SESSION['dialogMessage'] ?? null;
+            unset($_SESSION['dialogMessage']);
+
             self::render(
                 'dialog.twig',
                 [
+                    'dialogMessage'   => $dialogMessage,
                     'dialog_id'       => $id,
                     'messages'        => $USER->getMessages($id, true),
                     'userId'          => $USER->getId(),
@@ -189,13 +199,25 @@
                 return;
             }
 
-            if (empty($_FILES['file']['tmp_name'])) {
+            $uploadedFile = UploadedFile::fromArray($_FILES['file'] ?? []);
+
+            if ($uploadedFile === null) {
                 $USER->getDialogObject()->sendMessage($userId, $message);
             } else {
-                $fileObject = new File();
-                $fileObject->saveFile($_FILES['file']['tmp_name'], $_FILES['file']['name'], true);
+                $allowedTypes = UploadedFile::IMAGE_TYPES + UploadedFile::DOCUMENT_TYPES;
 
-                $USER->getDialogObject()->sendFile($userId, $fileObject->getId(), in_array($_FILES['file']['type'], ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true));
+                try {
+                    $fileObject = (new File())->saveUploadedFile($uploadedFile, $allowedTypes);
+                } catch (CoreException $e) {
+                    if ($isAjax) {
+                        self::outputJson(['success' => false, 'error' => $e->getMessage()]);
+                    }
+                    $_SESSION['dialogMessage'] = $e->getMessage();
+                    header('Location: /dialog/' . (int)$_REQUEST['dialogId']);
+                    return;
+                }
+
+                $USER->getDialogObject()->sendFile($userId, $fileObject->getId(), $uploadedFile->isImage());
             }
 
             $dialogId = (int)$_REQUEST['dialogId'];
@@ -432,19 +454,16 @@
                 return;
             }
 
-            if (!in_array($_FILES['avatar']['type'], ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
-                self::setProfileMessage('error', 'Аватар должен быть изображением (JPEG, PNG, GIF или WEBP).');
-                header('Location: /profile');
-                return;
-            }
-
             try {
-                $fileObject = new File();
-                $fileObject->saveFile($_FILES['avatar']['tmp_name'], $_FILES['avatar']['name'], true);
+                $fileObject = (new File())->saveUploadedFile(
+                    UploadedFile::fromArray($_FILES['avatar']),
+                    UploadedFile::IMAGE_TYPES,
+                    self::AVATAR_MAX_SIZE,
+                );
                 $USER->update(['image_id' => $fileObject->getId()]);
                 self::setProfileMessage('success', 'Аватар обновлён.');
             } catch (CoreException $e) {
-                self::setProfileMessage('error', 'Не удалось загрузить файл.');
+                self::setProfileMessage('error', $e->getMessage());
             }
 
             header('Location: /profile');

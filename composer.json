@@ -32,6 +32,7 @@
       "ext-dom": "*",
       "ext-pdo": "*",
       "ext-mbstring": "*",
+      "ext-fileinfo": "*",
       "dompdf/dompdf": "^2.0",
       "robmorgan/phinx": "^0.13.4",
       "ext-gd": "*"

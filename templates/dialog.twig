@@ -28,6 +28,13 @@
                 {% include '_messageList.twig' with {messages: messages, userId: userId} %}
             </div>
 
+            {% if dialogMessage %}
+                <div class="alert alert-error">
+                    {{ icons.warning() }}
+                    <span>{{ dialogMessage }}</span>
+                </div>
+            {% endif %}
+
             <div class="chat-compose">
                 <form method="POST" action="/users/{{ companionId }}/sendMessage" enctype="multipart/form-data" id="chatComposeForm">
                     <input type="hidden" name="dialogId" value="{{ dialog_id }}">

@@ -27,6 +27,12 @@
     class Log
     {
         /**
+         * Заглушка в первой строке файла журнала: не даёт прочитать журнал по прямой ссылке,
+         * пока каталог логов находится внутри корня сайта
+         */
+        private const FILE_GUARD = '<?php exit; ?>';
+
+        /**
          * Уровни логирования
          */
         private static $priorityList = [
@@ -66,7 +72,18 @@
             }
             $jsonOptions = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
             $message     = str_replace(["\r\n", "\r", "\n"], PHP_EOL, trim($message));
-            $logFile     = LOG_PATH . '/' . $filename;
+
+            /**
+             * Каталог логов лежит внутри корня сайта, а веб-сервер (nginx) отдаёт любой файл
+             * не с расширением .php сырым текстом — то есть журнал со стектрейсами, IP и
+             * логинами читался бы прямо по URL. Поэтому файл журнала получает расширение .php
+             * и заглушку в первой строке: обращение по URL исполнит файл и не выдаст ничего.
+             * После переноса docroot в public/ (Этап 3) эту защиту можно будет убрать.
+             */
+            $logFile = LOG_PATH . '/' . $filename . '.php';
+            if (is_file($logFile) === false) {
+                @file_put_contents($logFile, self::FILE_GUARD . PHP_EOL, LOCK_EX);
+            }
 
             $logContent = '';
             if (!empty($content)) {

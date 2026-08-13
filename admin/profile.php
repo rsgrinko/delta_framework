@@ -55,9 +55,9 @@
                 <div class="col-md-12">
                     <?php
                         $newUserFields = ['name' => $_POST['name'], 'email' => $_POST['email']];
-                        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                            $File = new File();
-                            $File->saveFile($_FILES['image']['tmp_name'], $_FILES['image']['name'], true);
+                        $uploadedImage = \Delta\Http\UploadedFile::fromArray($_FILES['image'] ?? []);
+                        if ($uploadedImage !== null) {
+                            $File = (new File())->saveUploadedFile($uploadedImage, \Delta\Http\UploadedFile::IMAGE_TYPES);
                             $newUserFields['image_id'] = $File->getId();
 
                             $image = new Thumbs($_SERVER['DOCUMENT_ROOT'] . $File->getPath());

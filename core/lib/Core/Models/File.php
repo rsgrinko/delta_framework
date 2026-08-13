@@ -23,6 +23,7 @@
 
     use Core\CoreException;
     use Core\Database\DataBase;
+    use Delta\Http\UploadedFile;
 
     class File
     {
@@ -184,6 +185,53 @@
             return end(explode('.', $filename));
         }
 
+        /**
+         * Сохранить загруженный пользователем файл.
+         *
+         * В отличие от saveFile(), расширение берётся не из имени, присланного клиентом,
+         * а выводится из реального MIME-типа содержимого, и файл проходит проверку типа и
+         * размера. Это единственный допустимый способ сохранять пользовательские загрузки:
+         * каталог uploads лежит внутри корня сайта, а защиты на уровне веб-сервера нет
+         * (сервер — nginx, .htaccess не читается).
+         *
+         * @param UploadedFile            $uploadedFile Загруженный файл
+         * @param array<string, string[]> $allowedTypes Карта разрешённых MIME-типов
+         * @param int                     $maxSize      Предельный размер, байт
+         *
+         * @return self Объект файла
+         * @throws CoreException Если файл не прошёл проверку или не сохранился
+         */
+        public function saveUploadedFile(
+            UploadedFile $uploadedFile,
+            array $allowedTypes,
+            int $maxSize = UploadedFile::DEFAULT_MAX_SIZE
+        ): self {
+            $error = $uploadedFile->validate($allowedTypes, $maxSize);
+            if ($error !== null) {
+                throw new CoreException($error, CoreException::ERROR_FILE_COPY);
+            }
+
+            $storageFileName = md5(time() . $uploadedFile->clientName() . random_int(1, 9999))
+                . '.' . $uploadedFile->safeExtension($allowedTypes);
+            $storageFullPath = $this->folder . '/' . $storageFileName;
+
+            if (!move_uploaded_file($uploadedFile->tmpPath(), $storageFullPath)) {
+                throw new CoreException('Не удалось сохранить загруженный файл', CoreException::ERROR_FILE_COPY);
+            }
+
+            $this->name = htmlspecialchars(strip_tags(trim($uploadedFile->clientName())));
+            $this->path = self::FOLDER . '/' . $storageFileName;
+            $this->id   = $this->DB->add(self::TABLE, ['name' => $this->name, 'path' => $this->path]);
+
+            return $this;
+        }
+
+        /**
+         * Сохранить файл, находящийся на диске.
+         *
+         * Метод не предназначен для пользовательских загрузок: расширение берётся из
+         * переданного имени. Для файлов из HTTP-запроса используйте saveUploadedFile().
+         */
         public function saveFile(string $filePath, ?string $fileName = null, bool $useMove = false): self
         {
             $storageFileName = md5(time() . $fileName . rand(1, 9999));

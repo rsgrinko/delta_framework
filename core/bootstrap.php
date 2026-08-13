@@ -20,14 +20,17 @@
      */
 
     use Core\CoreException;
-    use Core\ExternalServices\Request\Request;
     use Core\Helpers\Cache;
     use Core\Helpers\DDosProtection;
-    use Core\Models\Router;
+    use Core\Helpers\Log;
     use Core\Models\User;
     use Core\Models\UTM;
     use Core\SystemConfig;
     use Delta\Config\Config;
+    use Delta\Error\ErrorHandler;
+    use Delta\Http\Kernel;
+    use Delta\Http\Request;
+    use Delta\Routing\Router;
 
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -68,6 +71,18 @@
         ini_set('display_errors', '0');
     }
     date_default_timezone_set(Config::getInstance()->get('app.timezone'));
+
+    /**
+     * Центральный обработчик ошибок.
+     * Регистрируется сразу после конфигурации, чтобы любая последующая ошибка попадала
+     * в журнал приложения, а не зависела от display_errors в php.ini.
+     */
+    $errorHandler = (new ErrorHandler(
+        DEBUG,
+        static function (string $message, array $context): void {
+            Log::logToFile($message, 'error.log', $context, LOG_ERR, 'core');
+        },
+    ))->register();
 
     $isCronProcess = false;
     if (defined('IS_CRON_PROCESS') && IS_CRON_PROCESS === true) {
@@ -149,7 +164,7 @@
     //end debug
 
     /**
-     * Запускаем маршрутизатор если не сказано иного
+     * Запускаем ядро обработки запроса, если не сказано иного
      */
     if (CORE_FULL_LOAD && defined('USE_ROUTER') && USE_ROUTER === true) {
         /**
@@ -163,7 +178,10 @@
         if (DEBUG) {
             $twig->addExtension(new \Twig\Extension\DebugExtension());
         }
-        require_once __DIR__ . '/routes.php';
-        Router::execute();
+
+        $router = new Router();
+        require __DIR__ . '/routes.php';
+
+        (new Kernel($router, $errorHandler))->handle(Request::capture())->send();
         die();
     }
